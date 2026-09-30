@@ -1,4 +1,4 @@
-import { Cpu, Package, Flame, Zap, Boxes, Heart } from 'lucide-react';
+import { Cpu, Package, Flame, Zap, Heart } from 'lucide-react';
 
 // prettier-ignore
 const usps = [
@@ -19,8 +19,8 @@ const usps = [
     },
     {
         icon: <Zap className="w-5 h-5" />,
-        metric: '<1ms',
-        label: 'Asset streaming',
+        metric: '<3s',
+        label: 'Startup times',
     },
     {
         icon: <Heart className="w-5 h-5" />,
@@ -29,17 +29,31 @@ const usps = [
     },
 ];
 
+// Hairline separators between the spec-bar cells. Mobile is a two-column
+// grid (left borders on the second column, top borders between the rows);
+// on lg it becomes a single five-cell row, so only left borders remain.
+// The last cell spans both columns on mobile, hence no left border.
+const cellSeparators = [
+    '',
+    'border-l',
+    'border-t lg:border-t-0 lg:border-l',
+    'border-l border-t lg:border-t-0',
+    'border-t lg:border-t-0 lg:border-l',
+];
+
 /**
- * Compact above-the-fold proof strip. Mirrors the benchmark figures from the
- * Performance section cards so a visitor sees the numbers without scrolling.
+ * Compact above-the-fold proof strip, rendered as one continuous spec-sheet
+ * bar (see .spec-bar in index.css) split into five cells by hairline
+ * separators. Mirrors the benchmark figures from the Performance section
+ * cards so a visitor sees the numbers without scrolling.
  */
 const UspStrip = () => {
     return (
-        <div className="scroll-mt-24 grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3">
+        <div className="scroll-mt-24 spec-bar grid grid-cols-2 lg:grid-cols-5">
             {usps.map((usp, index) => (
                 <div
                     key={usp.metric}
-                    className={`glass-card p-3 sm:p-4 flex flex-col items-center text-center gap-1.5 sm:gap-2 ${
+                    className={`border-white/[0.06] p-3 sm:p-4 flex flex-col items-center text-center gap-1.5 sm:gap-2 ${cellSeparators[index]} ${
                         index === usps.length - 1 ? 'col-span-2 lg:col-span-1' : ''
                     }`}
                 >

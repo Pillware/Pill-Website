@@ -129,6 +129,16 @@
    ═══════════════════════════════════════════════════════════════════════ */
 html {
     scroll-behavior: smooth;
+    /* Keep the scrollbar space permanently reserved. The SPA root is empty
+       until React mounts (page does not overflow, no scrollbar), then content
+       mounts and the scrollbar appears - without this the viewport narrows by
+       the scrollbar width at that instant and every percentage-sized element
+       (hero band, buttons) visibly jumps. overflow-y: scroll keeps the
+       scrollbar always present; scrollbar-gutter: stable handles cases where
+       the scrollbar is hidden later (scroll locks, modals). Overlay-scrollbar
+       platforms show neither until scrolling (no-op there). */
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
 }
 
 ::selection {

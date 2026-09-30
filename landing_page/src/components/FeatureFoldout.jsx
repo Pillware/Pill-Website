@@ -8,7 +8,9 @@ import { ChevronDown } from 'lucide-react';
  * (padding included) count, not just on the row with the icon and title. The
  * button sits inside the <h3> per the ARIA accordion pattern. The body
  * animation is pure CSS (grid-rows 0fr -> 1fr trick), so it works with
- * content of any height without measuring it in JS.
+ * content of any height without measuring it in JS. The root carries
+ * `foldout-card` and `data-open`, which a parent `.foldout-grid` reads for
+ * the sibling spotlight (currently disabled in index.css).
  *
  * @param {React.ReactNode} props.icon     - Icon shown in the tile
  * @param {string}          props.title    - Foldout title
@@ -20,10 +22,10 @@ const FeatureFoldout = ({ icon, title, children }) => {
     const contentId = useId();
 
     return (
-        <div className="glass-card-top group">
+        <div className="glass-card-top group foldout-card" data-open={isOpen}>
             {/* The button carries the card padding, so the whole foldout
                 surface - padding included - is one click target. */}
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-xl font-semibold text-white">
                 <button
                     type="button"
                     onClick={() => setIsOpen((open) => !open)}
@@ -53,7 +55,7 @@ const FeatureFoldout = ({ icon, title, children }) => {
                 className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 visible' : 'grid-rows-[0fr] opacity-0 invisible'}`}
             >
                 <div className="overflow-hidden">
-                    <p className="px-6 pb-6 text-md text-gray-500 leading-relaxed">{children}</p>
+                    <p className="px-6 pb-6 text-md text-gray-400 leading-relaxed">{children}</p>
                 </div>
             </div>
         </div>

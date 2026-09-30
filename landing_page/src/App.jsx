@@ -5,6 +5,7 @@ import Hero from './components/sections/Hero';
 import Showcase from './components/sections/Showcase';
 import FlagshipFeatures from './components/sections/FlagshipFeatures';
 import CTA from './components/sections/CTA';
+import CommunityCTA from './components/sections/CommunityCTA';
 import Footer from './components/sections/Footer';
 import SectionDivider from './components/effects/SectionDivider';
 import Features from './components/sections/Features';
@@ -32,8 +33,8 @@ function Home() {
             <SectionDivider label="Features"  />
             <Features /> */}
             <div className="h-[70px]" />
-            <SectionDivider label="Performance" />
-            <Iteration />
+            {/* <SectionDivider label="Performance" />
+            <Iteration /> */}
             <div className="h-[70px] sm:h-0" />
             <div className="section-divider" />
             <PillLabs />
@@ -44,6 +45,9 @@ function Home() {
             {/* <div className="h-[70px] sm:h-0" />
             <SectionDivider label="Let's go!" />
             <CTA /> */}
+            <div className="h-[70px] sm:h-0" />
+            <SectionDivider label="Join us" />
+            <CommunityCTA />
             <Footer />
         </>
     );

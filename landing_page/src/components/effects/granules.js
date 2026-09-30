@@ -36,11 +36,10 @@ const BRAND_B             = 99;
 const KEYFRAME_MID_X      = -0.6;  // multiplier at 66%
 const KEYFRAME_MID_Y      = -0.8;
 
-export function generateGranuleField({
-    seed = DEFAULT_SEED,
-    count = DEFAULT_COUNT,
-    keyframesName = DEFAULT_KEYFRAMES,
-} = {}) {
+// Deterministic granule factory: every spawnGranule() call advances the
+// seeded PRNG and returns one granule with percent coordinates (edge biased),
+// radius, opacity, animation timing and drift offsets.
+export function createGranuleFactory({ seed = DEFAULT_SEED } = {}) {
     // Mulberry32 PRNG
     const mulberry32 = (s) => {
         return () => {
@@ -69,8 +68,7 @@ export function generateGranuleField({
         return `rgb(${BRAND_R},${g},${b})`;
     };
 
-    const circles = [];
-    for (let i = 0; i < count; i++) {
+    const spawnGranule = () => {
         // Place on edges: one axis at edge, other full-range
         const onVerticalEdge = random() < 0.5;
         const x = onVerticalEdge ? edgeCoordinate().toFixed(1) : uniformCoordinate().toFixed(1);
@@ -83,12 +81,46 @@ export function generateGranuleField({
         const driftY = (random() * DRIFT_MAX * 2 - DRIFT_MAX).toFixed(1);
         const colorMix = random();
 
+        return {
+            x,
+            y,
+            radius,
+            opacity,
+            duration,
+            delay,
+            driftX,
+            driftY,
+            color: granuleColor(colorMix),
+        };
+    };
+
+    return { spawnGranule };
+}
+
+// CSS for the drifting float animation shared by every granule, used both by
+// the static SVG string builder and the live GranuleField component.
+export function granuleKeyframesCss(keyframesName = DEFAULT_KEYFRAMES) {
+    return `@keyframes ${keyframesName}{0%,100%{transform:translate3d(0,0,0)}33%{transform:translate3d(var(--drift-x),var(--drift-y),0)}66%{transform:translate3d(calc(var(--drift-x) * ${KEYFRAME_MID_X}),calc(var(--drift-y) * ${KEYFRAME_MID_Y}),0)}}`;
+}
+
+// Builds the granule field as a static { __html } string for sections whose
+// size does not change (used through dangerouslySetInnerHTML).
+export function generateGranuleField({
+    seed = DEFAULT_SEED,
+    count = DEFAULT_COUNT,
+    keyframesName = DEFAULT_KEYFRAMES,
+} = {}) {
+    const { spawnGranule } = createGranuleFactory({ seed });
+
+    const circles = [];
+    for (let i = 0; i < count; i++) {
+        const granule = spawnGranule();
         circles.push(
-            `<circle cx="${x}%" cy="${y}%" r="${radius}" fill="${granuleColor(colorMix)}" opacity="${opacity}" style="animation: ${keyframesName} ${duration}s ${delay}s ease-in-out infinite; --drift-x: ${driftX}px; --drift-y: ${driftY}px;" />`
+            `<circle cx="${granule.x}%" cy="${granule.y}%" r="${granule.radius}" fill="${granule.color}" opacity="${granule.opacity}" style="animation: ${keyframesName} ${granule.duration}s ${granule.delay}s ease-in-out infinite; --drift-x: ${granule.driftX}px; --drift-y: ${granule.driftY}px;" />`
         );
     }
 
     return {
-        __html: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="position:absolute;inset:0;pointer-events:none;"><defs><style>@keyframes ${keyframesName}{0%,100%{transform:translate3d(0,0,0)}33%{transform:translate3d(var(--drift-x),var(--drift-y),0)}66%{transform:translate3d(calc(var(--drift-x) * ${KEYFRAME_MID_X}),calc(var(--drift-y) * ${KEYFRAME_MID_Y}),0)}}</style></defs>${circles.join('')}</svg>`
+        __html: `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="position:absolute;inset:0;pointer-events:none;"><defs><style>${granuleKeyframesCss(keyframesName)}</style></defs>${circles.join('')}</svg>`
     };
 }

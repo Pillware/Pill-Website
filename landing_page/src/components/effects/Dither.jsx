@@ -23,6 +23,7 @@ uniform float colorNum;
 uniform int isDarkTheme;
 uniform sampler2D patternTexture;
 uniform vec2 textureSize;
+uniform float patternScale;
 
 // --- Noise functions ---
 float hash(vec2 p) {
@@ -108,7 +109,12 @@ void main() {
     col *= vignette;
 
     // --- Pill pattern mask ---
-    vec2 patternUV = mod(gl_FragCoord.xy, textureSize) / textureSize;
+    // gl_FragCoord is in device pixels while the drawing buffer is DPR-scaled,
+    // so the tile is multiplied by patternScale (= DPR) to keep the pattern at
+    // a constant size in CSS pixels on every screen (otherwise high-DPI phones
+    // render it DPR times smaller than desktop).
+    vec2 tileSize = textureSize * patternScale;
+    vec2 patternUV = mod(gl_FragCoord.xy, tileSize) / tileSize;
     float patternMask = texture2D(patternTexture, patternUV).r;
     float pillMask = 1.0 - patternMask * 0.25;
     col *= pillMask;
@@ -221,7 +227,8 @@ function useWebGLShader(canvasRef, {
             colorNum: gl.getUniformLocation(program, 'colorNum'),
             isDarkTheme: gl.getUniformLocation(program, 'isDarkTheme'),
             patternTexture: gl.getUniformLocation(program, 'patternTexture'),
-            textureSize: gl.getUniformLocation(program, 'textureSize')
+            textureSize: gl.getUniformLocation(program, 'textureSize'),
+            patternScale: gl.getUniformLocation(program, 'patternScale')
         };
 
         // Load pattern texture
@@ -251,6 +258,8 @@ function useWebGLShader(canvasRef, {
             canvas.height = canvas.clientHeight * dpr;
             gl.viewport(0, 0, canvas.width, canvas.height);
             gl.uniform2f(uniformsRef.current.resolution, canvas.width, canvas.height);
+            // Keep the pill pattern tiled at a constant CSS-pixel size (see shader).
+            gl.uniform1f(uniformsRef.current.patternScale, dpr);
         };
 
         handleResize();

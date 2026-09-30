@@ -14,8 +14,10 @@ export default withMermaid(
       ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
       ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
       ['link', { href: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap', rel: 'stylesheet' }],
-      // Favicons
-      ['link', { rel: 'icon', type: 'image/png', href: '/favicons/favicon-96x96.png', sizes: '96x96' }],
+      // Favicons (the PNG pair follows the browser theme wherever the SVG
+      // favicon is not rasterized, e.g. older Android Chrome)
+      ['link', { rel: 'icon', type: 'image/png', href: '/favicons/favicon-96x96.png', sizes: '96x96', media: '(prefers-color-scheme: light)' }],
+      ['link', { rel: 'icon', type: 'image/png', href: '/favicons/favicon-96x96-dark.png', sizes: '96x96', media: '(prefers-color-scheme: dark)' }],
       ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicons/favicon.svg' }],
       ['link', { rel: 'shortcut icon', href: '/favicons/favicon.ico' }],
       ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/favicons/apple-touch-icon.png' }],

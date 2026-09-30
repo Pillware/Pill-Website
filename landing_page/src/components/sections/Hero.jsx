@@ -1,10 +1,13 @@
 import { ArrowRight, Github } from 'lucide-react';
+import DiscordIcon from '../DiscordIcon';
 import Dither from '../effects/Dither';
 import UspStrip from './UspStrip';
 
-// Shared base class for the hero action buttons (Get Started / GitHub).
-// Fixed width on sm+ so both buttons render at the same size.
-const actionButtonClassName = 'inline-flex items-center justify-center gap-2 w-full sm:w-48 px-8 py-3.5 bg-white/[0.04] border border-white/[0.08] text-white font-semibold rounded-xl hover:bg-white/[0.08] hover:border-white/[0.14] transition-all duration-200 text-base';
+// Shared base class for the hero action buttons (Get Started / Discord /
+// GitHub). Fixed width on sm+ so all three buttons render at the same size.
+// transition-colors (NOT transition-all): a width change (scrollbar flip,
+// resize) must never be animated, or the buttons visibly "scale to fit".
+const actionButtonClassName = 'inline-flex items-center justify-center gap-2 w-full sm:w-48 px-8 py-3.5 bg-white/[0.04] border border-white/[0.08] text-white font-semibold rounded-xl hover:bg-white/[0.08] hover:border-white/[0.14] transition-colors duration-200 text-base';
 
 const Hero = () => {
     return (
@@ -55,14 +58,14 @@ const Hero = () => {
                 </h1>
 
                 {/* USP strip - the proof, above the fold */}
-                <div className="mb-6 sm:mb-8 animate-fade-in-up delay-200 mt-[48px]">
+                <div className="hidden sm:block mb-6 sm:mb-8 animate-fade-in-up delay-200 mt-[48px]">
                     <UspStrip />
                 </div>
 
                 {/* Action band - one row: doer, buyer, verifier */}
                 <div
                     id="contact"
-                    className="scroll-mt-24 flex flex-col sm:flex-row flex-wrap gap-3 justify-center items-center w-full max-w-sm sm:max-w-none mx-auto animate-fade-in-up delay-300 mb-8"
+                    className="mt-[60px] sm:mt-0 scroll-mt-24 flex flex-col sm:flex-row flex-wrap gap-3 justify-center items-center w-[70%] sm:w-full max-w-sm sm:max-w-none mx-auto animate-fade-in-up delay-300 mb-8"
                 >
                     <a
                         href={`https://docs.${window.location.hostname}/guide/`}
@@ -70,6 +73,15 @@ const Hero = () => {
                     >
                         Get Started
                         <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                    </a>
+                    <a
+                        href="https://discord.gg/VUKNQrctms"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={actionButtonClassName}
+                    >
+                        <DiscordIcon className="w-4 h-4" />
+                        Discord
                     </a>
                     <a
                         href="https://github.com/Pillware/Pill"

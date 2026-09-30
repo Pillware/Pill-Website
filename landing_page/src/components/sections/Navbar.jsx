@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 
 // Section links use absolute home-page paths so they also open the main
 // page when the navbar is rendered on a subpage like /demos. A bare "#hash"
@@ -9,6 +9,9 @@ const NAV_LINKS = [
     { label: 'Demos', href: '/demos' },
     { label: 'Guide', href: `https://docs.${window.location.hostname}` },
     { label: 'Examples', href: 'https://github.com/Pillware/Pill/tree/main/examples' },
+    // Discord + GitHub are the community pair; on desktop a hairline splits
+    // them from the section links (dividerBefore renders the line).
+    { label: 'Discord', href: 'https://discord.gg/VUKNQrctms', dividerBefore: true },
     { label: 'GitHub', href: 'https://github.com/Pillware/Pill' },
 ];
 
@@ -45,13 +48,18 @@ const Navbar = () => {
                 {/* Desktop nav links */}
                 <div className="hidden md:flex items-center gap-1">
                     {NAV_LINKS.map((link) => (
-                        <a
-                            key={link.label}
-                            href={link.href}
-                            className="px-3.5 py-1.5 text-[13px] font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.06] transition-all duration-150"
-                        >
-                            {link.label}
-                        </a>
+                        <Fragment key={link.label}>
+                            {/* Light hairline between the section links and the Discord/GitHub pair */}
+                            {link.dividerBefore && (
+                                <span className="w-px h-5 bg-white/10 mx-1" aria-hidden="true" />
+                            )}
+                            <a
+                                href={link.href}
+                                className="px-3.5 py-1.5 text-[13px] font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.06] transition-all duration-150"
+                            >
+                                {link.label}
+                            </a>
+                        </Fragment>
                     ))}
                 </div>
 
@@ -79,21 +87,20 @@ const Navbar = () => {
                         {/* Close the fold after selection: hash links load instantly and would
                             otherwise leave the menu open, covering the section it scrolled to. */}
                         {NAV_LINKS.map((link) => (
-                            <a
-                                key={link.label}
-                                href={link.href}
-                                onClick={() => setMobileOpen(false)}
-                                className="block px-3 py-2 text-md font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.06] transition-all duration-150"
-                            >
-                                {link.label}
-                            </a>
+                            <Fragment key={link.label}>
+                                {/* Light hairline between the section links and the Discord/GitHub pair */}
+                                {link.dividerBefore && (
+                                    <div className="h-px bg-white/10 my-2 " aria-hidden="true" />
+                                )}
+                                <a
+                                    href={link.href}
+                                    onClick={() => setMobileOpen(false)}
+                                    className="block px-3 py-3 text-md font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.06] transition-all duration-150"
+                                >
+                                    {link.label}
+                                </a>
+                            </Fragment>
                         ))}
-                        <a
-                            href={`mailto:${CONTACT_EMAIL}`}
-                            className="block px-3 py-2 mt-2 text-md font-semibold text-center text-white bg-brand-500 hover:bg-brand-400 rounded-lg transition-all duration-150"
-                        >
-                            Contact
-                        </a>
                     </div>
                 </div>
             </div>

@@ -65,6 +65,16 @@
         pointer-events: none;
     }
 
+    /* Single "spec sheet" bar for the hero proof strip: one flat surface
+       (no blur, no outer outline, no hover lift - the whole bar is not
+       interactive) that holds cells split only by the hairline borders on
+       the cells themselves. */
+    .spec-bar {
+        position: relative;
+        background: var(--glass-background);
+        border-radius: var(--radius-xl);
+    }
+
     /* Subtle border bottom for sections */
     .section-divider {
         border-bottom: 1px solid var(--border);
@@ -90,6 +100,34 @@
     .group:hover .feature-icon {
         background-color: rgb(var(--brand-500-rgb) / 0.2);
     }
+
+    /* Sibling spotlight - temporarily disabled on request. Uncomment each
+       rule block below to re-enable the effect. */
+
+    /* While any foldout in the grid is open, the other cards fade back so
+       the open one stands out. Opacity only - a filter here would become a
+       backdrop root and kill the glass blur. */
+    /*
+    .foldout-grid:has(.foldout-card[data-open='true']) .foldout-card:not([data-open='true']) {
+        opacity: 0.45;
+    }
+    */
+
+    /* Hover or keyboard focus restores a faded card, keeping it readable
+       before it is opened. */
+    /*
+    .foldout-grid:has(.foldout-card[data-open='true']) .foldout-card:not([data-open='true']):hover,
+    .foldout-grid:has(.foldout-card[data-open='true']) .foldout-card:not([data-open='true']):focus-within {
+        opacity: 1;
+    }
+    */
+
+    /* Brand hairline marks the open card as the active entry. */
+    /*
+    .foldout-grid .foldout-card[data-open='true'] {
+        border-color: rgb(var(--brand-500-rgb) / 0.35);
+    }
+    */
 
     .feature-icon-blister-dome {
         position: relative;
