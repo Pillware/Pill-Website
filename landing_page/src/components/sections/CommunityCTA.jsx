@@ -68,7 +68,7 @@ const CommunityCTA = () => {
                         firstContent={
                             <div
                                 className="w-full h-full"
-                                style={{ background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.045), transparent 55%)' }}
+                                style={{ background: 'radial-gradient(circle at 30% 20%, rgba(0,0,0,0.345), transparent 55%)' }}
                             />
                         }
                         secondContent={
