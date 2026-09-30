@@ -43,12 +43,14 @@ const Hero = () => {
             />
 
             <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                {/* Logo */}
-                <div className="mb-4 sm:mb-6 animate-fade-in">
+                {/* Logo - the animated copy traces its outline first, then fades
+                    the fill in, and the whole mark gives a springy bump
+                    (see pill_logo_animated.svg + .logo-bump); no wrapper fade. */}
+                <div className="mb-4 sm:mb-6">
                     <img
-                        src="/logos/pill_logo.svg"
+                        src="/logos/pill_logo_animated.svg"
                         alt="Pill Engine"
-                        className="h-[120px] sm:h-[200px] md:h-[220px] xl:h-[280px] mx-auto"
+                        className="h-[120px] sm:h-[200px] md:h-[220px] xl:h-[280px] mx-auto logo-bump"
                     />
                 </div>
 

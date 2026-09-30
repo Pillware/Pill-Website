@@ -219,6 +219,25 @@
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
 
+/* Hero logo "bump": a springy scale pop once the SVG intro's draw + fill are
+   done. Applied to the <img> in the page - scaling inside the SVG itself
+   would clip the artwork against its edge-to-edge viewBox. The 2.4s delay
+   must match the SVG's trace + fill durations (pill_logo_animated.svg). */
+@keyframes logoBump {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.005); }
+    65% { transform: scale(0.995); }
+    100% { transform: scale(1); }
+}
+
+.logo-bump {
+    animation: logoBump 0.4s ease-in-out 0.95s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .logo-bump { animation: none; }
+}
+
 @keyframes orbPulse {
     0%, 100% { opacity: 0.3; transform: scale(1); }
     50% { opacity: 0.5; transform: scale(1.1); }
