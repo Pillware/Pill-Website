@@ -70,6 +70,55 @@
         border-bottom: 1px solid var(--border);
     }
 
+    /* Icon tile used above feature copy (stat tiles, feature cards). Size
+       stays with the consumer, e.g. `feature-icon w-9 h-9`; a margin
+       utility overrides the default bottom spacing (utilities beat the
+       components layer). */
+    .feature-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem;
+        background-color: rgb(var(--brand-500-rgb) / 0.1);
+        color: rgb(var(--brand-400-rgb));
+        transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 0.3s;
+    }
+
+    /* Brighten the tile while its parent card (the `group` class) is hovered */
+    .group:hover .feature-icon {
+        background-color: rgb(var(--brand-500-rgb) / 0.2);
+    }
+
+    .feature-icon-blister-dome {
+        position: relative;
+        border-radius: 12px;
+        background: rgb(var(--brand-500-rgb) / 0.12);
+        box-shadow:
+            0 0 0 1px rgba(197, 197, 197, 0.02),
+            inset 0 -3px 6px rgba(0, 0, 0, 0.05),
+            inset 0 2px 3px rgba(255, 255, 255, 0.02),
+            0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+
+    /* Glossy highlight of the transparent dome */
+    .feature-icon-blister-dome::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: radial-gradient(circle at 32% 28%, rgba(151, 45, 45, 0.116), transparent 30%);
+        transition: opacity 0.3s ease;
+    }
+
+    /* Parent card hover brightens the dome - keeps the old icon-box hover cue */
+    .group:hover .feature-icon-blister-dome {
+        background-color: rgb(var(--brand-500-rgb) / 0.2);
+    }
+
+
     /* Floating glass navbar */
     .navbar-glass {
         background: var(--glass-background-navbar);
@@ -423,3 +472,4 @@
     width: auto;
     height: 100%;
 }
+

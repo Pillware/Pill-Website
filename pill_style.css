@@ -101,7 +101,7 @@
     --glass-border-hover: rgba(255, 255, 255, 0.1);
     --glass-border-navbar: rgba(255, 255, 255, 0.05);
     --glass-border-navbar-scrolled: rgba(255, 255, 255, 0.08);
-    --glass-blur: 12px;
+    --glass-blur: 4px;
     --glass-blur-navbar: 16px;
     --glass-blur-navbar-scrolled: 32px;
 

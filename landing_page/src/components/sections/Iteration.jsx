@@ -10,11 +10,11 @@ const loop = [
 ];
 
 const Tile = ({ item }) => (
-    <div className="glass-card-top p-4 group items-center justify-center flex flex-col text-center">
-        <div className="w-9 h-9 rounded-xl bg-brand-500/10 flex items-center justify-center text-brand-400 mb-3 group-hover:bg-brand-500/20 transition-colors duration-300">
+    <div className="glass-card-top p-4 group items-center justify-center flex flex-col text-center gap-2 sm:gap-1">
+        <div className="feature-icon w-9 h-9 mb-1">
             {item.icon}
         </div>
-        <h3 className="text-2xl font-semibold text-white mb-1">
+        <h3 className="text-2xl font-semibold text-white">
             {item.metric}
         </h3>
         <p className="text-md text-gray-500 leading-relaxed">
@@ -48,7 +48,7 @@ const Iteration = () => {
                 </p>
 
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 mb-10">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-3 mb-10">
                     {loop.map((item) => <Tile key={item.label} item={item} />)}
                 </div>
 

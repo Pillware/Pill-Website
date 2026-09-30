@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
     HeartHandshake, Code2, Box, Flame, ShieldCheck, Boxes, ListTree,
     Puzzle, Gauge, Feather, Cpu, Rocket, AppWindow, Waves, Columns2,
@@ -9,12 +10,12 @@ import FeatureFoldout from '../FeatureFoldout';
 const FLAGSHIP_FEATURES = [
     {
         icon: <HeartHandshake className="w-5 h-5" />,
-        title: 'Free',
+        title: '100% free and open source',
         description: 'The idea is to empower people so they can make amazing stuff. Out of passion. For community, by community.',
     },
     {
         icon: <Code2 className="w-5 h-5" />,
-        title: 'C# and Rust as first-class citizen scripting languages',
+        title: 'C# and Rust scripting languages',
         description: 'You have a choice: extremely convenient and maximally efficient. Pick C# when you want to move conveniently and fast, Rust for full low-level control and maxed out performance.',
     },
     {
@@ -30,18 +31,20 @@ const FLAGSHIP_FEATURES = [
     {
         icon: <ShieldCheck className="w-5 h-5" />,
         title: 'Crash free',
-        description: "Sounds crazy, but Pill is written in Rust - a modern, low-level, highly efficient programming language with extremely strong memory safety guarantees. Combined with project sandboxing, Pill can't really crash.",
+        description: (
+            <>
+                Sounds crazy, but Pill is written in <span className="text-orange-400">Rust</span> - a modern,
+                low-level, highly efficient programming language with extremely strong memory safety guarantees.
+                Combined with project sandboxing, Pill can't really crash.
+            </>
+        ),
     },
     {
         icon: <Boxes className="w-5 h-5" />,
         title: 'Entity Component System at the core',
         description: "The fastest possible architecture, capable of simulating millions of entities on the CPU. Optimized for cache locality, parallelism and raw performance. Archetype-based. Also, Pill's ECS implementation is hybrid. This means that you are not limited to the classic system approach - break the wall and write logic inside the components if you want, or mix the two approaches. Underlying data and logic stay the same - packed in an efficient, data-oriented way.",
     },
-    {
-        icon: <ListTree className="w-5 h-5" />,
-        title: 'Next level error logs',
-        description: 'Extremely descriptive and configurable error call stacks. Debugging was never that easy.',
-    },
+    
     {
         icon: <Puzzle className="w-5 h-5" />,
         title: 'Fully modular architecture',
@@ -64,6 +67,11 @@ const FLAGSHIP_FEATURES = [
         ),
     },
     {
+        icon: <ListTree className="w-5 h-5" />,
+        title: 'Next level error logs',
+        description: 'Extremely descriptive and configurable error call stacks. Debugging was never that easy.',
+    },
+    {
         icon: <Feather className="w-5 h-5" />,
         title: 'Tiny build sizes',
         description: 'Builds as small as 0.5 MB - around 2000 times smaller than one GB.',
@@ -79,23 +87,49 @@ const FLAGSHIP_FEATURES = [
         description: 'Opening the editor with a huge project in below 10 seconds? Pill got you covered.',
     },
     {
-        icon: <AppWindow className="w-5 h-5" />,
-        title: 'Editor',
-        description: 'We have it. And it works in the web browser as well.',
-    },
-    {
         icon: <Waves className="w-5 h-5" />,
         title: 'Absolute streaming beast',
         description: 'Stream huge amounts of assets and world data on demand without loading everything upfront. Keep memory usage low and massive projects moving fast.',
     },
     {
         icon: <Columns2 className="w-5 h-5" />,
-        title: 'Game viewport and camera viewport in the editor!',
-        description: 'You can run your project in one viewport and still edit your scene in another one at the same time. Play the game and keep working on it without constantly switching back and forth.',
+        title: 'Game and scene view in the editor',
+        description: 'First of all we have an editor. You can run your project in one viewport and still edit your scene in another one at the same time. Play the game and keep working on it without constantly switching back and forth.',
     },
 ];
 
+// Tracks whether the viewport is at the two-column breakpoint (Tailwind's
+// `md`). Splitting the cards into two independent column stacks has to be
+// decided in JS: a CSS grid shares row heights between columns, so opening
+// one card would push everything below it in BOTH columns.
+const useTwoColumnLayout = () => {
+    const [isTwoColumn, setIsTwoColumn] = useState(
+        () => window.matchMedia('(min-width: 768px)').matches
+    );
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(min-width: 768px)');
+        const handleChange = (event) => setIsTwoColumn(event.matches);
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
+    }, []);
+
+    return isTwoColumn;
+};
+
 const FlagshipFeatures = () => {
+    const isTwoColumn = useTwoColumnLayout();
+
+    // Two columns take alternating items, keeping the current left-right
+    // pairing while letting each column stack independently. On small
+    // screens one flat list keeps the original top-to-bottom order.
+    const columns = isTwoColumn
+        ? [
+              FLAGSHIP_FEATURES.filter((feature, index) => index % 2 === 0),
+              FLAGSHIP_FEATURES.filter((feature, index) => index % 2 === 1),
+          ]
+        : [FLAGSHIP_FEATURES];
+
     return (
         <section
             id="flagship-features"
@@ -107,16 +141,21 @@ const FlagshipFeatures = () => {
                 </h2>
                 <p className="text-xl text-gray-400 max-w-2xl mb-10">
                     Main goal of Pill is to fix the problems of existing engines and to improve on the good things.
-                    The flagship features are below.
+                    The flagship features are below - This is how we make the difference.
                 </p>
 
-                {/* Foldout grid. items-start keeps the collapsed card of a row
-                    at its own height when the other card is expanded. */}
-                <div className="grid grid-cols-1 md:grid-cols-2 items-start gap-4">
-                    {FLAGSHIP_FEATURES.map((feature) => (
-                        <FeatureFoldout key={feature.title} icon={feature.icon} title={feature.title}>
-                            {feature.description}
-                        </FeatureFoldout>
+                {/* Foldout columns - each column is its own stack, so
+                    expanding a card only moves the cards below it in the
+                    same column; the neighbouring column never gets a gap. */}
+                <div className="flex flex-col md:flex-row gap-4">
+                    {columns.map((column, columnIndex) => (
+                        <div key={columnIndex} className="flex flex-col gap-4 flex-1 min-w-0">
+                            {column.map((feature) => (
+                                <FeatureFoldout key={feature.title} icon={feature.icon} title={feature.title}>
+                                    {feature.description}
+                                </FeatureFoldout>
+                            ))}
+                        </div>
                     ))}
                 </div>
             </div>

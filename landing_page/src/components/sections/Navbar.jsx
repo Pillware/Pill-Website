@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 
+// Section links use absolute home-page paths so they also open the main
+// page when the navbar is rendered on a subpage like /demos. A bare "#hash"
+// would only rewrite the current URL and leave the visitor where they are.
 const NAV_LINKS = [
-    { label: 'Features', href: '#features' },
-    { label: 'Roadmap', href: '#roadmap' },
+    { label: 'Features', href: '/#flagship-features' },
+    { label: 'Roadmap', href: '/#roadmap' },
     { label: 'Demos', href: '/demos' },
     { label: 'Guide', href: `https://docs.${window.location.hostname}` },
     { label: 'Examples', href: 'https://github.com/Pillware/Pill/tree/main/examples' },
@@ -73,10 +76,13 @@ const Navbar = () => {
             >
                 <div className="overflow-hidden">
                     <div className="border-t border-white/[0.06] px-5 py-4 space-y-1">
+                        {/* Close the fold after selection: hash links load instantly and would
+                            otherwise leave the menu open, covering the section it scrolled to. */}
                         {NAV_LINKS.map((link) => (
                             <a
                                 key={link.label}
                                 href={link.href}
+                                onClick={() => setMobileOpen(false)}
                                 className="block px-3 py-2 text-md font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.06] transition-all duration-150"
                             >
                                 {link.label}

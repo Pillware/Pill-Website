@@ -34,7 +34,10 @@ const captureVideoFrame = (video) => {
  * - showVolumeControl: render the mute button + volume slider (default true)
  * - showFullscreenControl: render the fullscreen toggle (default true)
  * - showQualityControl: render the HD/4K quality toggle (default false)
- * - src4k: URL of the higher-quality source used by the quality toggle
+ * - src4k: URL of the higher-quality source used by the quality toggle. When
+ *   set, it is also preloaded in the background and the player upgrades to it
+ *   automatically once it can play through - a manual quality switch cancels
+ *   the automatic upgrade
  * - fullscreenMode: how the video fills the fullscreen - 'letterbox' |
  *   'width' | 'height' (default 'letterbox': whole video visible with bars)
  * - className: extra classes merged onto the player container (e.g. a
@@ -80,6 +83,9 @@ const VideoPlayer = ({
     const pendingResumeRef = useRef(null);
     // 1s timer that decides whether the spinner overlay should appear.
     const qualityOverlayTimerRef = useRef(null);
+    // True once the background HD -> 4K upgrade has run or been abandoned
+    // (manual quality switch, load error), so it never runs twice.
+    const autoUpgradeDoneRef = useRef(false);
 
     const isMuted = muted || volume === 0;
 
@@ -176,20 +182,20 @@ const VideoPlayer = ({
 
     const toggleSound = () => setMuted((prev) => !prev);
 
-    // Toggle between the HD and 4K sources in either direction. Remember the
-    // current time, show the spinner overlay only if loading takes longer
-    // than 1 second.
-    const switchQuality = () => {
+    // Swap the rendered source, remembering the current playback position so
+    // the player resumes exactly where it left off instead of restarting.
+    // Shared by the manual HD/4K button and the automatic background upgrade.
+    const performSourceSwitch = (nextIs4K) => {
         const video = videoRef.current;
-        if (!video || !src4k || isQualityLoading) return;
-        const nextIs4K = !is4K;
+        if (!video) return;
 
         pendingResumeRef.current = {
             resumeTime: video.currentTime,
             wasPlaying: !video.paused,
         };
         // Keep the old video's aspect ratio and frame on screen while the
-        // new source loads (no collapse, no black blink).
+        // new source loads (no collapse, no black blink). The spinner only
+        // appears if loading takes longer than 1 second.
         setPlaceholderAspectRatio(
             video.videoWidth && video.videoHeight
                 ? `${video.videoWidth} / ${video.videoHeight}`
@@ -205,6 +211,69 @@ const VideoPlayer = ({
         }, 1000);
         setCurrentSrc(nextIs4K ? src4k : src);
     };
+
+    // Toggle between the HD and 4K sources in either direction. A manual
+    // switch always wins over the automatic upgrade, so it disables it.
+    const switchQuality = () => {
+        if (!videoRef.current || !src4k || isQualityLoading) return;
+        autoUpgradeDoneRef.current = true;
+        performSourceSwitch(!is4K);
+    };
+
+    // Background quality upgrade: once the main source can play, fetch the
+    // 4K file with a hidden preloader and, when the browser can play it
+    // through, switch the player over - playback continues from the current
+    // position. Skipped for data-saver users, who should not get a silent
+    // 4K download.
+    useEffect(() => {
+        if (!src4k || navigator.connection?.saveData) return;
+        const video = videoRef.current;
+        if (!video) return;
+
+        let cancelled = false;
+        let preloader = null;
+
+        const handleReady = () => {
+            if (cancelled || autoUpgradeDoneRef.current) return;
+            autoUpgradeDoneRef.current = true;
+            performSourceSwitch(true);
+        };
+        const handleError = () => {
+            autoUpgradeDoneRef.current = true;
+        };
+
+        // Start only after the main source can play, so the 4K download
+        // never competes with the first seconds of playback.
+        const startPreload = () => {
+            if (cancelled || autoUpgradeDoneRef.current) return;
+            preloader = document.createElement('video');
+            preloader.preload = 'auto';
+            preloader.muted = true;
+            preloader.playsInline = true;
+            preloader.src = src4k;
+            preloader.addEventListener('canplaythrough', handleReady, { once: true });
+            preloader.addEventListener('error', handleError, { once: true });
+            preloader.load();
+        };
+
+        if (video.readyState >= 3) {
+            startPreload();
+        } else {
+            video.addEventListener('canplay', startPreload, { once: true });
+        }
+
+        return () => {
+            cancelled = true;
+            video.removeEventListener('canplay', startPreload);
+            if (preloader) {
+                preloader.removeEventListener('canplaythrough', handleReady);
+                preloader.removeEventListener('error', handleError);
+                // Abort any download still in flight.
+                preloader.removeAttribute('src');
+                preloader.load();
+            }
+        };
+    }, [src4k]);
 
     // Mobile: double-tap toggles fullscreen (touch devices only).
     const handleVideoDoubleClick = () => {
