@@ -1,0 +1,17 @@
+# Pill Engine
+
+> Pill is a modern, free and blazingly fast game engine: an Entity Component System core written in Rust, hot reloading in 1-2 seconds, and a WebAssembly build under 0.5 MB. Open source (MIT) and community driven.
+
+Key resources:
+
+- [Documentation](https://docs.pill.rocks/guide/): installation, ECS, Pill launcher, contributing guides and the full API reference
+- [LLM-friendly docs index](https://docs.pill.rocks/llms.txt): curated Markdown links to the documentation for AI agents and tools
+- [Full documentation as one file](https://docs.pill.rocks/llms-full.txt): every docs page concatenated into a single Markdown file
+- [Demos](https://pill.rocks/demos): gameplay videos and example projects
+- [GitHub repository](https://github.com/Pillware/Pill): source code, examples and issues
+- [Discord community](https://discord.gg/VUKNQrctms)
+
+## Optional
+
+- [Guide start](https://docs.pill.rocks/markdown/guide/getting-started/setup.md): step-by-step setup for a first Pill project
+- [What is Pill](https://docs.pill.rocks/markdown/guide/what-is-pill.md): architecture and feature overview in plain Markdown
