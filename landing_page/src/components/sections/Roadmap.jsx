@@ -243,7 +243,7 @@ const roadmapItems = [
                 {/* block span - the item text renders inside a <p>, which
                     must not contain flow elements like <div>. */}
                 <span className="block text-xl text-gray-400 max-w-2xl p-3 pl-0">
-                    <span className={highlightedClassName}>You - the community - decide!</span>
+                    <span className={highlightedClassName}>You decide!</span>
                 </span>
             </>
         ),

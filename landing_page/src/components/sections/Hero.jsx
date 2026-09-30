@@ -56,7 +56,8 @@ const Hero = () => {
 
                 {/* Headline */}
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] tracking-tight mb-4 sm:mb-[48px] animate-fade-in-up">
-                    Modern, <span className="text-gradient">free</span> and <span className="text-gradient">blazingly fast</span> game engine<br/>
+                    Modern, free and <span className="text-gradient">blazingly fast</span> game engine<br />
+                    {/* <span className="text-gradient">Modern</span>, <span className="text-gradient">free</span> and <span className="text-gradient">blazingly fast</span> game engine<br /> */}
                 </h1>
 
                 {/* USP strip - the proof, above the fold */}

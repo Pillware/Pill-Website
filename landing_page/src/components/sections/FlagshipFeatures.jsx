@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
-    HeartHandshake, Code2, Box, Flame, ShieldCheck, Boxes, ListTree,
+    Heart, Code2, Box, Flame, ShieldCheck, Boxes, ListTree,
     Puzzle, Gauge, Feather, Cpu, Rocket, AppWindow, Waves, Columns2,
 } from 'lucide-react';
 import FeatureFoldout from '../FeatureFoldout';
@@ -10,7 +10,7 @@ import GranuleField from '../effects/GranuleField';
 // title always visible, description revealed when the card is opened.
 const FLAGSHIP_FEATURES = [
     {
-        icon: <HeartHandshake className="w-5 h-5" />,
+        icon: <Heart className="w-5 h-5" />,
         title: '100% free and open source',
         description: 'The idea is to empower people so they can make amazing stuff. Out of passion. For community, by community.',
     },
