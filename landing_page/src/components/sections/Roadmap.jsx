@@ -69,7 +69,7 @@ const roadmapItems = [
         important: true,
         label: (
             <>
-                Modular architecture - split into separate{' '}
+                Ultra modular architecture - split into separate{' '}
                 <span className={highlightedClassName}>reloadable DLLs</span>
             </>
         ),
@@ -163,22 +163,21 @@ const roadmapItems = [
         ),
     },
     {
-        id: 'headless-rendering',
+        id: 'headless-engine',
         label: (
             <>
-                <span className={highlightedClassName}>Headless rendering</span>, for servers and{' '}
-                <span className={highlightedClassName}>CI</span>
+                <span className={highlightedClassName}>Headless mode</span>, for servers, CI and non-gamedev use cases
             </>
         ),
     },
-    {
-        id: 'webgpu-support',
-        label: (
-            <>
-                <span className={highlightedClassName}>WebGPU</span> support in browsers and native
-            </>
-        ),
-    },
+    // {
+    //     id: 'webgpu-support',
+    //     label: (
+    //         <>
+    //             <span className={highlightedClassName}>WebGPU</span> support in browsers and native
+    //         </>
+    //     ),
+    // },
     {
         id: 'scriptable-rendering-pipeline',
         important: true,
@@ -186,6 +185,15 @@ const roadmapItems = [
             <>
                 SIGGRAPH-grade{' '}
                 <span className={highlightedClassName}>scriptable rendering pipeline</span>
+            </>
+        ),
+    },
+    {
+        id: 'advanced-rendering-pipeline',
+        important: false,
+        label: (
+            <>
+                Advanced renderer with NVIDIA technologies support
             </>
         ),
     },
@@ -200,6 +208,23 @@ const roadmapItems = [
         ),
     },
     {
+        id: 'gpu-compute',
+        label: (
+            <>
+                <span className={highlightedClassName}>GPU compute</span> support, for built-in systems and
+                user-defined tasks
+            </>
+        ),
+    },
+    {
+        id: 'wasm-editor',
+        label: (
+            <>
+                Editor running in the browser
+            </>
+        ),
+    },
+    {
         id: 'hardware-ray-tracing',
         label: (
             <>
@@ -209,11 +234,17 @@ const roadmapItems = [
         ),
     },
     {
-        id: 'gpu-compute',
+        id: 'you-decide',
+        important: true,
+        // The community-decides entry is not a feature to vote on.
+        show_vote: false,
         label: (
             <>
-                <span className={highlightedClassName}>GPU compute</span> support, for physics and
-                other tasks
+                {/* block span - the item text renders inside a <p>, which
+                    must not contain flow elements like <div>. */}
+                <span className="block text-xl text-gray-400 max-w-2xl p-3 pl-0">
+                    <span className={highlightedClassName}>You - the community - decide!</span>
+                </span>
             </>
         ),
     }
@@ -222,9 +253,27 @@ const roadmapItems = [
 /**
  * One timeline entry: a node sitting on the spine, the item text, and a vote
  * affordance. The button is presentational for now - votes are not collected.
+ * Items can opt out of the vote affordance with `show_vote: false`.
  */
-const RoadmapItem = ({ item, vote, votes, voted }) => (
+const RoadmapItem = ({ item, vote, votes, voted, isFirst, isLast }) => (
     <li className="relative pl-10 sm:pl-12">
+        {/* Spine segments - every marker sits at 50% of its row, so the line
+            between two markers is split at the row boundary: the part above
+            this marker and the part below it. The first row skips the upper
+            part and the last row skips the lower part, so the spine starts
+            and ends exactly at the first and last markers. */}
+        {!isFirst && (
+            <span
+                className="absolute left-[15px] sm:left-[19px] top-0 bottom-1/2 w-px bg-white/[0.08]"
+                aria-hidden="true"
+            />
+        )}
+        {!isLast && (
+            <span
+                className="absolute left-[15px] sm:left-[19px] top-1/2 -bottom-6 w-px bg-white/[0.08]"
+                aria-hidden="true"
+            />
+        )}
         <div className="flex items-center gap-2 mb-1 ">
             {item.important ? (
                 <Gem
@@ -285,7 +334,8 @@ const RoadmapItem = ({ item, vote, votes, voted }) => (
                     {item.label}
                 </p>
                 <div className="hidden md:block">
-                    {!item.completed && (
+                    {/* Hidden when the item is completed or opts out with show_vote: false. */}
+                    {!item.completed && item.show_vote !== false && (
                         <button
                             type="button"
                             disabled={voted.has(item.id)}
@@ -394,16 +444,20 @@ const Roadmap = () => {
                 </div>
                  
 
-                {/* Vertical timeline */}
+                {/* Vertical timeline - the spine is drawn per item (see
+                    RoadmapItem) so it starts and ends at the end markers. */}
                 <div className="relative">
-                    {/* Spine */}
-                    <span
-                        className="absolute left-[15px] sm:left-[19px] top-2 bottom-2 w-px bg-white/[0.08]"
-                        aria-hidden="true"
-                    />
                     <ul className="space-y-6">
-                        {roadmapItems.map((item) => (
-                            <RoadmapItem key={item.id} item={item} vote={vote} votes={votes} voted={voted} />
+                        {roadmapItems.map((item, index) => (
+                            <RoadmapItem
+                                key={item.id}
+                                item={item}
+                                vote={vote}
+                                votes={votes}
+                                voted={voted}
+                                isFirst={index === 0}
+                                isLast={index === roadmapItems.length - 1}
+                            />
                         ))}
                     </ul>
                 </div>
