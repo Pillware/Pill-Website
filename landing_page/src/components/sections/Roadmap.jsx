@@ -1,5 +1,6 @@
 import { Check, Gem, ThumbsUp } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { supabase } from '../../lib/supabase.js';
 
 // Shared class for emphasized terms in roadmap entries
@@ -255,7 +256,16 @@ const roadmapItems = [
  * affordance. The button is presentational for now - votes are not collected.
  * Items can opt out of the vote affordance with `show_vote: false`.
  */
-const RoadmapItem = ({ item, vote, votes, voted, isFirst, isLast }) => (
+const RoadmapItem = ({
+    item,
+    vote,
+    votes,
+    voted,
+    mostRequestedId,
+    votePending,
+    isFirst,
+    isLast,
+}) => (
     <li className="relative pl-10 sm:pl-12">
         {/* Spine segments - every marker sits at 50% of its row, so the line
             between two markers is split at the row boundary: the part above
@@ -286,7 +296,7 @@ const RoadmapItem = ({ item, vote, votes, voted, isFirst, isLast }) => (
                     aria-hidden="true"
                 />
             )}
-        
+
             <div
                 className={`
                     glass-card p-5 sm:p-5 group relative flex items-start gap-4 w-full
@@ -333,12 +343,29 @@ const RoadmapItem = ({ item, vote, votes, voted, isFirst, isLast }) => (
                 >
                     {item.label}
                 </p>
+                  {item.id === mostRequestedId && (
+                    <span
+                        className="
+                            inline-flex
+                            rounded-full
+                            bg-brand-400/10
+                            px-2 py-1
+                            text-xs font-medium
+                            text-brand-400
+                        "
+                    >
+                        Most requested
+                    </span>
+                )}
                 <div className="hidden md:block">
                     {/* Hidden when the item is completed or opts out with show_vote: false. */}
                     {!item.completed && item.show_vote !== false && (
                         <button
                             type="button"
-                            disabled={voted.has(item.id)}
+                            disabled={
+                              voted.has(item.id) ||
+                              votePending !== null
+                            }
                             onClick={() => vote(item.id)}
                             aria-label={`Vote for ${item.label}`}
                             className={`
@@ -351,8 +378,22 @@ const RoadmapItem = ({ item, vote, votes, voted, isFirst, isLast }) => (
                                 }
                             `}
                         >
-                            <ThumbsUp className="w-4 h-4" />
-                            {/*TODO: disabled until we have heaps of votes * {votes[item.id] ?? 0} */}
+                            <ThumbsUp
+                                className={`w-4 h-4 ${
+                                    voted.has(item.id)
+                                        ? 'fill-current'
+                                        : ''
+                                }`}
+                            />
+
+                            <span>
+                                {voted.has(item.id)
+                                    ? `Voted · ${votes[item.id] ?? 0}`
+                                    : (votes[item.id] ?? 0) >= 10
+                                        ? `${votes[item.id]} votes`
+                                        : 'Vote'
+                                }
+                            </span>
                         </button>
                     )}
                 </div>
@@ -361,17 +402,35 @@ const RoadmapItem = ({ item, vote, votes, voted, isFirst, isLast }) => (
     </li>
 );
 
+const getVoterId = () => {
+    const key = 'roadmap-voter-id';
+
+    let id = localStorage.getItem(key);
+
+    if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem(key, id);
+    }
+
+    return id;
+};
+
 const Roadmap = () => {
     const [votes, setVotes] = useState({});
     const [voted, setVoted] = useState(
         () => new Set(JSON.parse(localStorage.getItem('roadmap-votes') ?? '[]'))
     );
+    const turnstileRef = useRef(null);
+
+    const [turnstileToken, setTurnstileToken] = useState(null);
+    const [votePending, setVotePending] = useState(null);
+    const [voteError, setVoteError] = useState(null);
 
     useEffect(() => {
         if (!supabase) return;
 
         supabase
-            .from('roadmap_votes')
+            .from('roadmap_vote_counts')
             .select('item_id, votes')
             .then(({ data }) => {
                 if (!data) return;
@@ -385,34 +444,90 @@ const Roadmap = () => {
     }, []);
 
     const vote = async (itemId) => {
-        if (!supabase || voted.has(itemId)) {
+        if (
+            !supabase ||
+            voted.has(itemId) ||
+            votePending
+        ) {
             return;
         }
 
-        const { data, error } = await supabase.rpc('vote_roadmap_item', {
-            p_item_id: itemId,
-        });
+        if (!turnstileToken) {
+            setVoteError(
+                'Spam protection is still loading. Please try again.'
+            );
+            return;
+        }
 
-        if (error) {
+        setVotePending(itemId);
+        setVoteError(null);
+
+        try {
+            const { data, error } =
+                await supabase.functions.invoke(
+                    'roadmap-vote',
+                    {
+                        body: {
+                            itemId,
+                            voterId: getVoterId(),
+                            turnstileToken,
+                        },
+                    }
+                );
+
+            if (error) {
+                throw error;
+            }
+
+            setVotes((old) => ({
+                ...old,
+                [itemId]: Number(data.votes),
+            }));
+
+            const next = new Set(voted);
+            next.add(itemId);
+
+            setVoted(next);
+
+            localStorage.setItem(
+                'roadmap-votes',
+                JSON.stringify([...next]),
+            );
+        } catch (error) {
             console.error(error);
-            return;
+
+            setVoteError(
+                "Couldn't submit your vote. Please try again."
+            );
+        } finally {
+            setVotePending(null);
+            setTurnstileToken(null);
+            turnstileRef.current?.reset();
+        }
+    };
+
+    const mostRequestedId = useMemo(() => {
+        let bestId = null;
+        let bestVotes = 0;
+
+        for (const item of roadmapItems) {
+            if (
+                item.completed ||
+                item.show_vote === false
+            ) {
+                continue;
+            }
+
+            const count = votes[item.id] ?? 0;
+
+            if (count > bestVotes) {
+                bestVotes = count;
+                bestId = item.id;
+            }
         }
 
-        setVotes((old) => ({
-            ...old,
-            [itemId]: data,
-        }));
-
-        const next = new Set(voted);
-        next.add(itemId);
-
-        setVoted(next);
-
-        localStorage.setItem(
-            'roadmap-votes',
-            JSON.stringify([...next]),
-        );
-    };
+        return bestId;
+    }, [votes]);
 
     return (
         <section
@@ -442,7 +557,7 @@ const Roadmap = () => {
                         Flagship features are marked with <Gem className="w-5 h-5 text-brand-400 inline translate-y-[-2px]" aria-hidden="true" /> icon.
                     </p>
                 </div>
-                 
+
 
                 {/* Vertical timeline - the spine is drawn per item (see
                     RoadmapItem) so it starts and ends at the end markers. */}
@@ -455,6 +570,8 @@ const Roadmap = () => {
                                 vote={vote}
                                 votes={votes}
                                 voted={voted}
+                                mostRequestedId={mostRequestedId}
+                                votePending={votePending}
                                 isFirst={index === 0}
                                 isLast={index === roadmapItems.length - 1}
                             />
@@ -462,6 +579,28 @@ const Roadmap = () => {
                     </ul>
                 </div>
             </div>
+
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+            options={{
+                action: 'roadmap_vote',
+                appearance: 'interaction-only',
+                theme: 'dark',
+            }}
+            onSuccess={setTurnstileToken}
+            onExpire={() => setTurnstileToken(null)}
+            onError={() => setTurnstileToken(null)}
+          />
+
+          {voteError && (
+            <p
+                role="status"
+                className="mt-4 text-sm text-red-400"
+            >
+                {voteError}
+            </p>
+          )}
         </section>
     );
 };

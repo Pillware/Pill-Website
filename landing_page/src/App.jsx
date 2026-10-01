@@ -21,7 +21,7 @@ function App() {
         <div className="min-h-screen bg-[#0A0A0A] text-white">
             <Navbar />
             <Hero />
-            <PillDemo />
+      {/*<PillDemo /> */}
             <Features />
             <SectionDivider label="Performance" />
             <Iteration />
