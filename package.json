@@ -16,8 +16,9 @@
         "install:all": "cd landing_page && npm install && cd ../docs_page && npm install"
     },
     "devDependencies": {
-        "baseline-browser-mapping": "^2.11.20",
-        "concurrently": "^9.2.1"
+        "baseline-browser-mapping": "^2.11.26",
+        "concurrently": "^9.2.1",
+        "react-router-dom": "^7.18.4"
     },
     "dependencies": {
         "@supabase/supabase-js": "^2.112.4"
