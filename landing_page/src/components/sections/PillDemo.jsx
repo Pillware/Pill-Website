@@ -250,7 +250,7 @@ export default function PillDemo({
             <canvas
                 id="canvas"
                 ref={canvasRef}
-                className="absolute inset-0 block h-full w-full"
+                className="absolute inset-0 block h-full w-full pointer-events-none"
             />
         </div>
     );
