@@ -7,7 +7,12 @@ import UspStrip from './UspStrip';
 // GitHub). Fixed width on sm+ so all three buttons render at the same size.
 // transition-colors (NOT transition-all): a width change (scrollbar flip,
 // resize) must never be animated, or the buttons visibly "scale to fit".
-const actionButtonClassName = 'inline-flex items-center justify-center gap-2 w-full sm:w-48 px-8 py-3.5 bg-white/[0.04] border border-white/[0.08] text-white font-semibold rounded-xl hover:bg-white/[0.08] hover:border-white/[0.14] transition-colors duration-200 text-base';
+const actionButtonBaseClassName = 'inline-flex items-center justify-center gap-2 w-full sm:w-48 px-8 py-3.5 text-white font-semibold rounded-xl transition-colors duration-200 text-base';
+const actionButtonClassName = `${actionButtonBaseClassName} bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.14]`;
+// Discord is the community channel, so it wears the brand red like the
+// other Discord CTAs on the site. The border matches the background so the
+// button keeps the exact same size as its glass siblings.
+const discordButtonClassName = `${actionButtonBaseClassName} bg-brand-500 hover:bg-brand-400 border border-brand-500 hover:border-brand-400`;
 
 const Hero = () => {
     return (
@@ -81,10 +86,10 @@ const Hero = () => {
                         href="https://discord.gg/VUKNQrctms"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={actionButtonClassName}
+                        className={discordButtonClassName}
                     >
                         <DiscordIcon className="w-4 h-4" />
-                        Discord
+                        Join Discord!
                     </a>
                     <a
                         href="https://github.com/Pillware/Pill"

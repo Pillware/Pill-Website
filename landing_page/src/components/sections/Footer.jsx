@@ -21,7 +21,7 @@ const Footer = () => {
                     <div className="col-span-2 md:col-span-1">
                         <a href="/" className="flex items-center">
                             <img
-                                src="/logos/pill_logo.svg"
+                                src="/logos/pill_logo_white.svg"
                                 alt="Pill Engine"
                                 className="size-20"
                             />

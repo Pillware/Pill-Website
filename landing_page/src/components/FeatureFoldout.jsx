@@ -12,24 +12,45 @@ import { ChevronDown } from 'lucide-react';
  * `foldout-card` and `data-open`, which a parent `.foldout-grid` reads for
  * the sibling spotlight (currently disabled in index.css).
  *
- * @param {React.ReactNode} props.icon     - Icon shown in the tile
- * @param {string}          props.title    - Foldout title
- * @param {React.ReactNode} props.children - Collapsible body content
+ * The open state can be owned by the parent (`isOpen` + `onToggle`, used by
+ * the section's Expand all / Collapse all button) or by the card itself
+ * when no `isOpen` prop is passed.
+ *
+ * @param {React.ReactNode} props.icon       - Icon shown in the tile
+ * @param {string}          props.title      - Foldout title
+ * @param {React.ReactNode} props.children   - Collapsible body content
+ * @param {boolean}         [props.isOpen]   - Optional controlled open state
+ * @param {Function}        [props.onToggle] - Called on toggle while controlled
  */
-const FeatureFoldout = ({ icon, title, children }) => {
-    const [isOpen, setIsOpen] = useState(false);
+const FeatureFoldout = ({ icon, title, isOpen, onToggle, children }) => {
+    const [internalIsOpen, setInternalIsOpen] = useState(false);
+    // Controlled when the parent supplies `isOpen`; otherwise the card falls
+    // back to its own state so it stays usable as a standalone component.
+    const isControlled = isOpen !== undefined;
+    const isCurrentlyOpen = isControlled ? isOpen : internalIsOpen;
+
+    // Controlled cards report the toggle upward; uncontrolled cards flip
+    // their own state.
+    const handleToggle = () => {
+        if (isControlled) {
+            onToggle?.();
+        } else {
+            setInternalIsOpen((open) => !open);
+        }
+    };
+
     // Unique id linking the toggle button to the region it controls.
     const contentId = useId();
 
     return (
-        <div className="glass-card-top group foldout-card" data-open={isOpen}>
+        <div className="glass-card-top group foldout-card" data-open={isCurrentlyOpen}>
             {/* The button carries the card padding, so the whole foldout
                 surface - padding included - is one click target. */}
             <h3 className="text-lg font-semibold text-white">
                 <button
                     type="button"
-                    onClick={() => setIsOpen((open) => !open)}
-                    aria-expanded={isOpen}
+                    onClick={handleToggle}
+                    aria-expanded={isCurrentlyOpen}
                     aria-controls={contentId}
                     className="w-full text-left cursor-pointer p-4 sm:p-6"
                 >
@@ -41,7 +62,7 @@ const FeatureFoldout = ({ icon, title, children }) => {
                         <span className="flex-1 min-w-0">{title}</span>
                         <ChevronDown
                             aria-hidden="true"
-                            className={`w-5 h-5 flex-shrink-0 text-gray-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+                            className={`w-5 h-5 flex-shrink-0 text-gray-500 transition-transform duration-300 ${isCurrentlyOpen ? 'rotate-180' : ''}`}
                         />
                     </span>
                 </button>
@@ -51,8 +72,8 @@ const FeatureFoldout = ({ icon, title, children }) => {
                 selected or read by assistive tech. */}
             <div
                 id={contentId}
-                aria-hidden={!isOpen}
-                className={`grid transition-all duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100 visible' : 'grid-rows-[0fr] opacity-0 invisible'}`}
+                aria-hidden={!isCurrentlyOpen}
+                className={`grid transition-all duration-300 ease-in-out ${isCurrentlyOpen ? 'grid-rows-[1fr] opacity-100 visible' : 'grid-rows-[0fr] opacity-0 invisible'}`}
             >
                 <div className="overflow-hidden">
                     <p className="px-6 pb-6 text-md text-gray-400 leading-relaxed">{children}</p>

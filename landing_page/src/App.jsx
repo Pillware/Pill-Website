@@ -24,7 +24,7 @@ function Home() {
             <div className="h-[70px]" />
             <Showcase />
             <div className="h-[70px]" />
-            <SectionDivider label="Flagship features" />
+            <SectionDivider label="Flagship features goals" />
             <FlagshipFeatures />
             <div className="h-[70px]" />
             <SectionDivider label="Roadmap" />

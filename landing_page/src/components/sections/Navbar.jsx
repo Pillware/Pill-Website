@@ -38,7 +38,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-3">
                     <a href="/" className="flex items-center gap-2.5 group">
                         <img
-                            src="/logos/pill_logo.svg"
+                            src="/logos/pill_logo_white.svg"
                             alt="Pill Engine"
                             className="h-12 w-12 transition-transform duration-200 group-hover:scale-105"
                         />
