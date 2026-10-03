@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/sections/Navbar';
 import Hero from './components/sections/Hero';
@@ -14,7 +14,10 @@ import PillLabs from './components/sections/PillLabs';
 import Roadmap from './components/sections/Roadmap';
 import Sponsor from './components/sections/Sponsor';
 import Community from './components/sections/Community';
-import Demos from './pages/Demos';
+
+// The /demos page is split into its own chunk so home-page visitors do not
+// download code for a route they never open.
+const Demos = lazy(() => import('./pages/Demos'));
 
 function Home() {
     return (
@@ -74,7 +77,14 @@ function App() {
             <HashScrollHandler />
             <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/demos" element={<Demos />} />
+                <Route
+                    path="/demos"
+                    element={
+                        <Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}>
+                            <Demos />
+                        </Suspense>
+                    }
+                />
             </Routes>
         </BrowserRouter>
     );

@@ -4,3 +4,4 @@ dist-docs
 .DS_Store
 *.log
 landing_page/public/pill_demo/
+local/

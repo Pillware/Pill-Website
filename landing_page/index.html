@@ -19,6 +19,11 @@
         content="Pill - Modern, free and blazingly fast game engine. Built for developers who refuse to compromise, Pill delivers the raw speed and creative freedom needed to bring even the wildest ideas to life." />
     <meta name="keywords" content="game engine, rust, ECS, 3D graphics, pill engine, game development, blazing fast" />
     <title>Pill - Modern, free and blazingly fast game engine</title>
+    <!-- Above-the-fold assets: preload the two variable fonts and the hero
+         logo so they start downloading before React mounts. -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-variable-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/outfit-variable-latin.woff2" crossorigin />
+    <link rel="preload" as="image" href="/logos/pill_logo_animated.svg" fetchpriority="high" />
     <script defer src="https://umami.campfire-on-the-wall.com/script.js"
         data-website-id="be02f2ef-9344-46d7-bc07-c9c56af6531e"></script>
 </head>

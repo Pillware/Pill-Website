@@ -5,9 +5,26 @@
    roundness, gradients, shadows, glass) live in /pill_style.css at the
    repository root and are consumed here as CSS variables.
    ═══════════════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
-/* Fredoka - kept for later. Uncomment to switch back, and comment out Outfit above.
+/* Self-hosted variable fonts (previously imported from Google Fonts): serving
+   them from this origin removes two chained render-blocking requests and lets
+   the files be preloaded in index.html. Licenses live next to the files. */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/fonts/inter-variable-latin.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Outfit';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/fonts/outfit-variable-latin.woff2') format('woff2');
+}
+/* Fredoka - kept for later. To switch back: uncomment the import below, add its
+   woff2 under /fonts, and comment out the Outfit @font-face above.
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap');
 */
 

@@ -1,0 +1,5 @@
+# https://pillengine.org - crawling policy.
+# The guide and reference live on docs.pillengine.org (separate deployment
+# with its own robots.txt), so the landing page only needs to allow crawling.
+User-agent: *
+Allow: /

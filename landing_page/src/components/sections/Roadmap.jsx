@@ -421,44 +421,55 @@ const Roadmap = () => {
         () => new Set(JSON.parse(localStorage.getItem('roadmap-votes') ?? '[]'))
     );
     const turnstileRef = useRef(null);
+    const roadmapSectionRef = useRef(null);
 
     const [turnstileToken, setTurnstileToken] = useState(null);
     const [votePending, setVotePending] = useState(null);
     const [voteError, setVoteError] = useState(null);
+    // Turnstile is mounted lazily (first vote attempt) so its script and
+    // challenge iframe never load with the page. `pendingVoteItemId` remembers
+    // the clicked item so the vote submits on its own once a token arrives.
+    const [turnstileEnabled, setTurnstileEnabled] = useState(false);
+    const [pendingVoteItemId, setPendingVoteItemId] = useState(null);
 
+    // Vote counts are only needed once the Roadmap section comes near the
+    // viewport, so the fetch is deferred from page load to first approach.
     useEffect(() => {
         if (!supabase) return;
 
-        supabase
-            .from('roadmap_vote_counts')
-            .select('item_id, votes')
-            .then(({ data }) => {
-                if (!data) return;
+        const sectionElement = roadmapSectionRef.current;
+        if (!sectionElement) return;
 
-                setVotes(
-                    Object.fromEntries(
-                        data.map(({ item_id, votes }) => [item_id, votes])
-                    )
-                );
-            });
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (!entries.some((entry) => entry.isIntersecting)) return;
+
+                observer.disconnect();
+
+                supabase
+                    .from('roadmap_vote_counts')
+                    .select('item_id, votes')
+                    .then(({ data }) => {
+                        if (!data) return;
+
+                        setVotes(
+                            Object.fromEntries(
+                                data.map(({ item_id, votes }) => [item_id, votes])
+                            )
+                        );
+                    });
+            },
+            { rootMargin: '300px 0px' }
+        );
+
+        observer.observe(sectionElement);
+
+        return () => observer.disconnect();
     }, []);
 
-    const vote = async (itemId) => {
-        if (
-            !supabase ||
-            voted.has(itemId) ||
-            votePending
-        ) {
-            return;
-        }
-
-        if (!turnstileToken) {
-            setVoteError(
-                'Spam protection is still loading. Please try again.'
-            );
-            return;
-        }
-
+    // Sends the actual vote using a fresh Turnstile token; shared by the
+    // direct path (token already available) and the lazy widget path below.
+    const submitVote = async (itemId, token) => {
         setVotePending(itemId);
         setVoteError(null);
 
@@ -470,7 +481,7 @@ const Roadmap = () => {
                         body: {
                             itemId,
                             voterId: getVoterId(),
-                            turnstileToken,
+                            turnstileToken: token,
                         },
                     }
                 );
@@ -506,6 +517,40 @@ const Roadmap = () => {
         }
     };
 
+    const vote = async (itemId) => {
+        if (
+            !supabase ||
+            voted.has(itemId) ||
+            votePending
+        ) {
+            return;
+        }
+
+        if (!turnstileToken) {
+            // First attempt: mount the Turnstile widget now and remember the
+            // item; handleTurnstileSuccess submits it once the token arrives,
+            // so the user never has to click twice.
+            setPendingVoteItemId(itemId);
+            setTurnstileEnabled(true);
+            setVoteError(null);
+            return;
+        }
+
+        await submitVote(itemId, turnstileToken);
+    };
+
+    // Runs when the (lazily mounted) Turnstile widget produces a token: keeps
+    // the token for the normal vote path and submits the remembered vote.
+    const handleTurnstileSuccess = (token) => {
+        setTurnstileToken(token);
+
+        if (pendingVoteItemId) {
+            const itemId = pendingVoteItemId;
+            setPendingVoteItemId(null);
+            submitVote(itemId, token);
+        }
+    };
+
     const mostRequestedId = useMemo(() => {
         let bestId = null;
         let bestVotes = 0;
@@ -532,6 +577,7 @@ const Roadmap = () => {
     return (
         <section
             id="roadmap"
+            ref={roadmapSectionRef}
             className="relative scroll-mt-24 py-8 sm:py-10 px-4 sm:px-6 lg:px-8"
         >
             <div className="max-w-6xl mx-auto">
@@ -544,7 +590,7 @@ const Roadmap = () => {
                         We're forging the future. Vote on what matters most to you, or{' '}
                         <a
                             href={`mailto:${['contact', '@', 'pillengine', '.', 'org'].join('')}`}
-                            className="text-brand-400 hover:text-brand-300 transition-colors duration-150"
+                            className="text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors duration-150"
                         >
                             contact us
                         </a>
@@ -580,18 +626,20 @@ const Roadmap = () => {
                 </div>
             </div>
 
-          <Turnstile
-            ref={turnstileRef}
-            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-            options={{
-                action: 'roadmap_vote',
-                appearance: 'interaction-only',
-                theme: 'dark',
-            }}
-            onSuccess={setTurnstileToken}
-            onExpire={() => setTurnstileToken(null)}
-            onError={() => setTurnstileToken(null)}
-          />
+          {turnstileEnabled && (
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+              options={{
+                  action: 'roadmap_vote',
+                  appearance: 'interaction-only',
+                  theme: 'dark',
+              }}
+              onSuccess={handleTurnstileSuccess}
+              onExpire={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
+            />
+          )}
 
           {voteError && (
             <p

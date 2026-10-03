@@ -40,9 +40,9 @@ const Footer = () => {
                         {Object.entries(footerLinks).map(([category, links]) => (
                             <div className="min-w-[40%] sm:min-w-[180px]" key={category}>
                                 <div key={category}>
-                                    <h4 className="text-lg font-semibold text-white mb-4">
+                                    <h3 className="text-lg font-semibold text-white mb-4">
                                         {category}
-                                    </h4>
+                                    </h3>
                                     <ul className="space-y-3">
                                         {links.map((link) => (
                                             <li key={link.label}>
@@ -61,9 +61,9 @@ const Footer = () => {
 
                         {/* Newsletter / Subscribe */}
                         <div>
-                            <h4 className="text-lg font-semibold text-white mb-4">
+                            <h3 className="text-lg font-semibold text-white mb-4">
                                 Stay updated
-                            </h4>
+                            </h3>
                             <p className="text-md text-gray-500 mb-3 leading-relaxed">
                                 Get product updates and news. <br/>No spam.
                             </p>

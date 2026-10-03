@@ -52,7 +52,7 @@ const FLAGSHIP_FEATURES = [
                 engine goes through automated continuous integration and benchmarking systems. The{' '}
                 <a
                     href="#labs"
-                    className="text-brand-400 hover:text-brand-300 transition-colors duration-150"
+                    className="text-brand-400 hover:text-brand-300 underline underline-offset-2 transition-colors duration-150"
                 >
                     Pill Labs
                 </a>{' '}

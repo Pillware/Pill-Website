@@ -55,7 +55,10 @@ const Hero = () => {
                     <img
                         src="/logos/pill_logo_animated.svg"
                         alt="Pill Engine"
-                        className="h-[120px] sm:h-[200px] md:h-[220px] xl:h-[280px] mx-auto logo-bump"
+                        width="402"
+                        height="209"
+                        fetchpriority="high"
+                        className="h-[120px] sm:h-[200px] md:h-[220px] xl:h-[280px] w-auto mx-auto logo-bump"
                     />
                 </div>
 
