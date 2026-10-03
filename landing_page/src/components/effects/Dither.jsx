@@ -253,7 +253,7 @@ function useWebGLShader(canvasRef, {
 
         // Handle resize
         const handleResize = () => {
-            const dpr = window.devicePixelRatio || 1;
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
             canvas.width = canvas.clientWidth * dpr;
             canvas.height = canvas.clientHeight * dpr;
             gl.viewport(0, 0, canvas.width, canvas.height);
@@ -340,6 +340,10 @@ export default function Dither({
     mouseRadius = 1
 }) {
     const canvasRef = useRef(null);
+    const visibleRef = useRef(false);
+    const rafRef = useRef(null);
+    const FRAME_INTERVAL = 1000 / 30;
+    let lastFrame = 0;
 
     useWebGLShader(canvasRef, {
         waveSpeed,
@@ -351,6 +355,43 @@ export default function Dither({
         enableMouseInteraction,
         mouseRadius
     });
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                visibleRef.current = entry.isIntersecting;
+
+                if (entry.isIntersecting && rafRef.current === null) {
+                    rafRef.current = requestAnimationFrame(render);
+                }
+            },
+            {
+                threshold: 0.01,
+            },
+        );
+
+        observer.observe(canvas);
+
+        return () => observer.disconnect();
+    }, []);
+
+    const render = (timestamp) => {
+        rafRef.current = null;
+
+        if (!visibleRef.current) {
+            return;
+        }
+
+        if (timestamp - lastFrame >= FRAME_INTERVAL) {
+            lastFrame = timestamp;
+            drawFrame(timestamp);
+        }
+
+        rafRef.current = requestAnimationFrame(render);
+    };
 
     return (
         <canvas

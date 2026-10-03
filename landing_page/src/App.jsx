@@ -14,6 +14,7 @@ import PillLabs from './components/sections/PillLabs';
 import Roadmap from './components/sections/Roadmap';
 import Sponsor from './components/sections/Sponsor';
 import Community from './components/sections/Community';
+import Performance from './components/sections/Performance';
 import Demos from './pages/Demos';
 
 function Home() {
@@ -26,6 +27,9 @@ function Home() {
             <div className="h-[70px]" />
             <SectionDivider label="Flagship features" />
             <FlagshipFeatures />
+            <div className="h-[70px]" />
+            <SectionDivider label="Performance" />
+            <Performance />
             <div className="h-[70px]" />
             <SectionDivider label="Roadmap" />
             <Roadmap />
