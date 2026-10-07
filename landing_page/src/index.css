@@ -85,13 +85,101 @@
     /* Single "spec sheet" bar for the hero proof strip: one flat surface
        (no blur, no outer outline, no hover lift - the whole bar is not
        interactive) that holds cells split only by the hairline borders on
-       the cells themselves. */
+       the cells themselves. The box-shadow lifts the bar off the animated
+       glass backdrop. */
     .spec-bar {
         position: relative;
         background: var(--glass-background);
         border-radius: var(--radius-xl);
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
     }
 
+    /* Hero elevation: soft drop shadows that lift the logo and the headline
+       off the animated glass backdrop. Drop-shadow FILTERS (not text-shadow)
+       so the background-clipped gradient span in the headline gets a clean
+       outer shadow instead of a shadow smeared across the gradient. */
+    .hero-logo-shadow {
+        filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.1)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
+    }
+
+    .hero-headline-shadow {
+        filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.4)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+    }
+    /* Two-handle range slider for the effect panel (dither brightness band):
+       two native range inputs stacked on one shared track. The inputs ignore
+       pointer events so only the round thumbs are draggable; the track and
+       the brand-coloured fill between the handles are separate layers. */
+    .dual-range {
+        position: relative;
+        height: 1.25rem;
+    }
+
+    .dual-range .dual-range-track,
+    .dual-range .dual-range-fill {
+        position: absolute;
+        top: 50%;
+        height: 4px;
+        border-radius: 9999px;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    .dual-range .dual-range-track {
+        left: 0;
+        right: 0;
+        background: rgb(255 255 255 / 0.12);
+    }
+
+    .dual-range .dual-range-fill {
+        background: rgb(var(--brand-500-rgb));
+    }
+
+    .dual-range input[type='range'] {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        background: none;
+        pointer-events: none;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    .dual-range input[type='range']::-webkit-slider-runnable-track {
+        height: 100%;
+        background: none;
+    }
+
+    .dual-range input[type='range']::-moz-range-track {
+        height: 100%;
+        background: none;
+    }
+
+    .dual-range input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        pointer-events: auto;
+        width: 0.75rem;
+        height: 0.75rem;
+        margin-top: 0.25rem;
+        border: none;
+        border-radius: 9999px;
+        background: rgb(var(--brand-500-rgb));
+        box-shadow: 0 0 0 2px rgb(0 0 0 / 0.45);
+        cursor: pointer;
+    }
+
+    .dual-range input[type='range']::-moz-range-thumb {
+        pointer-events: auto;
+        width: 0.75rem;
+        height: 0.75rem;
+        border: none;
+        border-radius: 9999px;
+        background: rgb(var(--brand-500-rgb));
+        box-shadow: 0 0 0 2px rgb(0 0 0 / 0.45);
+        cursor: pointer;
+    }
     /* Subtle border bottom for sections */
     .section-divider {
         border-bottom: 1px solid var(--border);

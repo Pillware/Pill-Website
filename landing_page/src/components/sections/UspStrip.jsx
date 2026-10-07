@@ -14,12 +14,12 @@ const usps = [
     },
     {
         icon: <Flame className="w-5 h-5" />,
-        metric: 'HOT reload',
-        label: 'Only 1-2 sec',
+        metric: 'Instant ~1 sec',
+        label: 'HOT reload',
     },
     {
         icon: <Zap className="w-5 h-5" />,
-        metric: '<3s',
+        metric: '<5 secs',
         label: 'Startup times',
     },
     {
@@ -49,21 +49,21 @@ const cellSeparators = [
  */
 const UspStrip = () => {
     return (
-        <div className="scroll-mt-24 spec-bar grid grid-cols-2 lg:grid-cols-5">
+        <div className="scroll-mt-24 spec-bar grid grid-cols-2 lg:grid-cols-5 ">
             {usps.map((usp, index) => (
                 <div
                     key={usp.metric}
-                    className={`border-white/[0.06] p-3 sm:p-4 flex flex-col items-center text-center gap-1.5 sm:gap-2 ${cellSeparators[index]} ${
+                    className={`border-white/[0.08] p-3 sm:p-4 flex flex-col items-center text-center gap-1.5 sm:gap-2 ${cellSeparators[index]} ${
                         index === usps.length - 1 ? 'col-span-2 lg:col-span-1' : ''
                     }`}
                 >
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center">
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center">
                         {usp.icon}
                     </div>
                     <span className="text-xl sm:text-2xl font-bold text-white tabular-nums tracking-tight leading-none">
                         {usp.metric}
                     </span>
-                    <span className="text-xs sm:text-sm text-gray-500 leading-snug">
+                    <span className="text-xs sm:text-sm text-gray-400 leading-snug">
                         {usp.label}
                     </span>
                 </div>
