@@ -13,11 +13,15 @@ precision highp float;
 uniform vec2 resolution;
 uniform vec2 viewport;
 uniform float time;
-// How far the two opening reveals have progressed on the JavaScript side -
-// the light rises from zero first and the rib refraction follows a second
-// later, growing from flat to full strength; both are pinned to 1 when
-// frames are frozen.
+// How far the opening wave has progressed on the JavaScript side: the
+// light is born on the hero's centre line and sweeps outward along the
+// glass ribs in both directions, driving the light's intensity; pinned
+// to 1 when frames are frozen.
 uniform float introReveal;
+// The rib refraction's own global ramp during the reveal - the JS side
+// starts it after the panel's "Reveal delay" (user rejected the spatial
+// along-the-ribs refraction: "this refraction should not be animated
+// along the ribs it should work as it was working").
 uniform float introRefraction;
 
 // Live tunables - driven by the floating controls panel and kept in the
@@ -164,9 +168,14 @@ void main() {
     vec2 uv = gl_FragCoord.xy / resolution.xy;
 
     // Flute space: screen coordinates in CSS pixels with the origin at the
-    // centre - the space flute sizes are authored in, so the glass keeps its
-    // physical rib width on any display.
-    vec2 mappedCoords = gl_FragCoord.xy * viewport / resolution - viewport * 0.5;
+    // centre - the space flute sizes are authored in. On viewports smaller
+    // than the ~900px reference size that whole space is scaled down with
+    // the screen (clamped, never upscaled), so the glass keeps a similar
+    // feature density instead of showing chunky oversized ribs on small
+    // screens; the reveal wave below compensates so it stays relative to
+    // the screen, not to the scaled space.
+    float effectScale = clamp(min(viewport.x, viewport.y) / 900.0, 0.35, 1.0);
+    vec2 mappedCoords = (gl_FragCoord.xy * viewport / resolution - viewport * 0.5) / effectScale;
 
     // Reeded glass: the flute layout can be tilted by ribRotation. The
     // screen is rotated into flute space, inside each flute the sampled x is
@@ -182,14 +191,37 @@ void main() {
     mat2 fromFluteSpace = mat2(ribCos, ribSin, -ribSin, ribCos);
     vec2 fluteSpace = toFluteSpace * mappedCoords;
 
+    // Intro wave field: the opening light is born on the centre line and
+    // sweeps OUTWARD ALONG the glass ribs in both directions at once - the
+    // wavefronts are two lines perpendicular to the rib direction moving
+    // apart, so every rib fills with light along its length from its
+    // middle toward both ends (user: "make it like right now but start
+    // from the center and expand to both sides"). waveRadius is how far
+    // from the centre line (along the ribs, in half-viewport-height units)
+    // the fronts have reached; it starts at zero and ends beyond the
+    // farthest corner plus the light ramp, so the settled frame is fully
+    // lit. waveEnergy is how much of the light's intensity this pixel has
+    // received (0 ahead of the fronts, 1 in their settled wake) and
+    // waveFront marks the travelling edges, where the wave deposits a
+    // burst of extra light. The rib refraction is driven separately - a
+    // global ramp, not part of this wave (see introRefraction above).
+    float waveExtent = (viewport.x / viewport.y) * abs(ribSin) + abs(ribCos);
+    float waveRadius = mix(-0.1, waveExtent + 0.6, introReveal);
+    // Multiplying back by the effect scale keeps the wave in screen-
+    // relative units, so shrinking the pixel space never changes how the
+    // light travels across the screen.
+    float waveAxialDistance = abs(fluteSpace.y) * effectScale / (0.5 * viewport.y);
+    float waveEnergy = 1.0 - smoothstep(waveRadius - 0.55, waveRadius, waveAxialDistance);
+    float waveFront = 4.0 * waveEnergy * (1.0 - waveEnergy);
+
     vec2 scaledCoords = fluteSpace / vec2(fluteWidth);
     float flutePhase = fract(scaledCoords.x);
 
-    // The rib refraction ramps in one second behind the light reveal - the
-    // ribs are flat at zero and reach the full fluteStrength after the
-    // light is already rising - so the glass forms instead of snapping into
-    // its finished shape. The mirrored reflection below reuses these terms,
-    // so it deepens with them.
+    // The ribs form on their own global clock (the pre-wave behavior): the
+    // JS side ramps introRefraction 0..1 smoothly once the reveal delay
+    // has passed, so every pixel's refraction grows together - it does
+    // NOT travel along the ribs with the light. The mirrored reflection
+    // below reuses these terms, so it deepens with them.
     float animatedFluteStrength = fluteStrength * introRefraction;
     float flutedX = animatedFluteStrength * (flutePhase - 0.5);
     // phase to the sixth as a multiply chain - cheaper than pow() and exact.
@@ -260,6 +292,15 @@ void main() {
     float crestSheen = exp(-crestOffset * crestOffset);
     color += color * 1.15 * crestSheen * ribReflection * 0.25 * lightLevel;
 
+    // The wave drives the light's intensity: until the front reaches this
+    // pixel the light is only partially powered, and the tone map renders
+    // that as genuinely dimmer light - a different roll-off than dimming
+    // the finished frame. The travelling edge itself deposits a burst of
+    // extra energy exactly where it is crossing, so the front reads as the
+    // brightest moment of the passage.
+    color *= waveEnergy;
+    color += color * waveFront * 2.0;
+
     // Exponential tone mapping compresses the overbright blob overlaps while
     // keeping the colours rich.
     color = 1.0 - exp(-color * exposure);
@@ -283,19 +324,17 @@ void main() {
     // the sides, dim the very top slightly behind the navbar, ease the light
     // down near the feature strip, and blend into the page colour at the very
     // bottom so the hero joins the next section seamlessly.
-    float sideFade = smoothstep(0.0, 0.10, uv.x) * (1.0 - smoothstep(0.90, 1.0, uv.x));
+    float sideFade = smoothstep(-0.05, 0.05, uv.x) * (1.0 - smoothstep(0.95, 1.05, uv.x));
     float topEdge = 1.0 - 0.45 * smoothstep(0.93, 1.0, uv.y);
     float bottomEase = mix(0.45, 1.0, smoothstep(0.0, 0.20, uv.y));
-    float vignette = 1.0 - 0.25 * length((uv - vec2(0.5, 0.5)) * vec2(0.9, 1.1));
+    float vignette = 1.0 - 0.5 * length((uv - vec2(0.5, 0.5)) * vec2(0.9, 1.1));
     color *= sideFade * topEdge * bottomEase * vignette;
 
-    // Intro reveal: the hero opens pitch dark and the light rises to the
-    // full look within the first few seconds (the JS render loop eases this
-    // 0..1 value and pins it to 1 for frozen frames; the rib refraction
-    // ramps on its own value, delayed behind this one). Applied before the
-    // bottom blend so the page-colour seam stays seamless while dark.
-    color *= introReveal;
-
+    // (The opening wave lives up in the light pipeline: it scales the
+    // light's energy before the tone map and forms the rib refraction in
+    // its wake, instead of masking the finished frame.) The bottom blend
+    // joins the hero into the page colour so the seam stays seamless while
+    // the wave is still dark.
     color = mix(color, vec3(0.039, 0.039, 0.039), 1.0 - smoothstep(0.0, 0.14, uv.y));
 
     // Dither: an optional screen-space pattern quantises the frame into
@@ -366,6 +405,7 @@ export const defaultAuroraParams = {
     ditherFadeEnd: 0.73,
     ditherLevels: 12,
     ditherScale: 1,
+    introRefractionDelay: 0.8,
 };
 
 // The render buffer is capped at this device-pixel-ratio: fragment cost
@@ -565,11 +605,9 @@ const Aurora = ({ disableAnimation = false, isPaused = false, params = defaultAu
         const startTime = Date.now();
         let animationFrameId = null;
 
-        // Seconds each opening reveal takes to rise from zero to full
-        // strength, and how much later the rib refraction starts compared
-        // with the light; frozen frames skip both entirely.
+        // Seconds the opening wave takes to sweep outward along the ribs
+        // from the hero's centre line; frozen frames skip it entirely.
         const introRevealDurationSeconds = 3;
-        const introRefractionDelaySeconds = 0.5;
 
         // FPS sampling: count drawn frames, report the rounded rate once per
         // second, and skip unchanged values so the parent rarely re-renders.
@@ -584,22 +622,27 @@ const Aurora = ({ disableAnimation = false, isPaused = false, params = defaultAu
             const elapsedSeconds = isFrozen ? 0 : (Date.now() - startTime - pausedMilliseconds) / 1000;
             gl.uniform1f(timeLocation, elapsedSeconds);
 
-            // Intro reveal: smoothstep-eased from zero to the full look
-            // across the first few seconds of the first visit (gentle start
-            // and settle, so the whole reveal stays visibly in motion); the
-            // rib refraction follows the light with a one-second delay, so
-            // the flat gradient appears first and the ribs form after it.
-            // Frozen frames (reduced motion / disableAnimation) show the
-            // full look immediately, and pausing freezes both reveals where
-            // they are.
-            const revealProgress = Math.min(elapsedSeconds / introRevealDurationSeconds, 1);
-            const refractionProgress = Math.min(Math.max((elapsedSeconds - introRefractionDelaySeconds) / introRevealDurationSeconds, 0), 1);
-            const easedReveal = isFrozen ? 1 : revealProgress * revealProgress * (3 - 2 * revealProgress);
-            const easedRefraction = isFrozen ? 1 : refractionProgress * refractionProgress * (3 - 2 * refractionProgress);
-            gl.uniform1f(introRevealLocation, easedReveal);
-            gl.uniform1f(introRefractionLocation, easedRefraction);
-
+            // Intro wave: the light is born on the hero's centre line and
+            // sweeps outward along the glass ribs in both directions, its
+            // intensity ramping in the wave's wake (computed per pixel in
+            // the shader). Smoothed so it eases in and settles after
+            // reaching the ends; frozen frames (reduced motion /
+            // disableAnimation) pin it to 1 so they see the full look
+            // immediately, and pausing freezes the wave where it is.
             const currentParams = paramsRef.current;
+            const revealProgress = Math.min(elapsedSeconds / introRevealDurationSeconds, 1);
+            const easedReveal = isFrozen ? 1 : revealProgress * revealProgress * (3 - 2 * revealProgress);
+            gl.uniform1f(introRevealLocation, easedReveal);
+
+            // The rib refraction keeps its own clock (the pre-wave
+            // behavior): after the panel's "Reveal delay" seconds it ramps
+            // globally over the same duration, so the ribs form everywhere
+            // at once instead of being animated along the ribs with the
+            // light. Frozen frames pin it to 1 like the wave.
+            const refractionDelaySeconds = currentParams.introRefractionDelay ?? defaultAuroraParams.introRefractionDelay;
+            const refractionProgress = Math.min(Math.max((elapsedSeconds - refractionDelaySeconds) / introRevealDurationSeconds, 0), 1);
+            const easedRefraction = isFrozen ? 1 : refractionProgress * refractionProgress * (3 - 2 * refractionProgress);
+            gl.uniform1f(introRefractionLocation, easedRefraction);
             paramUniforms.forEach(({ key, location }) => {
                 // Fall back to the defaults: a hot-reload can leave the
                 // parent's state without a newly added key, and pushing

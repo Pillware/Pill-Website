@@ -9,8 +9,7 @@ import UspStrip from './UspStrip';
 // GitHub). Fixed width on sm+ so all three buttons render at the same size.
 // transition-colors (NOT transition-all): a width change (scrollbar flip,
 // resize) must never be animated, or the buttons visibly "scale to fit".
-// The drop shadow lifts all three off the animated glass backdrop.
-const actionButtonBaseClassName = 'inline-flex items-center justify-center gap-2 w-full sm:w-48 px-8 py-3.5 text-white font-semibold rounded-xl transition-colors duration-200 text-base shadow-lg shadow-black/40';
+const actionButtonBaseClassName = 'inline-flex items-center justify-center gap-2 w-full sm:w-48 px-8 py-3.5 text-white font-semibold rounded-xl transition-colors duration-200 text-base';
 const actionButtonClassName = `${actionButtonBaseClassName} bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.14]`;
 // Discord is the community channel, so it wears the brand red like the
 // other Discord CTAs on the site. The border matches the background so the
@@ -59,12 +58,12 @@ fluctuates. The shader fades into the page colour in the next section. */}
                         width="402"
                         height="209"
                         fetchpriority="high"
-                        className="h-[120px] sm:h-[200px] md:h-[220px] xl:h-[280px] w-auto mx-auto logo-bump hero-logo-shadow"
+                        className="h-[120px] sm:h-[200px] md:h-[220px] xl:h-[280px] w-auto mx-auto logo-bump"
                     />
                 </div>
 
                 {/* Headline */}
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] tracking-tight mb-4 sm:mb-[48px] animate-fade-in-up hero-headline-shadow">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] tracking-tight mb-4 sm:mb-[48px] animate-fade-in-up">
                     Modern, free and <span className="text-gradient">blazingly fast</span> game engine<br />
                     {/* <span className="text-gradient">Modern</span>, <span className="text-gradient">free</span> and <span className="text-gradient">blazingly fast</span> game engine<br /> */}
                 </h1>
@@ -110,14 +109,14 @@ fluctuates. The shader fades into the page colour in the next section. */}
 
             {/* Floating tuner for the hero effect; sits above the content
                 layer so the sliders stay clickable across the whole hero. */}
-            <AuroraControls
+            {/* <AuroraControls
                 params={auroraParams}
                 onChange={handleAuroraParamChange}
                 onReset={handleAuroraReset}
                 isPaused={isAuroraPaused}
                 onTogglePause={handleAuroraPauseToggle}
                 fps={auroraFps}
-            />
+            /> */}
         </section>
     );
 };

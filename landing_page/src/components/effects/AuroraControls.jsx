@@ -7,6 +7,12 @@ import { defaultAuroraParams } from './Aurora';
 // and a new knob only needs one entry here.
 const controlGroups = [
     {
+        label: 'Reveal',
+        controls: [
+            { key: 'introRefractionDelay', label: 'Reveal delay (s)', min: 0, max: 2, step: 0.05 },
+        ],
+    },
+    {
         label: 'Reeded glass',
         controls: [
             { key: 'fluteWidth', label: 'Rib width (px)', min: 20, max: 320, step: 5 },
