@@ -2,14 +2,16 @@ import { useEffect, useRef } from 'react';
 import init, * as pill from '../../pill_demo/pill_web_app.js';
 
 const MAX_DPR = 1.5;
+const PRELOAD_MARGIN = '600px 0px';
 
-// Module-level promise = one WASM initialization even with React StrictMode.
+// Module-level promise = exactly one WASM initialization,
+// including React StrictMode development remounts.
 let pillInitPromise = null;
 
 function initPillOnce() {
     if (!pillInitPromise) {
         pillInitPromise = init().catch((error) => {
-            // Allow retry if initialization genuinely failed.
+            // If initialization genuinely failed, allow a later retry.
             pillInitPromise = null;
             throw error;
         });
@@ -28,8 +30,8 @@ export default function PillDemo({
 
     const startedRef = useRef(false);
     const readyRef = useRef(false);
-    const visibleRef = useRef(false);
 
+    // Keep current callbacks without rebuilding the whole lifecycle effect.
     const onReadyRef = useRef(onReady);
     const onStatsRef = useRef(onStats);
     const onErrorRef = useRef(onError);
@@ -45,15 +47,32 @@ export default function PillDemo({
         const canvas = canvasRef.current;
 
         if (!container || !canvas) {
-            return;
+            return undefined;
         }
 
         let cancelled = false;
-        let resizeRaf = null;
+
+        let resizeRaf1 = null;
+        let resizeRaf2 = null;
         let statsTimer = null;
 
+        /*
+         * Resize canvas backing store.
+         *
+         * Important:
+         * - CSS controls the visible size.
+         * - canvas.width/height control the WebGPU backing resolution.
+         * - only mutate dimensions when they actually changed.
+         */
         const resize = () => {
             const rect = container.getBoundingClientRect();
+
+            if (
+                rect.width <= 0 ||
+                rect.height <= 0
+            ) {
+                return;
+            }
 
             const dpr = Math.min(
                 window.devicePixelRatio || 1,
@@ -70,162 +89,227 @@ export default function PillDemo({
                 Math.round(rect.height * dpr),
             );
 
-            if (canvas.width !== width) {
-                canvas.width = width;
+            if (
+                canvas.width === width &&
+                canvas.height === height
+            ) {
+                return;
             }
 
-            if (canvas.height !== height) {
-                canvas.height = height;
-            }
+            /*
+             * Updating either backing-store dimension clears the canvas.
+             *
+             * Do both together only when required. Winit/WebGPU should then
+             * receive the resulting resize and reconfigure its surface.
+             */
+            canvas.width = width;
+            canvas.height = height;
         };
 
+        /*
+         * Zoom/layout changes can happen over multiple browser layout passes.
+         *
+         * Waiting two animation frames makes browser zoom substantially less
+         * prone to giving us an intermediate/fractional layout size.
+         */
         const queueResize = () => {
-            if (resizeRaf !== null) {
-                cancelAnimationFrame(resizeRaf);
+            if (resizeRaf1 !== null) {
+                cancelAnimationFrame(resizeRaf1);
             }
 
-            resizeRaf = requestAnimationFrame(() => {
-                resizeRaf = null;
-                resize();
+            if (resizeRaf2 !== null) {
+                cancelAnimationFrame(resizeRaf2);
+            }
+
+            resizeRaf1 = requestAnimationFrame(() => {
+                resizeRaf1 = null;
+
+                resizeRaf2 = requestAnimationFrame(() => {
+                    resizeRaf2 = null;
+                    resize();
+                });
             });
         };
 
-        // Give Winit/WebGPU a valid canvas size before initialization.
+        /*
+         * Make sure the canvas has real non-zero dimensions BEFORE Winit
+         * creates its Window/WebGPU surface.
+         */
         resize();
 
-        // Observe the CONTAINER, not the canvas we're resizing.
-        const resizeObserver = new ResizeObserver(queueResize);
+        /*
+         * ResizeObserver handles actual layout/container changes.
+         *
+         * Observe the container, NOT the canvas whose backing dimensions
+         * we're mutating.
+         */
+        const resizeObserver =
+            new ResizeObserver(queueResize);
+
         resizeObserver.observe(container);
 
         /*
-         * Lazy initialization.
-         *
-         * Start loading Pill when the demo is getting close to the viewport,
-         * so WebAssembly/WebGPU initialization happens before the user sees it.
+         * Browser zoom generally emits window.resize, even when the DOM box
+         * itself doesn't change in the way ResizeObserver expects.
          */
-        const preloadObserver = new IntersectionObserver(
-            async ([entry]) => {
-                if (
-                    !entry.isIntersecting ||
-                    startedRef.current
-                ) {
-                    return;
-                }
+        window.addEventListener(
+            'resize',
+            queueResize,
+            { passive: true },
+        );
 
-                startedRef.current = true;
+        /*
+         * visualViewport gives us another reliable signal for browser zoom,
+         * mobile viewport changes and UI/chrome resizing.
+         */
+        window.visualViewport?.addEventListener(
+            'resize',
+            queueResize,
+            { passive: true },
+        );
 
-                // Ensure correct dimensions immediately before WebGPU starts.
-                resize();
-
-                try {
-                    await initPillOnce();
-
-                    if (cancelled) {
+        /*
+         * Lazy initialization only.
+         *
+         * This is what prevents Pill from loading at all if the visitor never
+         * approaches the Performance section.
+         *
+         * Do NOT use this observer to pause/resume the Winit loop.
+         */
+        const preloadObserver =
+            new IntersectionObserver(
+                async ([entry]) => {
+                    if (
+                        !entry.isIntersecting ||
+                        startedRef.current
+                    ) {
                         return;
                     }
 
-                    readyRef.current = true;
-                    onReadyRef.current?.();
+                    startedRef.current = true;
 
                     /*
-                     * UI statistics do not need updating every frame.
-                     * Twice per second is plenty.
+                     * Stop observing immediately.
+                     *
+                     * Pill only initializes once, so there is no reason for
+                     * IntersectionObserver to keep doing work after this.
                      */
-                    statsTimer = window.setInterval(() => {
-                        if (
-                            !visibleRef.current ||
-                            !readyRef.current
-                        ) {
+                    preloadObserver.disconnect();
+
+                    /*
+                     * Get the freshest dimensions just before Winit/WebGPU
+                     * creates its surface.
+                     */
+                    resize();
+
+                    try {
+                        await initPillOnce();
+
+                        if (cancelled) {
                             return;
                         }
 
-                        onStatsRef.current?.({
-                            fps: pill.get_fps?.() ?? null,
-                            pillCount:
-                                pill.get_num_pills?.() ?? null,
-                            frameTimeMs:
-                                pill.get_frame_time_ms?.() ?? null,
-                        });
-                    }, 500);
+                        readyRef.current = true;
 
-                    // The demo may already have entered the viewport while
-                    // WASM was initializing.
-                    pill.set_active?.(
-                        visibleRef.current &&
-                        !document.hidden,
-                    );
-                } catch (error) {
-                    console.error(
-                        'Failed to initialize Pill demo:',
-                        error,
-                    );
+                        /*
+                         * A resize after initialization is useful because
+                         * initialization itself can take long enough for the
+                         * browser layout/DPR to have changed.
+                         */
+                        queueResize();
 
-                    onErrorRef.current?.(error);
-                }
-            },
-            {
-                rootMargin: '500px 0px',
-                threshold: 0,
-            },
-        );
+                        onReadyRef.current?.();
+
+                        /*
+                         * React does not need per-frame statistics.
+                         *
+                         * 2 Hz is enough visually and avoids unnecessary
+                         * React rendering / JS↔WASM traffic.
+                         */
+                        statsTimer =
+                            window.setInterval(() => {
+                                if (
+                                    cancelled ||
+                                    !readyRef.current
+                                ) {
+                                    return;
+                                }
+
+                                onStatsRef.current?.({
+                                    fps:
+                                        pill.get_fps?.() ??
+                                        null,
+
+                                    pillCount:
+                                        pill.get_num_pills?.() ??
+                                        null,
+
+                                    frameTimeMs:
+                                        pill.get_frame_time_ms?.() ??
+                                        null,
+                                });
+                            }, 500);
+                    } catch (error) {
+                        console.error(
+                            'Failed to initialize Pill demo:',
+                            error,
+                        );
+
+                        onErrorRef.current?.(error);
+                    }
+                },
+                {
+                    root: null,
+
+                    /*
+                     * Start WASM/WebGPU shortly before the user actually sees
+                     * the Performance section.
+                     */
+                    rootMargin: PRELOAD_MARGIN,
+
+                    /*
+                     * Any intersection with the enlarged root is enough.
+                     *
+                     * We only use this to trigger initialization once, so
+                     * threshold maths cannot affect playback afterwards.
+                     */
+                    threshold: 0,
+                },
+            );
 
         preloadObserver.observe(container);
 
         /*
-         * Actual rendering visibility.
+         * Tab visibility is intentionally NOT wired to pill.set_active()
+         * here yet.
          *
-         * Different from preloadObserver:
-         * - preload at 500 px away
-         * - render only while actually visible
+         * Browsers already throttle background requestAnimationFrame work.
+         *
+         * Once pill_web::set_active(true) explicitly wakes Winit /
+         * request_redraw(), it is safe to add pause/resume here.
          */
-        const visibilityObserver = new IntersectionObserver(
-            ([entry]) => {
-                visibleRef.current = entry.isIntersecting;
-
-                if (readyRef.current) {
-                    pill.set_active?.(
-                        entry.isIntersecting &&
-                        !document.hidden,
-                    );
-                }
-            },
-            {
-                threshold: 0.05,
-            },
-        );
-
-        visibilityObserver.observe(container);
-
-        const handleVisibilityChange = () => {
-            if (!readyRef.current) {
-                return;
-            }
-
-            pill.set_active?.(
-                visibleRef.current &&
-                !document.hidden,
-            );
-        };
-
-        document.addEventListener(
-            'visibilitychange',
-            handleVisibilityChange,
-        );
-
         return () => {
             cancelled = true;
 
-            resizeObserver.disconnect();
             preloadObserver.disconnect();
-            visibilityObserver.disconnect();
+            resizeObserver.disconnect();
 
-            document.removeEventListener(
-                'visibilitychange',
-                handleVisibilityChange,
+            window.removeEventListener(
+                'resize',
+                queueResize,
             );
 
-            if (resizeRaf !== null) {
-                cancelAnimationFrame(resizeRaf);
+            window.visualViewport?.removeEventListener(
+                'resize',
+                queueResize,
+            );
+
+            if (resizeRaf1 !== null) {
+                cancelAnimationFrame(resizeRaf1);
+            }
+
+            if (resizeRaf2 !== null) {
+                cancelAnimationFrame(resizeRaf2);
             }
 
             if (statsTimer !== null) {
@@ -233,12 +317,12 @@ export default function PillDemo({
             }
 
             /*
-             * Don't try to destroy/reinitialize the Winit event loop.
-             * Just stop rendering.
+             * Do NOT call set_active(false) here.
+             *
+             * React StrictMode runs effect cleanup during development,
+             * and an inactive Winit loop may then never receive another event
+             * to wake itself back up.
              */
-            if (readyRef.current) {
-                pill.set_active?.(false);
-            }
         };
     }, []);
 
@@ -250,7 +334,15 @@ export default function PillDemo({
             <canvas
                 id="canvas"
                 ref={canvasRef}
-                className="absolute inset-0 block h-full w-full pointer-events-none"
+                tabIndex={-1}
+                className="
+                    absolute
+                    inset-0
+                    block
+                    h-full
+                    w-full
+                    pointer-events-none
+                "
             />
         </div>
     );
