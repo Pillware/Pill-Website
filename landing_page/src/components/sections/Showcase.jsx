@@ -26,7 +26,7 @@ const Showcase = () => {
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-400" />
                         </span>
                         <span className="text-xs sm:text-sm font-semibold tracking-wider sm:tracking-widest uppercase text-brand-300">
-                            Pill is currently under heavy rework
+                            Pill is currently under heavy architecture rework
                         </span>
                     </p>
                     <h2 className="flex flex-col items-center gap-2 sm:gap-3">

@@ -77,8 +77,8 @@ const FLAGSHIP_FEATURES = [
     },
     {
         icon: <Columns2 className="w-5 h-5" />,
-        title: 'Game and scene view in the editor',
-        description: 'First of all there is an editor. You can run your project in one viewport and still edit your scene in another one at the same time. Play the game and keep working on it without constantly switching back and forth. Super convenient.',
+        title: 'Live game + scene editing workflow',
+        description: 'Run your game in one viewport while continuing to inspect and edit the scene in another. Changes can be made while the project is running, without constantly switching between play and edit modes. Project code is fully sandboxed, so crashes stay contained and do not take down the editor. Super convenient.',
     },
     {
         icon: <Feather className="w-5 h-5" />,
