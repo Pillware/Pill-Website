@@ -25,29 +25,29 @@ uniform float introReveal;
 uniform float introRefraction;
 
 // Live tunables - driven by the floating controls panel and kept in the
-// same keys as defaultAuroraParams on the JavaScript side.
-uniform float fluteWidth;
-uniform float fluteStrength;
+// same names as defaultAuroraParams on the JavaScript side.
+uniform float ribWidth;
+uniform float ribRefraction;
 uniform float ribRotation;
 uniform float edgeGlint;
 uniform float lightLeak;
 uniform float leakVariation;
 uniform float leakFlicker;
-uniform float ribReflection;
-uniform float pillStrength;
+uniform float ribReflections;
+uniform float pillPattern;
 uniform float pillScale;
-uniform sampler2D pillPattern;
+uniform sampler2D pillPatternTexture;
 uniform float gradientSpeed;
 uniform float exposure;
 uniform float warpStrength;
 uniform float warpSpeed;
 uniform float noiseScaleX;
 uniform float noiseScaleY;
-uniform float grainAmount;
-uniform float ditherMode;
+uniform float filmGrain;
+uniform float ditherPattern;
 uniform float ditherAmount;
-uniform float ditherFadeStart;
-uniform float ditherFadeEnd;
+uniform float brightnessRangeStart;
+uniform float brightnessRangeEnd;
 uniform float ditherLevels;
 uniform float ditherScale;
 
@@ -214,20 +214,39 @@ void main() {
     float waveEnergy = 1.0 - smoothstep(waveRadius - 0.55, waveRadius, waveAxialDistance);
     float waveFront = 4.0 * waveEnergy * (1.0 - waveEnergy);
 
-    vec2 scaledCoords = fluteSpace / vec2(fluteWidth);
+    vec2 scaledCoords = fluteSpace / vec2(ribWidth);
     float flutePhase = fract(scaledCoords.x);
+
+    // How much of the flute phase one device pixel covers. Every transform
+    // feeding scaledCoords is linear, so this is exact rather than an
+    // estimate. It feeds the seam filter below and the glint widths in the
+    // glass-light pass: a highlight or a seam transition thinner than the
+    // pixels resolving it crawls and shimmers as the drift moves.
+    float phasePixelStep = max((abs(ribCos) * viewport.x / resolution.x
+        + abs(ribSin) * viewport.y / resolution.y) / (effectScale * ribWidth), 1e-5);
 
     // The ribs form on their own global clock (the pre-wave behavior): the
     // JS side ramps introRefraction 0..1 smoothly once the reveal delay
     // has passed, so every pixel's refraction grows together - it does
     // NOT travel along the ribs with the light. The mirrored reflection
     // below reuses these terms, so it deepens with them.
-    float animatedFluteStrength = fluteStrength * introRefraction;
-    float flutedX = animatedFluteStrength * (flutePhase - 0.5);
+    //
+    // The shear jumps hard where the flute phase wraps - the sawtooth in x
+    // and the atanh smear in y both have their seam there - which rendered
+    // as a one-pixel colour step that crawled and shimmered as the drift
+    // moved. Fading the shear out over the last ~2 device pixels before
+    // each seam (smoothstep is exactly 1 further away than that, so the
+    // interior look is untouched) replaces the step with a short soft
+    // valley; the glint highlight still sits exactly on the seam, so the
+    // edge reads crisp while its aliasing is gone.
+    float edgeDistance = min(flutePhase, 1.0 - flutePhase);
+    float shearFade = smoothstep(0.0, 2.0, edgeDistance / phasePixelStep);
+    float animatedRibRefraction = ribRefraction * introRefraction * shearFade;
+    float flutedX = animatedRibRefraction * (flutePhase - 0.5);
     // phase to the sixth as a multiply chain - cheaper than pow() and exact.
     float phaseSquared = flutePhase * flutePhase;
     float lensTail = min(phaseSquared * phaseSquared * phaseSquared, 0.995);
-    float flutedY = -animatedFluteStrength * 0.5 * log((1.0 + lensTail) / (1.0 - lensTail));
+    float flutedY = -animatedRibRefraction * 0.5 * log((1.0 + lensTail) / (1.0 - lensTail));
     vec2 flutedCoords = fromFluteSpace * vec2(fluteSpace.x + flutedX, fluteSpace.y + flutedY);
 
     // The gradient's pattern space: ~1000 CSS px per unit (matching the
@@ -250,13 +269,15 @@ void main() {
     // by the light level passing through, so bright areas behave like real
     // glass while dark zones stay quiet.
     float lightLevel = min(max(color.r, max(color.g, color.b)), 2.0);
-    float edgeDistance = min(flutePhase, 1.0 - flutePhase);
 
     // Edge glint: a razor highlight plus a tight core running along each
     // rib's refractive seam. The tint is the light's own colour (slightly
     // boosted), so glints read as saturated scarlet instead of pink-white.
-    float glintRazor = exp(-edgeDistance * 160.0);
-    float glintCore = exp(-edgeDistance * 60.0);
+    // The exponents are pixel-aware (see phasePixelStep above): each keeps
+    // its authored width on dense screens and widens toward ~1.5-2 device
+    // pixels of falloff once the authored width would fall below that.
+    float glintRazor = exp(-edgeDistance * min(160.0, 0.66 / phasePixelStep));
+    float glintCore = exp(-edgeDistance * min(60.0, 0.45 / phasePixelStep));
     vec3 glintTint = color * 1.2;
     color += glintTint * (glintRazor * 0.5 + glintCore) * edgeGlint * lightLevel;
 
@@ -283,14 +304,14 @@ void main() {
     // off polished rods.
     vec2 reflectedUv = fromFluteSpace * vec2(fluteSpace.x - flutedX, fluteSpace.y + flutedY) / 1000.0;
     vec3 reflected = meshGradient(reflectedUv, warpNoise);
-    color += reflected * ribReflection * 0.35 * (0.35 + 0.65 * lightLevel);
+    color += reflected * ribReflections * 0.35 * (0.35 + 0.65 * lightLevel);
 
     // pow() with a negative base (half this range) is undefined in GLSL ES
     // and can produce NaN on strict drivers; the explicit square is both
     // safe and cheaper than pow().
     float crestOffset = (flutePhase - 0.5) / 0.20;
     float crestSheen = exp(-crestOffset * crestOffset);
-    color += color * 1.15 * crestSheen * ribReflection * 0.25 * lightLevel;
+    color += color * 1.15 * crestSheen * ribReflections * 0.25 * lightLevel;
 
     // The wave drives the light's intensity: until the front reaches this
     // pixel the light is only partially powered, and the tone map renders
@@ -314,11 +335,11 @@ void main() {
     // frame - every shadow zone in the composition picks up the glow.
     vec2 pillSpace = rotate2d(fluteSpace, radians(45.0));
     vec2 pillUv = pillSpace / max(pillScale, 1.0);
-    float pillMask = texture2D(pillPattern, pillUv).a;
+    float pillMask = texture2D(pillPatternTexture, pillUv).a;
     float pillBrightness = max(color.r, max(color.g, color.b));
     float pillDarkness = 1.0 - smoothstep(0.10, 0.45, pillBrightness);
     vec3 pillHue = color / max(pillBrightness, 0.001);
-    color += pillHue * pillMask * pillStrength * pillDarkness * 0.30;
+    color += pillHue * pillMask * pillPattern * pillDarkness * 0.30;
 
     // Framing (uv.y = 1 is the screen top edge, 0 the bottom edge): soften
     // the sides, dim the very top slightly behind the navbar, ease the light
@@ -340,18 +361,18 @@ void main() {
     // Dither: an optional screen-space pattern quantises the frame into
     // engraved-looking steps inside a brightness band - pick a pattern in
     // the panel (None leaves the glass smooth). The band is set by the
-    // panel's two-handle range slider (ditherFadeStart .. ditherFadeEnd):
-    // full black below the band and the lit streaks above it stay untouched,
-    // with a short soft fade at each edge. ditherScale sets the pattern's
-    // cell size in pixels.
-    if (ditherMode > 0.5) {
+    // panel's two-handle range slider (brightnessRangeStart ..
+    // brightnessRangeEnd): full black below the band and the lit streaks
+    // above it stay untouched, with a short soft fade at each edge.
+    // ditherScale sets the pattern's cell size in pixels.
+    if (ditherPattern > 0.5) {
         vec2 ditherCoord = gl_FragCoord.xy / max(ditherScale, 1.0);
         float ditherValue = hash(ditherCoord * 0.371 + vec2(7.7, 3.1));
-        if (ditherMode < 1.5) {
+        if (ditherPattern < 1.5) {
             ditherValue = bayer4(ditherCoord);
-        } else if (ditherMode < 2.5) {
+        } else if (ditherPattern < 2.5) {
             ditherValue = bayer8(ditherCoord);
-        } else if (ditherMode < 3.5) {
+        } else if (ditherPattern < 3.5) {
             ditherValue = interleavedGradientNoise(ditherCoord);
         }
         float levels = max(ditherLevels, 2.0);
@@ -361,10 +382,10 @@ void main() {
         // short soft fade at each edge keeps the band from aliasing; the
         // fade width shrinks with the band so the two smoothsteps can never
         // invert (GLSL leaves edge0 > edge1 undefined).
-        float fadeEnd = max(ditherFadeEnd, ditherFadeStart + 0.02);
-        float edgeSoftness = min(0.06, (fadeEnd - ditherFadeStart) * 0.5);
+        float fadeEnd = max(brightnessRangeEnd, brightnessRangeStart + 0.02);
+        float edgeSoftness = min(0.06, (fadeEnd - brightnessRangeStart) * 0.5);
         float brightnessMax = max(color.r, max(color.g, color.b));
-        float ditherMask = smoothstep(ditherFadeStart, ditherFadeStart + edgeSoftness, brightnessMax)
+        float ditherMask = smoothstep(brightnessRangeStart, brightnessRangeStart + edgeSoftness, brightnessMax)
             * (1.0 - smoothstep(fadeEnd - edgeSoftness, fadeEnd, brightnessMax));
         color = mix(color, ditheredColor, clamp(ditherAmount, 0.0, 1.0) * ditherMask);
     }
@@ -372,7 +393,7 @@ void main() {
     // Film grain: animated per-pixel noise modulated by brightness (the
     // tutorial's grain recipe) - strongest where the light is.
     float grain = hash(gl_FragCoord.xy + vec2(7.7, 3.1) * floor(time * 24.0)) - 0.5;
-    color += grain * grainAmount * max(color.r, max(color.g, color.b));
+    color += grain * filmGrain * max(color.r, max(color.g, color.b));
     color = clamp(color, 0.0, 1.0);
 
     gl_FragColor = vec4(color, 1.0);
@@ -382,30 +403,30 @@ void main() {
 // Every tunable value of the shader. The floating controls panel edits a
 // copy of this object live, and a reset restores exactly these values.
 export const defaultAuroraParams = {
-    fluteWidth: 110,
-    fluteStrength: 200,
+    ribWidth: 110,
+    ribRefraction: 200,
     ribRotation: 49,
     edgeGlint: 1.0,
     lightLeak: 1.11,
     leakVariation: 1.0,
     leakFlicker: 0.55,
-    pillStrength: 0.15,
+    pillPattern: 0.15,
     pillScale: 17,
-    ribReflection: 0.5,
+    ribReflections: 0.5,
     gradientSpeed: 2.35,
     exposure: 0.6,
     noiseScaleX: 0.3,
     noiseScaleY: 0.55,
     warpStrength: 0.40,
     warpSpeed: 0.25,
-    grainAmount: 0.1,
-    ditherMode: 4,
+    filmGrain: 0.1,
+    ditherPattern: 4,
     ditherAmount: 0.15,
-    ditherFadeStart: 0,
-    ditherFadeEnd: 0.73,
+    brightnessRangeStart: 0,
+    brightnessRangeEnd: 0.73,
     ditherLevels: 12,
     ditherScale: 1,
-    introRefractionDelay: 0.8,
+    revealDelay: 0.8,
 };
 
 // The render buffer is capped at this device-pixel-ratio: fragment cost
@@ -548,7 +569,7 @@ const Aurora = ({ disableAnimation = false, isPaused = false, params = defaultAu
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.uniform1i(gl.getUniformLocation(program, 'pillPattern'), 0);
+        gl.uniform1i(gl.getUniformLocation(program, 'pillPatternTexture'), 0);
 
         const pillImage = new Image();
         pillImage.onload = () => {
@@ -639,7 +660,7 @@ const Aurora = ({ disableAnimation = false, isPaused = false, params = defaultAu
             // globally over the same duration, so the ribs form everywhere
             // at once instead of being animated along the ribs with the
             // light. Frozen frames pin it to 1 like the wave.
-            const refractionDelaySeconds = currentParams.introRefractionDelay ?? defaultAuroraParams.introRefractionDelay;
+            const refractionDelaySeconds = currentParams.revealDelay ?? defaultAuroraParams.revealDelay;
             const refractionProgress = Math.min(Math.max((elapsedSeconds - refractionDelaySeconds) / introRevealDurationSeconds, 0), 1);
             const easedRefraction = isFrozen ? 1 : refractionProgress * refractionProgress * (3 - 2 * refractionProgress);
             gl.uniform1f(introRefractionLocation, easedRefraction);

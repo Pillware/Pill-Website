@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Code2, Rocket, Package, Terminal, Book } from 'lucide-react';
-import FeatureCard from '../FeatureCard';
+import FeatureCard from '../elements/FeatureCard';
 import { generateGranuleField } from '../effects/granules';
 
 const capabilities = [

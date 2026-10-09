@@ -7,7 +7,7 @@ import FlagshipFeatures from './components/sections/FlagshipFeatures';
 import CTA from './components/sections/CTA';
 import CommunityCTA from './components/sections/CommunityCTA';
 import Footer from './components/sections/Footer';
-import SectionDivider from './components/effects/SectionDivider';
+import SectionDivider from './components/elements/SectionDivider';
 import Features from './components/sections/Features';
 import Iteration from './components/sections/Iteration';
 import PillLabs from './components/sections/PillLabs';

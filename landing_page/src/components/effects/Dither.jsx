@@ -242,14 +242,25 @@ function useWebGLShader(canvasRef, {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-        // Load image
+        // Load the brand pill tile - the same SVG asset the Aurora hero
+        // shader uses. The SVG is rasterised once through a 2D canvas at
+        // its natural 16x16 size (the path Aurora also takes) because
+        // direct SVG-to-texture uploads are inconsistent across browsers.
+        // Its transparent background reads as black in the red channel,
+        // so the mask maths and polarity match the old PNG exactly.
         const image = new Image();
         image.onload = () => {
+            const rasterWidth = image.naturalWidth || 16;
+            const rasterHeight = image.naturalHeight || 16;
+            const rasterCanvas = document.createElement('canvas');
+            rasterCanvas.width = rasterWidth;
+            rasterCanvas.height = rasterHeight;
+            rasterCanvas.getContext('2d').drawImage(image, 0, 0, rasterWidth, rasterHeight);
             gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-            textureSizeRef.current = { width: image.width, height: image.height };
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, rasterCanvas);
+            textureSizeRef.current = { width: rasterWidth, height: rasterHeight };
         };
-        image.src = '/pill_pattern.png';
+        image.src = '/logos/pill_pattern_1x1.svg';
 
         // Handle resize
         const handleResize = () => {

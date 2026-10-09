@@ -9,20 +9,20 @@ const controlGroups = [
     {
         label: 'Reveal',
         controls: [
-            { key: 'introRefractionDelay', label: 'Reveal delay (s)', min: 0, max: 2, step: 0.05 },
+            { key: 'revealDelay', label: 'Reveal delay (s)', min: 0, max: 2, step: 0.05 },
         ],
     },
     {
         label: 'Reeded glass',
         controls: [
-            { key: 'fluteWidth', label: 'Rib width (px)', min: 20, max: 320, step: 5 },
+            { key: 'ribWidth', label: 'Rib width (px)', min: 20, max: 320, step: 5 },
             { key: 'ribRotation', label: 'Rib rotation (deg)', min: -90, max: 90, step: 1 },
-            { key: 'fluteStrength', label: 'Rib refraction', min: 0, max: 200, step: 5 },
+            { key: 'ribRefraction', label: 'Rib refraction', min: 0, max: 200, step: 5 },
             { key: 'edgeGlint', label: 'Edge glint', min: 0, max: 1, step: 0.01 },
             { key: 'lightLeak', label: 'Light leak', min: 0, max: 1.5, step: 0.01 },
             { key: 'leakVariation', label: 'Leak variation', min: 0, max: 1, step: 0.05 },
             { key: 'leakFlicker', label: 'Leak flicker', min: 0, max: 1, step: 0.05 },
-            { key: 'ribReflection', label: 'Rib reflections', min: 0, max: 1.5, step: 0.01 },
+            { key: 'ribReflections', label: 'Rib reflections', min: 0, max: 1.5, step: 0.01 },
         ],
     },
     {
@@ -44,8 +44,8 @@ const controlGroups = [
     {
         label: 'Texture',
         controls: [
-            { key: 'grainAmount', label: 'Film grain', min: 0, max: 0.2, step: 0.002 },
-            { key: 'pillStrength', label: 'Pill pattern', min: 0, max: 1.5, step: 0.05 },
+            { key: 'filmGrain', label: 'Film grain', min: 0, max: 0.2, step: 0.002 },
+            { key: 'pillPattern', label: 'Pill pattern', min: 0, max: 1.5, step: 0.05 },
             { key: 'pillScale', label: 'Pill scale (px)', min: 10, max: 400, step: 1 },
         ],
     },
@@ -53,7 +53,7 @@ const controlGroups = [
         label: 'Dither',
         controls: [
             {
-                key: 'ditherMode',
+                key: 'ditherPattern',
                 label: 'Pattern',
                 type: 'select',
                 options: [
@@ -68,7 +68,7 @@ const controlGroups = [
             {
                 type: 'range',
                 label: 'Brightness range',
-                keys: ['ditherFadeStart', 'ditherFadeEnd'],
+                keys: ['brightnessRangeStart', 'brightnessRangeEnd'],
                 min: 0,
                 max: 1,
                 step: 0.01,

@@ -3,7 +3,7 @@ import {
     Heart, Code2, Box, Flame, ShieldCheck, Boxes, ListTree,
     Puzzle, Gauge, Feather, Cpu, Rocket, AppWindow, Waves, Columns2,
 } from 'lucide-react';
-import FeatureFoldout from '../FeatureFoldout';
+import FeatureFoldout from '../elements/FeatureFoldout';
 import GranuleField from '../effects/GranuleField';
 
 // IMPORTANT: For now this section is contains "goals" word as pill does not deliver all the features yet.
@@ -174,7 +174,7 @@ const FlagshipFeatures = () => {
 
                 <p className="text-xl text-gray-400 max-w-2xl mb-10">
                     <span className="text-xl text-brand-400 font-semibold leading-relaxed">
-                        The agenda is very ambitious
+                        The agenda for v1.0 is very ambitious
                     </span>
                 </p>
 

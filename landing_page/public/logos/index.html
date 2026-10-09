@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <!-- Static brand-asset gallery served at /logos/. Files in public/ are
+         copied verbatim (no bundling), so this page is dependency-free and
+         self-contained; all paths are relative so it works on every
+         deployment domain (pillengine.org, pill.rocks, localhost). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Pill brand assets - download the logos, icons and patterns of the Pill game engine." />
+    <meta name="theme-color" content="#0a0a0a" />
+    <link rel="icon" type="image/svg+xml" href="../favicons/favicon.svg" />
+    <title>Pill - Brand assets</title>
+    <style>
+        /* The same variable font files the landing page serves. */
+        @font-face {
+            font-family: 'Outfit';
+            src: url('../fonts/outfit-variable-latin.woff2') format('woff2');
+            font-weight: 100 900;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('../fonts/inter-variable-latin.woff2') format('woff2');
+            font-weight: 100 900;
+            font-display: swap;
+        }
+
+        :root {
+            --background: #0a0a0a;
+            --panel: #111113;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(240, 68, 68, 0.5);
+            --text: #ececee;
+            --text-dim: rgba(255, 255, 255, 0.5);
+            --brand: #f04444;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .page {
+            max-width: 1060px;
+            margin: 0 auto;
+            padding: 56px 24px 72px;
+        }
+
+        /* Header: brand mark linking home, title and the guidelines pointer. */
+        .page-header {
+            margin-bottom: 44px;
+        }
+
+        .page-brand {
+            display: inline-block;
+            margin-bottom: 28px;
+        }
+
+        .page-brand img {
+            display: block;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2rem, 5vw, 2.75rem);
+            font-weight: 650;
+            letter-spacing: -0.02em;
+            margin: 0 0 12px;
+        }
+
+        .lead {
+            max-width: 640px;
+            margin: 0;
+            color: var(--text-dim);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .lead a,
+        .page-footer a {
+            color: var(--brand);
+            text-decoration: none;
+        }
+
+        .lead a:hover,
+        .page-footer a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--text-dim);
+            margin: 0 0 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+            gap: 14px;
+        }
+
+        /* One card per asset; the whole card is the download link. */
+        .asset {
+            display: flex;
+            flex-direction: column;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            color: inherit;
+            text-decoration: none;
+            transition: border-color 0.18s ease, transform 0.18s ease;
+        }
+
+        .asset:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .asset-preview {
+            height: 148px;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+
+        .asset-preview img {
+            max-width: 80%;
+            max-height: 112px;
+        }
+
+        /* Preview tiles: dark for white artwork, light for black artwork. */
+        .asset-preview--dark {
+            background: #070709;
+        }
+
+        .asset-preview--light {
+            background: #f2f2f4;
+        }
+
+        /* Patterns preview as their own repeating tile. */
+        .asset-preview--pattern {
+            padding: 0;
+            background-color: #0b0b0d;
+            background-repeat: repeat;
+        }
+
+        .asset-preview--pattern-1x1 {
+            background-image: url('pill_pattern_1x1.svg');
+            background-size: 34px 34px;
+        }
+
+        .asset-preview--pattern-4x4 {
+            background-image: url('pill_pattern_4x4.svg');
+            background-size: 68px 68px;
+        }
+
+        /* Non-previewable formats (the Illustrator source) show a label. */
+        .asset-fallback {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.6rem;
+            font-weight: 650;
+            color: rgba(255, 255, 255, 0.22);
+        }
+
+        .asset-meta {
+            padding: 11px 14px 13px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .asset-name {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.86rem;
+            font-weight: 600;
+        }
+
+        .asset-file {
+            display: block;
+            margin-top: 3px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        .page-footer {
+            margin-top: 48px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+        <header class="page-header">
+            <a class="page-brand" href="../" title="Pill - modern, free and blazingly fast game engine">
+                <img src="pill_logo_white.svg" alt="Pill" height="34" />
+            </a>
+            <h1>Brand assets</h1>
+            <p class="lead">
+                Logos, icons and patterns for the Pill game engine. Use them freely when referring to
+                Pill - see the <a href="https://docs.pillengine.org/guide/other/brand-identity">brand
+                identity guidelines</a> for usage rules. Click any asset to download it.
+            </p>
+        </header>
+
+        <section>
+            <h2>Logos</h2>
+            <div class="grid">
+                <a class="asset" href="pill_logo_white.svg" download>
+                    <span class="asset-preview asset-preview--dark"><img src="pill_logo_white.svg" alt="White Pill wordmark" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">White wordmark</span><span class="asset-file">pill_logo_white.svg</span></span>
+                </a>
+                <a class="asset" href="pill_logo_black.svg" download>
+                    <span class="asset-preview asset-preview--light"><img src="pill_logo_black.svg" alt="Black Pill wordmark" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Black wordmark</span><span class="asset-file">pill_logo_black.svg</span></span>
+                </a>
+                <a class="asset" href="pill_logo_white.png" download>
+                    <span class="asset-preview asset-preview--dark"><img src="pill_logo_white.png" alt="White Pill wordmark, PNG" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">White wordmark (PNG)</span><span class="asset-file">pill_logo_white.png</span></span>
+                </a>
+                <a class="asset" href="pill_logo_black.png" download>
+                    <span class="asset-preview asset-preview--light"><img src="pill_logo_black.png" alt="Black Pill wordmark, PNG" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Black wordmark (PNG)</span><span class="asset-file">pill_logo_black.png</span></span>
+                </a>
+                <a class="asset" href="pill_logo_white_marginless.png" download>
+                    <span class="asset-preview asset-preview--dark"><img src="pill_logo_white_marginless.png" alt="White Pill wordmark without margins" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">White wordmark, marginless</span><span class="asset-file">pill_logo_white_marginless.png</span></span>
+                </a>
+                <a class="asset" href="pill_logo_black_marginless.png" download>
+                    <span class="asset-preview asset-preview--light"><img src="pill_logo_black_marginless.png" alt="Black Pill wordmark without margins" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Black wordmark, marginless</span><span class="asset-file">pill_logo_black_marginless.png</span></span>
+                </a>
+                <a class="asset" href="pill_logo_animated.svg" download>
+                    <span class="asset-preview asset-preview--dark"><img src="pill_logo_animated.svg" alt="Animated Pill wordmark" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Animated wordmark</span><span class="asset-file">pill_logo_animated.svg</span></span>
+                </a>
+            </div>
+        </section>
+
+        <section>
+            <h2>Icons</h2>
+            <div class="grid">
+                <a class="asset" href="pill_icon_white.svg" download>
+                    <span class="asset-preview asset-preview--dark"><img src="pill_icon_white.svg" alt="White Pill icon" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">White icon</span><span class="asset-file">pill_icon_white.svg</span></span>
+                </a>
+                <a class="asset" href="pill_icon_black.svg" download>
+                    <span class="asset-preview asset-preview--light"><img src="pill_icon_black.svg" alt="Black Pill icon" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Black icon</span><span class="asset-file">pill_icon_black.svg</span></span>
+                </a>
+                <a class="asset" href="pill_icon_black.png" download>
+                    <span class="asset-preview asset-preview--light"><img src="pill_icon_black.png" alt="Black Pill icon, PNG" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Black icon (PNG)</span><span class="asset-file">pill_icon_black.png</span></span>
+                </a>
+                <a class="asset" href="pill_icon_white_marginless.png" download>
+                    <span class="asset-preview asset-preview--dark"><img src="pill_icon_white_marginless.png" alt="White Pill icon without margins" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">White icon, marginless</span><span class="asset-file">pill_icon_white_marginless.png</span></span>
+                </a>
+                <a class="asset" href="pill_icon_black_marginless.png" download>
+                    <span class="asset-preview asset-preview--light"><img src="pill_icon_black_marginless.png" alt="Black Pill icon without margins" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Black icon, marginless</span><span class="asset-file">pill_icon_black_marginless.png</span></span>
+                </a>
+                <a class="asset" href="pill_icon_white_black_bg.png" download>
+                    <span class="asset-preview asset-preview--dark"><img src="pill_icon_white_black_bg.png" alt="White Pill icon on black background" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">White icon on black</span><span class="asset-file">pill_icon_white_black_bg.png</span></span>
+                </a>
+                <a class="asset" href="pill_icon_black_white_bg.png" download>
+                    <span class="asset-preview asset-preview--light"><img src="pill_icon_black_white_bg.png" alt="Black Pill icon on white background" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Black icon on white</span><span class="asset-file">pill_icon_black_white_bg.png</span></span>
+                </a>
+                <a class="asset" href="pill_icon_raw.svg" download>
+                    <span class="asset-preview asset-preview--dark"><img src="pill_icon_raw.svg" alt="Raw Pill icon mark" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Raw icon mark</span><span class="asset-file">pill_icon_raw.svg</span></span>
+                </a>
+            </div>
+        </section>
+
+        <section>
+            <h2>Patterns</h2>
+            <div class="grid">
+                <a class="asset" href="pill_pattern_1x1.svg" download>
+                    <span class="asset-preview asset-preview--pattern asset-preview--pattern-1x1"></span>
+                    <span class="asset-meta"><span class="asset-name">Pill pattern, 1&times;1</span><span class="asset-file">pill_pattern_1x1.svg</span></span>
+                </a>
+                <a class="asset" href="pill_pattern_4x4.svg" download>
+                    <span class="asset-preview asset-preview--pattern asset-preview--pattern-4x4"></span>
+                    <span class="asset-meta"><span class="asset-name">Pill pattern, 4&times;4</span><span class="asset-file">pill_pattern_4x4.svg</span></span>
+                </a>
+            </div>
+        </section>
+
+        <section>
+            <h2>More</h2>
+            <div class="grid">
+                <a class="asset" href="pill_pile_white.png" download>
+                    <span class="asset-preview asset-preview--dark"><img src="pill_pile_white.png" alt="White stack of pills" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">White pill pile (PNG)</span><span class="asset-file">pill_pile_white.png</span></span>
+                </a>
+                <a class="asset" href="pill_pile_black.png" download>
+                    <span class="asset-preview asset-preview--light"><img src="pill_pile_black.png" alt="Black stack of pills" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Black pill pile (PNG)</span><span class="asset-file">pill_pile_black.png</span></span>
+                </a>
+                <a class="asset" href="pill_brand_identity_guidelines.ai" download>
+                    <span class="asset-preview asset-preview--dark"><span class="asset-fallback">Ai</span></span>
+                    <span class="asset-meta"><span class="asset-name">Brand identity guidelines</span><span class="asset-file">pill_brand_identity_guidelines.ai</span></span>
+                </a>
+            </div>
+        </section>
+
+        <footer class="page-footer">
+            <p>
+                Pill is an open-source project.
+                <a href="../">pillengine.org</a> &middot;
+                <a href="https://docs.pillengine.org">Documentation</a> &middot;
+                <a href="https://github.com/Pillware/Pill">GitHub</a>
+            </p>
+        </footer>
+    </main>
+</body>
+
+</html>

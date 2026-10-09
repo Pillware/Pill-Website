@@ -31,7 +31,7 @@ title: Brand Identity
 <br>
 </div>
 
-You can find all logo files [here](https://github.com/Pillware/Pill/tree/main/media/logo)
+You can find all logo files [here](https://pillengine.org/logos/)
 
 ## Fonts
 <br>

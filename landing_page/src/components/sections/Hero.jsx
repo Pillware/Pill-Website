@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, Github } from 'lucide-react';
-import DiscordIcon from '../DiscordIcon';
+import DiscordIcon from '../elements/DiscordIcon';
 import Aurora, { defaultAuroraParams } from '../effects/Aurora';
 import AuroraControls from '../effects/AuroraControls';
 import UspStrip from './UspStrip';
@@ -58,12 +58,12 @@ fluctuates. The shader fades into the page colour in the next section. */}
                         width="402"
                         height="209"
                         fetchpriority="high"
-                        className="h-[120px] sm:h-[200px] md:h-[220px] xl:h-[280px] w-auto mx-auto logo-bump"
+                        className="h-[120px] sm:h-[200px] md:h-[220px] xl:h-[280px] w-auto mx-auto logo-bump hero-logo-shadow"
                     />
                 </div>
 
                 {/* Headline */}
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] tracking-tight mb-4 sm:mb-[48px] animate-fade-in-up">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] hero-headline-shadow tracking-tight mb-4 sm:mb-[48px] animate-fade-in-up">
                     Modern, free and <span className="text-gradient">blazingly fast</span> game engine<br />
                     {/* <span className="text-gradient">Modern</span>, <span className="text-gradient">free</span> and <span className="text-gradient">blazingly fast</span> game engine<br /> */}
                 </h1>
@@ -108,15 +108,21 @@ fluctuates. The shader fades into the page colour in the next section. */}
             </div>
 
             {/* Floating tuner for the hero effect; sits above the content
-                layer so the sliders stay clickable across the whole hero. */}
-            {/* <AuroraControls
-                params={auroraParams}
-                onChange={handleAuroraParamChange}
-                onReset={handleAuroraReset}
-                isPaused={isAuroraPaused}
-                onTogglePause={handleAuroraPauseToggle}
-                fps={auroraFps}
-            /> */}
+                layer so the sliders stay clickable across the whole hero.
+                Development only: import.meta.env.DEV is a build-time
+                constant that Vite folds to false in production builds, so
+                the panel (and the AuroraControls import) is tree-shaken
+                away there - the tuner must never ship to visitors. */}
+            {import.meta.env.DEV && (
+                <AuroraControls
+                    params={auroraParams}
+                    onChange={handleAuroraParamChange}
+                    onReset={handleAuroraReset}
+                    isPaused={isAuroraPaused}
+                    onTogglePause={handleAuroraPauseToggle}
+                    fps={auroraFps}
+                />
+            )}
         </section>
     );
 };

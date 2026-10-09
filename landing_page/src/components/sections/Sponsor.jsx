@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Hammer, ArrowUpNarrowWide, MessagesSquare, HandMetal } from 'lucide-react';
-import FeatureCard from '../FeatureCard';
+import FeatureCard from '../elements/FeatureCard';
 
 // Obfuscated so the address never appears verbatim in the source.
 const SPONSOR_EMAIL = ['contact', '@', 'pillengine', '.', 'org'].join('');

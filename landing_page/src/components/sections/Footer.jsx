@@ -1,5 +1,5 @@
 import { Github } from 'lucide-react';
-import DiscordIcon from '../DiscordIcon';
+import DiscordIcon from '../elements/DiscordIcon';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();

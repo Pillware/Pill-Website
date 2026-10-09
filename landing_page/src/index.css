@@ -99,11 +99,11 @@
        so the background-clipped gradient span in the headline gets a clean
        outer shadow instead of a shadow smeared across the gradient. */
     .hero-logo-shadow {
-        filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.1)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
+        filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.15)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
     }
 
     .hero-headline-shadow {
-        filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.4)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+        filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.15)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.15));
     }
     /* Two-handle range slider for the effect panel (dither brightness band):
        two native range inputs stacked on one shared track. The inputs ignore

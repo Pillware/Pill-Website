@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { FlaskConical, GitBranch, ShieldCheck } from 'lucide-react';
-import FeatureCard from '../FeatureCard';
+import FeatureCard from '../elements/FeatureCard';
 import { generateGranuleField } from '../effects/granules';
 
 const method = [

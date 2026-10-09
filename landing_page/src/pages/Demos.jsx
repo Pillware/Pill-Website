@@ -1,6 +1,6 @@
 import Navbar from '../components/sections/Navbar';
 import Footer from '../components/sections/Footer';
-import VideoPlayer from '../components/VideoPlayer';
+import VideoPlayer from '../components/elements/VideoPlayer';
 
 const DEMO_ITEMS = [
     {

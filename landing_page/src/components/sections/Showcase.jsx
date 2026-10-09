@@ -1,5 +1,5 @@
 
-import VideoPlayer from '../VideoPlayer';
+import VideoPlayer from '../elements/VideoPlayer';
 
 const SHOWCASE_ITEMS = [
     {

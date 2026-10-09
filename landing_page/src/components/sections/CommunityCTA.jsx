@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import PixelSwap from '../effects/PixelSwap';
-import DiscordIcon from '../DiscordIcon';
+import DiscordIcon from '../elements/DiscordIcon';
 
 /**
  * Community invitation banner. Same layout as the CTA section: a glass card
