@@ -49,7 +49,7 @@ const cellSeparators = [
  */
 const UspStrip = () => {
     return (
-        <div className="scroll-mt-24 spec-bar grid grid-cols-2 lg:grid-cols-5 ">
+        <div id="usp-strip" className="scroll-mt-24 spec-bar grid grid-cols-2 lg:grid-cols-5">
             {usps.map((usp, index) => (
                 <div
                     key={usp.metric}

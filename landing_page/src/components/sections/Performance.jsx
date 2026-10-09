@@ -186,7 +186,7 @@ const PillLabs = () => {
     const granuleField = useMemo(() => generateGranuleField({ seed: 31 }), []);
 
     return (
-        <div>
+        <div id="labs" className="scroll-mt-24">
             <h2 className="text-3xl sm:text-4xl md:text-5xl text-white leading-[1.15] tracking-tight mb-6">
                 Pill Labs
             </h2>
@@ -231,7 +231,7 @@ const PillLabs = () => {
 const Performance = () => {
     return (
         <section
-            id="labs"
+            id="performance"
             className="relative scroll-mt-24 py-8 sm:py-10 px-4 sm:px-6 lg:px-8 overflow-hidden"
         >
             <div className="max-w-6xl mx-auto">

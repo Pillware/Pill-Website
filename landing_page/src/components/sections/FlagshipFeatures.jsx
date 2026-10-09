@@ -68,7 +68,7 @@ const FLAGSHIP_FEATURES = [
     {
         icon: <ListTree className="w-5 h-5" />,
         title: 'Next-level error logs',
-        description: 'Finally useful errors instead of cryptic walls of text. Deep, descriptive and configurable call stacks with enough context to understand what went wrong, and even with the tips on what to do in order to fix the issue.',
+        description: 'Finally useful errors instead of cryptic walls of text. Deep, descriptive and configurable call stacks with enough context to understand what went wrong, and even tips on how to fix the issue.',
     },
     {
         icon: <Box className="w-5 h-5" />,

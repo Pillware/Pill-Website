@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react';
 import init, * as pill from '../../pill_demo/pill_web_app.js';
 
-const MAX_DPR = 1.5;
 const PRELOAD_MARGIN = '600px 0px';
 
 // Module-level promise = exactly one WASM initialization,
@@ -50,6 +49,18 @@ export default function PillWebDemo({
             return undefined;
         }
 
+        /*
+         * The engine focuses the canvas when it boots so keyboard input
+         * works without a click, but a plain focus() also scrolls the
+         * canvas into view, cancelling any scroll in flight - the bottom
+         * navbar anchors land on this section instead of their target
+         * when the boot fires mid scroll. Shadowing focus to always pass
+         * preventScroll keeps the keyboard behaviour while the viewport
+         * stays put. (The engine will pass preventScroll itself in a
+         * future wasm rebuild; this covers the build shipped today.)
+         */
+        canvas.focus = () => HTMLElement.prototype.focus.call(canvas, { preventScroll: true });
+
         let cancelled = false;
 
         let resizeRaf1 = null;
@@ -74,10 +85,14 @@ export default function PillWebDemo({
                 return;
             }
 
-            const dpr = Math.min(
-                window.devicePixelRatio || 1,
-                MAX_DPR,
-            );
+            /*
+             * The backing store must match the canvas's device-pixel content
+             * box (CSS size times devicePixelRatio): winit's web backend
+             * observes exactly that box and sizes the renderer's frame for
+             * it. Capping the ratio here desynchronizes the two on phones
+             * (DPR 2 to 3) and the demo renders cropped with black gaps.
+             */
+            const dpr = window.devicePixelRatio || 1;
 
             const width = Math.max(
                 1,

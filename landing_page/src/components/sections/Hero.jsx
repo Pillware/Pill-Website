@@ -39,7 +39,10 @@ const Hero = () => {
     };
 
     return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+        <section
+            id="hero"
+            className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16"
+        >
             {/* Aurora background - wide diagonal beams of brand-red light
 over near-black broken glass; the glass never moves and only the light
 fluctuates. The shader fades into the page colour in the next section. */}

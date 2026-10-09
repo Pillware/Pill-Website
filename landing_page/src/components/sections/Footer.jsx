@@ -14,7 +14,10 @@ const Footer = () => {
     };
 
     return (
-        <footer className="relative py-16 px-4 sm:px-6 lg:px-8 border-t border-white/[0.06]">
+        <footer
+            id="footer"
+            className="relative py-16 px-4 sm:px-6 lg:px-8 border-t border-white/[0.06]"
+        >
             <div className="max-w-6xl mx-auto">
                 <div className="flex flex-col lg:flex-row justify-between gap-y-8 md:gap-x-8 mb-16">
                     {/* Brand */}
