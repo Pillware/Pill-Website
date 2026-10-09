@@ -10,6 +10,86 @@ void main() {
 
 const fragmentShader = `
 precision highp float;
+
+/* ------------------------------------------------------------------ */
+/* Tunable constants. Every magic number this shader uses lives here   */
+/* so the whole look can be retuned from one place. Groups follow the  */
+/* order in which the values are used in main().                       */
+/* ------------------------------------------------------------------ */
+
+// Value noise and fbm
+const vec2  hashScale           = vec2(127.1, 311.7);
+const float hashOutputScale     = 43758.5453;
+const int   fbmOctaves          = 3;
+const float fbmFrequencyStart   = 1.0;
+const float fbmFrequencyGrowth  = 2.0;
+const float fbmAmplitudeStart   = 0.5;
+const float fbmAmplitudeDecay   = 0.5;
+
+// Animated grain
+const float grainDriftSpeed     = 0.3;
+const float grainBandFrequency  = 50.0;
+const float grainBandAmplitude  = 0.02;
+const float grainStrength       = 0.05;
+
+// Drifting noise field
+const float fieldNoiseScale     = 3.0;
+const float fieldNoiseStrength  = 0.45;
+const vec2  fieldNoiseDrift     = vec2(0.08, 0.05);
+const float fieldDetailScale    = 5.5;
+const float fieldDetailStrength = 0.15;
+const vec2  fieldDetailDrift    = vec2(-0.06, 0.07);
+
+// Brand red orb
+const vec2  orbBrandCenter         = vec2(0.75, 0.35);
+const vec2  orbBrandOrbitRadius    = vec2(0.06, 0.05);
+const vec2  orbBrandDriftSpeed     = vec2(0.15, 0.18);
+const float orbBrandFalloff        = 2.5;
+const float orbBrandPulseBase      = 0.10;
+const float orbBrandPulseAmplitude = 0.08;
+const float orbBrandPulseSpeed     = 0.4;
+const vec3  orbBrandColor          = vec3(1.0, 0.39, 0.39);
+
+// Blue orb
+const vec2  orbBlueCenter          = vec2(0.22, 0.75);
+const vec2  orbBlueOrbitRadius     = vec2(0.05, 0.06);
+const vec2  orbBlueDriftSpeed      = vec2(0.13, 0.16);
+const float orbBlueFalloff         = 3.0;
+const float orbBluePulseBase       = 0.07;
+const float orbBluePulseAmplitude  = 0.09;
+const float orbBluePulseSpeed      = 0.35;
+const vec3  orbBlueColor           = vec3(0.25, 0.45, 0.9);
+
+// Warm center glow
+const vec2  centerGlowPositionBase   = vec2(0.5, 0.45);
+const vec2  centerGlowDrift          = vec2(0.03, 0.02);
+const vec2  centerGlowDriftSpeed     = vec2(0.1, 0.12);
+const float centerGlowFalloff        = 4.0;
+const float centerGlowPulseBase      = 0.04;
+const float centerGlowPulseAmplitude = 0.015;
+const float centerGlowPulseSpeed     = 0.5;
+const vec3  centerGlowColor          = vec3(1.0, 0.7, 0.5);
+
+// Floating specks
+const int   speckCount            = 6;
+const vec2  speckDriftSpeed       = vec2(0.3, 0.22);
+const vec2  speckSpeedStep        = vec2(0.03, 0.04);
+const float speckPhaseYMultiplier = 2.0;
+const float speckOrbitRadius      = 0.45;
+const float speckCenter           = 0.5;
+const float speckFalloff          = 40.0;
+const float speckPulseBase        = 0.02;
+const float speckPulseAmplitude   = 0.01;
+const float speckPulseSpeed       = 1.5;
+const float speckStrength         = 0.6;
+const vec3  speckColor            = vec3(1.0, 0.9, 0.8);
+
+// Final compose
+const vec2  screenCenter         = vec2(0.5, 0.5);
+const float baseLayerStrength    = 0.055;
+const float vignetteStrength     = 0.4;
+const float pillMaskStrength     = 0.25;
+
 uniform vec2 resolution;
 uniform float time;
 uniform float waveSpeed;
@@ -27,7 +107,7 @@ uniform float patternScale;
 
 // --- Noise functions ---
 float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+    return fract(sin(dot(p, hashScale)) * hashOutputScale);
 }
 
 float noise(vec2 p) {
@@ -43,12 +123,12 @@ float noise(vec2 p) {
 
 float fbm(vec2 p) {
     float value = 0.0;
-    float amp = 0.5;
-    float freq = 1.0;
-    for (int i = 0; i < 3; i++) {
-        value += amp * noise(p * freq);
-        freq *= 2.0;
-        amp *= 0.5;
+    float amplitude = fbmAmplitudeStart;
+    float frequency = fbmFrequencyStart;
+    for (int i = 0; i < fbmOctaves; i++) {
+        value += amplitude * noise(p * frequency);
+        frequency *= fbmFrequencyGrowth;
+        amplitude *= fbmAmplitudeDecay;
     }
     return value;
 }
@@ -58,39 +138,37 @@ void main() {
     float t = time;
 
     // --- Animated grain - faster, more alive ---
-    float grain = hash(uv + t * 0.3 + sin(uv.y * 50.0 + t) * 0.02) * 0.05;
+    float grain = hash(uv + t * grainDriftSpeed + sin(uv.y * grainBandFrequency + t) * grainBandAmplitude) * grainStrength;
 
     // --- Noise field with drifting motion ---
-    float n = fbm(uv * 3.0 + vec2(t * 0.08, t * 0.05)) * waveAmplitude * 0.45;
-    float n2 = fbm(uv * 5.5 + vec2(-t * 0.06, t * 0.07) + n) * 0.15;
+    float n = fbm(uv * fieldNoiseScale + fieldNoiseDrift * t) * waveAmplitude * fieldNoiseStrength;
+    float n2 = fbm(uv * fieldDetailScale + fieldDetailDrift * t + n) * fieldDetailStrength;
 
     // --- Drifting orbs ---
     // Brand red orb - slowly orbits
-    vec2 orb1Center = vec2(0.75 + sin(t * 0.15) * 0.06, 0.35 + cos(t * 0.18) * 0.05);
-    vec2 orb1 = uv - orb1Center;
-    float glow1 = exp(-length(orb1) * 2.5) * (0.10 + sin(t * 0.4) * 0.08);
-    vec3 orbColor1 = vec3(1.0, 0.39, 0.39);
+    vec2 orbBrandPosition = orbBrandCenter + vec2(sin(t * orbBrandDriftSpeed.x), cos(t * orbBrandDriftSpeed.y)) * orbBrandOrbitRadius;
+    vec2 orbBrandDelta = uv - orbBrandPosition;
+    float orbBrandGlow = exp(-length(orbBrandDelta) * orbBrandFalloff) * (orbBrandPulseBase + sin(t * orbBrandPulseSpeed) * orbBrandPulseAmplitude);
 
     // Blue orb - slowly orbits opposite direction
-    vec2 orb2Center = vec2(0.22 + cos(t * 0.13) * 0.05, 0.75 + sin(t * 0.16) * 0.06);
-    vec2 orb2 = uv - orb2Center;
-    float glow2 = exp(-length(orb2) * 3.0) * (0.07 + cos(t * 0.35) * 0.09);
-    vec3 orbColor2 = vec3(0.25, 0.45, 0.9);
+    vec2 orbBluePosition = orbBlueCenter + vec2(cos(t * orbBlueDriftSpeed.x), sin(t * orbBlueDriftSpeed.y)) * orbBlueOrbitRadius;
+    vec2 orbBlueDelta = uv - orbBluePosition;
+    float orbBlueGlow = exp(-length(orbBlueDelta) * orbBlueFalloff) * (orbBluePulseBase + cos(t * orbBluePulseSpeed) * orbBluePulseAmplitude);
 
     // Warm center glow - gently pulsing
-    vec2 center = uv - vec2(0.5 + sin(t * 0.1) * 0.03, 0.45 + cos(t * 0.12) * 0.02);
-    float glowCenter = exp(-length(center) * 4.0) * (0.04 + sin(t * 0.5) * 0.015);
+    vec2 centerGlowPosition = centerGlowPositionBase + vec2(sin(t * centerGlowDriftSpeed.x), cos(t * centerGlowDriftSpeed.y)) * centerGlowDrift;
+    float centerGlow = exp(-length(uv - centerGlowPosition) * centerGlowFalloff) * (centerGlowPulseBase + sin(t * centerGlowPulseSpeed) * centerGlowPulseAmplitude);
 
     // --- Floating specks ---
     float specks = 0.0;
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < speckCount; i++) {
         float fi = float(i);
-        vec2 speckPos = vec2(
-            sin(t * (0.3 + fi * 0.03) + fi) * 0.45 + 0.5,
-            cos(t * (0.22 + fi * 0.04) + fi * 2.0) * 0.45 + 0.5
+        vec2 speckPosition = vec2(
+            sin(t * (speckDriftSpeed.x + fi * speckSpeedStep.x) + fi) * speckOrbitRadius + speckCenter,
+            cos(t * (speckDriftSpeed.y + fi * speckSpeedStep.y) + fi * speckPhaseYMultiplier) * speckOrbitRadius + speckCenter
         );
-        float dist = length(uv - speckPos);
-        float speckGlow = exp(-dist * 40.0) * (0.02 + sin(t * 1.5 + fi) * 0.01);
+        float dist = length(uv - speckPosition);
+        float speckGlow = exp(-dist * speckFalloff) * (speckPulseBase + sin(t * speckPulseSpeed + fi) * speckPulseAmplitude);
         specks += speckGlow;
     }
 
@@ -98,14 +176,14 @@ void main() {
     float base = n + n2 + grain;
     vec3 col = vec3(0.0);
 
-    col += orbColor1 * glow1;
-    col += orbColor2 * glow2;
-    col += vec3(1.0, 0.7, 0.5) * glowCenter;
-    col += vec3(1.0, 0.9, 0.8) * specks * 0.6;
-    col += base * 0.055;
+    col += orbBrandColor * orbBrandGlow;
+    col += orbBlueColor * orbBlueGlow;
+    col += centerGlowColor * centerGlow;
+    col += speckColor * specks * speckStrength;
+    col += base * baseLayerStrength;
 
     // Subtle vignette
-    float vignette = 1.0 - length(uv - 0.5) * 0.4;
+    float vignette = 1.0 - length(uv - screenCenter) * vignetteStrength;
     col *= vignette;
 
     // --- Pill pattern mask ---
@@ -116,7 +194,7 @@ void main() {
     vec2 tileSize = textureSize * patternScale;
     vec2 patternUV = mod(gl_FragCoord.xy, tileSize) / tileSize;
     float patternMask = texture2D(patternTexture, patternUV).r;
-    float pillMask = 1.0 - patternMask * 0.25;
+    float pillMask = 1.0 - patternMask * pillMaskStrength;
     col *= pillMask;
 
     col = clamp(col, 0.0, 1.0);
@@ -264,7 +342,7 @@ function useWebGLShader(canvasRef, {
 
         // Handle resize
         const handleResize = () => {
-            const dpr = window.devicePixelRatio || 1;
+            const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
             canvas.width = canvas.clientWidth * dpr;
             canvas.height = canvas.clientHeight * dpr;
             gl.viewport(0, 0, canvas.width, canvas.height);
@@ -351,6 +429,10 @@ export default function Dither({
     mouseRadius = 1
 }) {
     const canvasRef = useRef(null);
+    const visibleRef = useRef(false);
+    const rafRef = useRef(null);
+    const FRAME_INTERVAL = 1000 / 30;
+    let lastFrame = 0;
 
     useWebGLShader(canvasRef, {
         waveSpeed,
@@ -362,6 +444,43 @@ export default function Dither({
         enableMouseInteraction,
         mouseRadius
     });
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                visibleRef.current = entry.isIntersecting;
+
+                if (entry.isIntersecting && rafRef.current === null) {
+                    rafRef.current = requestAnimationFrame(render);
+                }
+            },
+            {
+                threshold: 0.01,
+            },
+        );
+
+        observer.observe(canvas);
+
+        return () => observer.disconnect();
+    }, []);
+
+    const render = (timestamp) => {
+        rafRef.current = null;
+
+        if (!visibleRef.current) {
+            return;
+        }
+
+        if (timestamp - lastFrame >= FRAME_INTERVAL) {
+            lastFrame = timestamp;
+            drawFrame(timestamp);
+        }
+
+        rafRef.current = requestAnimationFrame(render);
+    };
 
     return (
         <canvas

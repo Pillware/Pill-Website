@@ -4,16 +4,11 @@ import Navbar from './components/sections/Navbar';
 import Hero from './components/sections/Hero';
 import Showcase from './components/sections/Showcase';
 import FlagshipFeatures from './components/sections/FlagshipFeatures';
-import CTA from './components/sections/CTA';
+import Performance from './components/sections/Performance';
 import CommunityCTA from './components/sections/CommunityCTA';
 import Footer from './components/sections/Footer';
 import SectionDivider from './components/elements/SectionDivider';
-import Features from './components/sections/Features';
-import Iteration from './components/sections/Iteration';
-import PillLabs from './components/sections/PillLabs';
 import Roadmap from './components/sections/Roadmap';
-import Sponsor from './components/sections/Sponsor';
-import Community from './components/sections/Community';
 
 // The /demos page is split into its own chunk so home-page visitors do not
 // download code for a route they never open.
@@ -30,6 +25,9 @@ function Home() {
             <SectionDivider label="Flagship features goals" />
             <FlagshipFeatures />
             <div className="h-[70px]" />
+            <SectionDivider label="Performance" />
+            <Performance />
+            <div className="h-[70px]" />
             <SectionDivider label="Roadmap" />
             <Roadmap />
             {/* <div className="h-[70px] sm:h-0" />
@@ -38,9 +36,8 @@ function Home() {
             <div className="h-[70px]" />
             {/* <SectionDivider label="Performance" />
             <Iteration /> */}
-            <div className="h-[70px] sm:h-0" />
-            <div className="section-divider" />
-            <PillLabs />
+            {/* <div className="h-[70px] sm:h-0" />
+            <div className="section-divider" /> */}
             {/* <div className="h-[70px] sm:h-0" />
             <SectionDivider label="Community" />
             <Community />

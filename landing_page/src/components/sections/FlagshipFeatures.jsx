@@ -18,7 +18,7 @@ const FLAGSHIP_FEATURES = [
     {
         icon: <Code2 className="w-5 h-5" />,
         title: 'C# and Rust scripting languages',
-        description: 'You get a real choice between convenience and maximum control. Pick C# when you want to move fast, iterate quickly and just get things done. Pick Rust when you want full low-level control, predictable performance and maximum efficiency. Both are first-class citizens.',
+        description: 'Both are first-class citizens, compile to native code and offer comparable performance. Choose the language, ecosystem and programming style that best fits your project or team, without giving up engine capabilities or performance-oriented workflows.',
     },
     {
         icon: <Flame className="w-5 h-5" />,
