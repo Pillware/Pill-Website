@@ -5,6 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Error</title>
+    <!-- Analytics: same Umami website as the main site (this page is served
+         by nginx directly, outside the SPA bundle). -->
+    <script defer src="https://umami.campfire-on-the-wall.com/script.js"
+        data-website-id="be02f2ef-9344-46d7-bc07-c9c56af6531e"></script>
     <style>
         * {
             margin: 0;
@@ -75,8 +79,11 @@
     <script>
         // Nginx internal error routing keeps browser URL unchanged,
         // so we read status injected by SSI, then fall back to query string.
+        // Without SSI processing (local previews) the comment is served
+        // verbatim, so only a real three-digit status counts as injected.
         const params = new URLSearchParams(window.location.search);
-        const injectedCode = (window.__ERROR_STATUS__ || '').trim();
+        const injectedValue = (window.__ERROR_STATUS__ || '').trim();
+        const injectedCode = /^\d{3}$/.test(injectedValue) ? injectedValue : '';
         const code = injectedCode || params.get('code') || '---';
 
         const messages = {
@@ -96,6 +103,16 @@
         document.getElementById('title').textContent = title;
         document.getElementById('message').textContent = message;
         document.title = code + ' - ' + title;
+
+        // Umami: report 404s with the attempted path (nginx keeps the browser
+        // URL unchanged on internal error routing) so broken inbound links
+        // show up in the dashboard. The deferred tracker has run by the time
+        // window.load fires.
+        if (code === '404') {
+            window.addEventListener('load', () => {
+                window.umami?.track('page-404', { path: window.location.pathname });
+            });
+        }
     </script>
 </body>
 

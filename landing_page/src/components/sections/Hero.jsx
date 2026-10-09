@@ -155,6 +155,9 @@ fluctuates. The shader fades into the page colour in the next section. */}
                 >
                     <a
                         href={`https://docs.${window.location.hostname}/guide/`}
+                        data-umami-event="cta-click"
+                        data-umami-event-target="docs"
+                        data-umami-event-location="hero"
                         className={`${actionButtonClassName} group`}
                     >
                         Get Started
@@ -164,6 +167,9 @@ fluctuates. The shader fades into the page colour in the next section. */}
                         href="https://discord.gg/VUKNQrctms"
                         target="_blank"
                         rel="noopener noreferrer"
+                        data-umami-event="cta-click"
+                        data-umami-event-target="discord"
+                        data-umami-event-location="hero"
                         className={discordButtonClassName}
                     >
                         <DiscordIcon className="w-4 h-4" />
@@ -173,6 +179,9 @@ fluctuates. The shader fades into the page colour in the next section. */}
                         href="https://github.com/Pillware/Pill"
                         target="_blank"
                         rel="noopener noreferrer"
+                        data-umami-event="cta-click"
+                        data-umami-event-target="github"
+                        data-umami-event-location="hero"
                         className={actionButtonClassName}
                     >
                         <Github className="w-4 h-4" />

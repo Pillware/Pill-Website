@@ -95,6 +95,9 @@ const CommunityCTA = () => {
                             href="https://discord.gg/VUKNQrctms"
                             target="_blank"
                             rel="noopener noreferrer"
+                            data-umami-event="cta-click"
+                            data-umami-event-target="discord"
+                            data-umami-event-location="community"
                             className="group inline-flex items-center gap-2.5 px-10 py-4 bg-brand-500 hover:bg-brand-400 text-white font-semibold rounded-xl transition-all duration-200 text-lg"
                         >
                             <DiscordIcon className="w-5 h-5" />

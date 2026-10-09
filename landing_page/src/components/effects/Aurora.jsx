@@ -459,6 +459,10 @@ const maximumRenderPixelRatio = 1.5;
  * prefers reduced motion, so the backdrop stays decorative and calm for
  * everyone.
  */
+// Report a missing WebGL context at most once per page load, even when the
+// effect runs twice (StrictMode development remounts).
+let webGlFallbackReported = false;
+
 const Aurora = ({ disableAnimation = false, isPaused = false, params = defaultAuroraParams, onFpsUpdate }) => {
     const canvasRef = useRef(null);
 
@@ -498,6 +502,14 @@ const Aurora = ({ disableAnimation = false, isPaused = false, params = defaultAu
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         if (!gl) {
             console.error('WebGL not supported');
+
+            // Umami: how much of the audience only ever sees the fallback
+            // hero background.
+            if (!webGlFallbackReported) {
+                webGlFallbackReported = true;
+                window.umami?.track('webgl-unsupported');
+            }
+
             return undefined;
         }
 

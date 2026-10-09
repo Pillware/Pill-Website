@@ -19,6 +19,44 @@ function initPillOnce() {
     return pillInitPromise;
 }
 
+/*
+ * WebGPU gate for the demo boot.
+ *
+ * Returns a short reason when this browser cannot run the demo
+ * ('no-webgpu-api' or 'no-webgpu-adapter'), or null when it can. Without
+ * this check a missing API or adapter still lets init() resolve: the canvas
+ * stays an empty box and the failure only surfaces as an uncaught error
+ * inside the wasm glue, where nothing can report it.
+ */
+async function probeWebGpuAvailability() {
+    if (!navigator.gpu) {
+        return 'no-webgpu-api';
+    }
+
+    try {
+        const adapter = await navigator.gpu.requestAdapter();
+
+        return adapter ? null : 'no-webgpu-adapter';
+    } catch {
+        return 'no-webgpu-adapter';
+    }
+}
+
+// Report WebGPU API presence once per page load, for every visitor, so the
+// dashboard can measure how much of the audience cannot run the demo at
+// all. Adapter-level failures are reported by the boot itself (demo-error).
+let overallCapabilityReported = false;
+
+function reportWebGpuCapabilityOnce() {
+    if (overallCapabilityReported) {
+        return;
+    }
+
+    overallCapabilityReported = true;
+
+    window.umami?.track('webgpu-capability', { api: Boolean(navigator.gpu) });
+}
+
 export default function PillWebDemo({
     onReady,
     onStats,
@@ -40,6 +78,12 @@ export default function PillWebDemo({
         onStatsRef.current = onStats;
         onErrorRef.current = onError;
     }, [onReady, onStats, onError]);
+
+    // One capability reading per page load, well before the demo is near
+    // booting, so it also covers visitors who never reach the demo.
+    useEffect(() => {
+        reportWebGpuCapabilityOnce();
+    }, []);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -66,6 +110,9 @@ export default function PillWebDemo({
         let resizeRaf1 = null;
         let resizeRaf2 = null;
         let statsTimer = null;
+
+        // One post-boot stats report per page load (see the interval below).
+        let firstStatsReported = false;
 
         /*
          * Resize canvas backing store.
@@ -217,6 +264,27 @@ export default function PillWebDemo({
                      */
                     resize();
 
+                    /*
+                     * Gate the boot on WebGPU availability: a failing probe
+                     * would otherwise end in an empty black canvas plus an
+                     * uncaught error, with nothing shown to the visitor.
+                     */
+                    const unavailableReason = await probeWebGpuAvailability();
+
+                    if (cancelled) {
+                        return;
+                    }
+
+                    if (unavailableReason) {
+                        window.umami?.track('demo-error', { reason: unavailableReason });
+
+                        onErrorRef.current?.(new Error(`WebGPU unavailable: ${unavailableReason}`));
+
+                        return;
+                    }
+
+                    const bootStartedAt = performance.now();
+
                     try {
                         await initPillOnce();
 
@@ -225,6 +293,11 @@ export default function PillWebDemo({
                         }
 
                         readyRef.current = true;
+
+                        // Report how long the boot took on this device.
+                        window.umami?.track('demo-ready', {
+                            boot_ms: Math.round(performance.now() - bootStartedAt),
+                        });
 
                         /*
                          * A resize after initialization is useful because
@@ -250,7 +323,7 @@ export default function PillWebDemo({
                                     return;
                                 }
 
-                                onStatsRef.current?.({
+                                const sample = {
                                     fps:
                                         pill.get_fps?.() ??
                                         null,
@@ -262,13 +335,35 @@ export default function PillWebDemo({
                                     frameTimeMs:
                                         pill.get_frame_time_ms?.() ??
                                         null,
-                                });
+                                };
+
+                                onStatsRef.current?.(sample);
+
+                                /*
+                                 * One post-boot reading per page load: real
+                                 * FPS and pill count from this device for
+                                 * the dashboard, without per-sample noise.
+                                 */
+                                if (
+                                    !firstStatsReported &&
+                                    sample.fps != null &&
+                                    sample.pillCount != null
+                                ) {
+                                    firstStatsReported = true;
+
+                                    window.umami?.track('demo-stats', {
+                                        fps: Math.round(sample.fps),
+                                        pills: sample.pillCount,
+                                    });
+                                }
                             }, 500);
                     } catch (error) {
                         console.error(
                             'Failed to initialize Pill demo:',
                             error,
                         );
+
+                        window.umami?.track('demo-error', { reason: 'init-failed' });
 
                         onErrorRef.current?.(error);
                     }

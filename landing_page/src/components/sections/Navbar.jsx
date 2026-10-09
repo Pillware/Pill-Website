@@ -3,17 +3,32 @@ import { Fragment, useState, useEffect } from 'react';
 // Section links use absolute home-page paths so they also open the main
 // page when the navbar is rendered on a subpage like /demos. A bare "#hash"
 // would only rewrite the current URL and leave the visitor where they are.
+// navSection marks the home-page section a link scrolls to (reported to
+// Umami as nav-click); ctaTarget marks an outbound destination (reported as
+// cta-click), keeping both event families filterable in the dashboard.
 const NAV_LINKS = [
-    { label: 'Features', href: '/#flagship-features' },
-    { label: 'Roadmap', href: '/#roadmap' },
-    { label: 'Demos', href: '/demos' },
-    { label: 'Guide', href: `https://docs.${window.location.hostname}` },
-    { label: 'Examples', href: 'https://github.com/Pillware/Pill/tree/main/examples' },
+    { label: 'Features', href: '/#flagship-features', navSection: 'flagship-features' },
+    { label: 'Roadmap', href: '/#roadmap', navSection: 'roadmap' },
+    { label: 'Demos', href: '/demos', navSection: 'demos' },
+    { label: 'Guide', href: `https://docs.${window.location.hostname}`, ctaTarget: 'docs' },
+    { label: 'Examples', href: 'https://github.com/Pillware/Pill/tree/main/examples', ctaTarget: 'github' },
     // Discord + GitHub are the community pair; on desktop a hairline splits
     // them from the section links (dividerBefore renders the line).
-    { label: 'Discord', href: 'https://discord.gg/VUKNQrctms', dividerBefore: true },
-    { label: 'GitHub', href: 'https://github.com/Pillware/Pill' },
+    { label: 'Discord', href: 'https://discord.gg/VUKNQrctms', dividerBefore: true, ctaTarget: 'discord' },
+    { label: 'GitHub', href: 'https://github.com/Pillware/Pill', ctaTarget: 'github' },
 ];
+
+// Report navigation intent to Umami from the click handler itself: the
+// mobile items already run their own onClick (closing the fold) and per the
+// umami docs other listeners on a data-umami-event element are not
+// triggered, so the attribute route would swallow the menu close.
+const trackNavLinkClick = (link) => {
+    if (link.navSection) {
+        window.umami?.track('nav-click', { section: link.navSection });
+    } else {
+        window.umami?.track('cta-click', { target: link.ctaTarget, location: 'navbar' });
+    }
+};
 
 // Obfuscated to avoid email-harvesting bots: full address is assembled at runtime.
 const CONTACT_EMAIL = ['contact', '@', 'pillengine', '.', 'org'].join('');
@@ -55,6 +70,7 @@ const Navbar = () => {
                             )}
                             <a
                                 href={link.href}
+                                onClick={() => trackNavLinkClick(link)}
                                 className="px-3.5 py-1.5 text-[13px] font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.06] transition-all duration-150"
                             >
                                 {link.label}
@@ -94,7 +110,10 @@ const Navbar = () => {
                                 )}
                                 <a
                                     href={link.href}
-                                    onClick={() => setMobileOpen(false)}
+                                    onClick={() => {
+                                        trackNavLinkClick(link);
+                                        setMobileOpen(false);
+                                    }}
                                     className="block px-3 py-3 text-md font-medium text-white/50 hover:text-white rounded-md hover:bg-white/[0.06] transition-all duration-150"
                                 >
                                     {link.label}

@@ -17,6 +17,7 @@ const Demos = lazy(() => import('./pages/Demos'));
 function Home() {
     return (
         <>
+            <ScrollDepthTracker />
             <Navbar />
             <Hero />
             <div className="h-[70px]" />
@@ -63,6 +64,36 @@ const HashScrollHandler = () => {
         if (!hash) return;
 
         document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'instant' });
+    }, []);
+
+    return null;
+};
+
+// Umami scroll depth: report each home-page section the first time it
+// scrolls into view (the -25% bottom margin fires once a section reaches
+// a quarter of the viewport height), so the dashboard shows how far
+// visitors get down the page. Sections render with this route and stay
+// mounted, so one pass right after mount covers them all; each section is
+// unobserved after its single event to keep the data free of duplicates.
+// The footer (a <footer>, not a <section>) rides along as the
+// reached-the-page-bottom signal.
+const ScrollDepthTracker = () => {
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                for (const entry of entries) {
+                    if (!entry.isIntersecting) continue;
+
+                    window.umami?.track('section-view', { section: entry.target.id });
+                    observer.unobserve(entry.target);
+                }
+            },
+            { threshold: 0, rootMargin: '0px 0px -25% 0px' },
+        );
+
+        document.querySelectorAll('section[id], footer[id]').forEach((element) => observer.observe(element));
+
+        return () => observer.disconnect();
     }, []);
 
     return null;

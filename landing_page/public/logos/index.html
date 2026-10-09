@@ -12,6 +12,10 @@
     <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" type="image/svg+xml" href="../favicons/favicon.svg" />
     <title>Pill - Brand assets</title>
+    <!-- Analytics: same Umami website as the main site; this page is copied
+         verbatim, so it carries its own tracker instead of the SPA bundle. -->
+    <script defer src="https://umami.campfire-on-the-wall.com/script.js"
+        data-website-id="be02f2ef-9344-46d7-bc07-c9c56af6531e"></script>
     <style>
         /* The same variable font files the landing page serves. */
         @font-face {
@@ -337,6 +341,18 @@
             </p>
         </footer>
     </main>
+    <script>
+        // Report brand-asset downloads so the dashboard shows which logos,
+        // icons and patterns actually get used. Delegated listener: the file
+        // name doubles as the event data, no per-card attributes needed.
+        document.addEventListener('click', (event) => {
+            const assetLink = event.target.closest('a.asset[download]');
+            if (!assetLink) {
+                return;
+            }
+            window.umami?.track('logo-download', { asset: assetLink.getAttribute('href') });
+        });
+    </script>
 </body>
 
 </html>

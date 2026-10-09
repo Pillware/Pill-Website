@@ -4,12 +4,13 @@ import DiscordIcon from '../elements/DiscordIcon';
 const Footer = () => {
     const currentYear = new Date().getFullYear();
 
+    // target feeds the Umami cta-click event ('docs' or 'github').
     const footerLinks = {
         Product: [
-            { label: 'Guide', href: `https://docs.${window.location.hostname}/guide/` },
-            { label: 'Examples', href: 'https://github.com/Pillware/Pill/tree/main/examples' },
-            { label: 'GitHub', href: 'https://github.com/Pillware/Pill' },
-            { label: 'Contributing', href: `https://docs.${window.location.hostname}/guide/contributing/contributing.html` },
+            { label: 'Guide', href: `https://docs.${window.location.hostname}/guide/`, target: 'docs' },
+            { label: 'Examples', href: 'https://github.com/Pillware/Pill/tree/main/examples', target: 'github' },
+            { label: 'GitHub', href: 'https://github.com/Pillware/Pill', target: 'github' },
+            { label: 'Contributing', href: `https://docs.${window.location.hostname}/guide/contributing/contributing.html`, target: 'docs' },
         ],
     };
 
@@ -51,6 +52,9 @@ const Footer = () => {
                                             <li key={link.label}>
                                                 <a
                                                     href={link.href}
+                                                    data-umami-event="cta-click"
+                                                    data-umami-event-target={link.target}
+                                                    data-umami-event-location="footer"
                                                     className="text-md text-gray-500 hover:text-gray-300 transition-colors duration-200"
                                                 >
                                                     {link.label}
@@ -75,6 +79,9 @@ const Footer = () => {
                                     href="https://github.com/Pillware/Pill"
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    data-umami-event="cta-click"
+                                    data-umami-event-target="github"
+                                    data-umami-event-location="footer"
                                     className="w-[180px] inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-white/[0.05] border border-white/[0.08] rounded-lg hover:bg-white/[0.08] transition-all duration-200"
                                 >
                                     <Github className="w-4 h-4" />
@@ -84,6 +91,9 @@ const Footer = () => {
                                     href="https://discord.gg/VUKNQrctms"
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    data-umami-event="cta-click"
+                                    data-umami-event-target="discord"
+                                    data-umami-event-location="footer"
                                     className="w-[180px] inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-white/[0.05] border border-white/[0.08] rounded-lg hover:bg-white/[0.08] transition-all duration-200"
                                 >
                                     <DiscordIcon className="w-4 h-4" />

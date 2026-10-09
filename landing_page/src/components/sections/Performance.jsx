@@ -107,10 +107,18 @@ const PerformanceWebDemo = () => {
     });
 
     const handleSpawn = () => {
+        // Report demo engagement; pills is the latest displayed count.
+        window.umami?.track(
+            'demo-spawn',
+            stats.pillCount == null ? undefined : { pills: stats.pillCount },
+        );
+
         pill.spawn_more_pills?.();
     };
 
     const handleReset = () => {
+        window.umami?.track('demo-reset');
+
         pill.reset_pills?.();
     };
 
