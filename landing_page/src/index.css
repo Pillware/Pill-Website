@@ -320,6 +320,23 @@
     animation: fadeIn 0.5s ease-out both;
 }
 
+/* Logo entrance: a soft fade whose `both` fill-mode holds the first frame
+   (opacity 0) while the animation sits paused. The animation is attached
+   from the very first render and starts paused, so NO frame can ever paint
+   the logo fully visible - the previous pending-class swap could flash one
+   full-opacity frame before the freshly-created animation took over. The
+   Hero effect flips play-state to running after the first painted frame,
+   so the whole fade happens in front of the visitor. */
+.logo-entrance {
+    animation: fadeInUp 0.5s ease-out both;
+    animation-play-state: paused;
+}
+
+/* Play, switched on by the Hero effect after the first painted frame. */
+.logo-entrance-running {
+    animation-play-state: running;
+}
+
 /* Staggered animation delays */
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }

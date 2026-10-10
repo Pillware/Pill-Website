@@ -23,9 +23,13 @@
          logo so they start downloading before React mounts. -->
     <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-variable-latin.woff2" crossorigin />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/outfit-variable-latin.woff2" crossorigin />
-    <link rel="preload" as="image" href="/logos/pill_logo_animated.svg" fetchpriority="high" />
+    <link rel="preload" as="image" href="/logos/pill_logo_white.svg" fetchpriority="high" />
+    <!-- Analytics. The data-domains allow-list keeps the tracker off
+         localhost and preview deployments; both production domain families
+         (pillengine.org and pill.rocks) are whitelisted. -->
     <script defer src="https://umami.campfire-on-the-wall.com/script.js"
-        data-website-id="be02f2ef-9344-46d7-bc07-c9c56af6531e"></script>
+        data-website-id="be02f2ef-9344-46d7-bc07-c9c56af6531e"
+        data-domains="pillengine.org,www.pillengine.org,docs.pillengine.org,pill.rocks,www.pill.rocks,docs.pill.rocks"></script>
 </head>
 
 <body>

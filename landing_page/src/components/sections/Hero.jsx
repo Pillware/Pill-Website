@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowRight, Github, Cpu, Package, Flame, Zap, Heart } from 'lucide-react';
 import DiscordIcon from '../elements/DiscordIcon';
 import Aurora, { defaultAuroraParams } from '../effects/Aurora';
@@ -97,6 +97,29 @@ const Hero = () => {
     // once per second and shown in the controls panel; null shows as "--".
     const [auroraFps, setAuroraFps] = useState(null);
 
+    // The logo's entrance animation starts paused on its transparent first
+    // frame (see .logo-entrance in index.css) and is set running after the
+    // first painted frame (see the effect below).
+    const [logoEntranceStarted, setLogoEntranceStarted] = useState(false);
+
+    // Start the logo fade only once the browser is about to paint the
+    // settled hero: running it from React commit let the first render and
+    // paint hitch consume most of the fade, which read as a hard pop. Two
+    // animation frames flip the paused animation to running after the first
+    // rendering pass, so the whole fade plays in front of the visitor.
+    useEffect(() => {
+        let secondFrame = null;
+        const firstFrame = requestAnimationFrame(() => {
+            secondFrame = requestAnimationFrame(() => setLogoEntranceStarted(true));
+        });
+        return () => {
+            cancelAnimationFrame(firstFrame);
+            if (secondFrame !== null) {
+                cancelAnimationFrame(secondFrame);
+            }
+        };
+    }, []);
+
     // One slider moved: merge the single changed key into the params object.
     const handleAuroraParamChange = (key, value) => {
         setAuroraParams((previous) => ({ ...previous, [key]: value }));
@@ -123,22 +146,23 @@ fluctuates. The shader fades into the page colour in the next section. */}
             </div>
 
             <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                {/* Logo - the animated copy traces its outline first, then fades
-                    the fill in, and the whole mark gives a springy bump
-                    (see pill_logo_animated.svg + .logo-bump); no wrapper fade. */}
+                {/* Logo - fades in with the hero entrance; the animation is
+                    attached from the start but paused on its transparent
+                    first frame until the first painted frame (see the effect
+                    above), so no un-hidden frame can ever flash. */}
                 <div className="mb-4 sm:mb-6">
                     <img
-                        src="/logos/pill_logo_animated.svg"
+                        src="/logos/pill_logo_white.svg"
                         alt="Pill Engine"
                         width="402"
                         height="209"
                         fetchpriority="high"
-                        className="h-[120px] sm:h-[200px] md:h-[220px] xl:h-[280px] w-auto mx-auto logo-bump hero-logo-shadow"
+                        className={`h-[120px] sm:h-[200px] md:h-[220px] xl:h-[280px] w-auto mx-auto hero-logo-shadow logo-entrance ${logoEntranceStarted ? 'logo-entrance-running' : ''}`}
                     />
                 </div>
 
                 {/* Headline */}
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] hero-headline-shadow tracking-tight mb-4 sm:mb-[48px] animate-fade-in-up">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] hero-headline-shadow tracking-tight mb-4 sm:mb-[48px] animate-fade-in-up delay-100">
                     Modern, free and <span className="text-gradient">blazingly fast</span> game engine<br />
                     {/* <span className="text-gradient">Modern</span>, <span className="text-gradient">free</span> and <span className="text-gradient">blazingly fast</span> game engine<br /> */}
                 </h1>
