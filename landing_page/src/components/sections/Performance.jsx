@@ -268,14 +268,14 @@ const Performance = () => {
                     <br/> by the Pill Labs, our internal research and benchmarking division.
                 </p>
 
-                <p className="text-xl text-gray-400 max-w-2xl mb-6">
+                {/* <p className="text-xl text-gray-400 max-w-2xl mb-6">
                     Try it yourself:
-                </p>
+                </p> */}
 
                 {/* Web demo */}
-                <PerformanceWebDemo />
+                {/* <PerformanceWebDemo /> */}
 
-                <div className="h-[70px] md:h-[70px]" />
+                {/* <div className="h-[70px] md:h-[70px]" /> */}
                 <div className="section-divider" />
                 <div className="h-[70px] md:h-[70px]" />
 
