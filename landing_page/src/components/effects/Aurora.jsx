@@ -427,6 +427,7 @@ export const defaultAuroraParams = {
     ditherLevels: 12,
     ditherScale: 1,
     revealDelay: 0.8,
+    revealDuration: 1.8,
 };
 
 // The render buffer is capped at this device-pixel-ratio: fragment cost
@@ -638,10 +639,6 @@ const Aurora = ({ disableAnimation = false, isPaused = false, params = defaultAu
         const startTime = Date.now();
         let animationFrameId = null;
 
-        // Seconds the opening wave takes to sweep outward along the ribs
-        // from the hero's centre line; frozen frames skip it entirely.
-        const introRevealDurationSeconds = 3;
-
         // FPS sampling: count drawn frames, report the rounded rate once per
         // second, and skip unchanged values so the parent rarely re-renders.
         let fpsFrameCount = 0;
@@ -663,7 +660,11 @@ const Aurora = ({ disableAnimation = false, isPaused = false, params = defaultAu
             // disableAnimation) pin it to 1 so they see the full look
             // immediately, and pausing freezes the wave where it is.
             const currentParams = paramsRef.current;
-            const revealProgress = Math.min(elapsedSeconds / introRevealDurationSeconds, 1);
+            // Reveal speed: how long the opening sweep takes (panel "Reveal
+            // duration"); the 0.1s floor keeps a stale hot-reload value from
+            // dividing the progress into a nonsense curve.
+            const revealDurationSeconds = Math.max(currentParams.revealDuration ?? defaultAuroraParams.revealDuration, 0.1);
+            const revealProgress = Math.min(elapsedSeconds / revealDurationSeconds, 1);
             const easedReveal = isFrozen ? 1 : revealProgress * revealProgress * (3 - 2 * revealProgress);
             gl.uniform1f(introRevealLocation, easedReveal);
 
@@ -673,7 +674,7 @@ const Aurora = ({ disableAnimation = false, isPaused = false, params = defaultAu
             // at once instead of being animated along the ribs with the
             // light. Frozen frames pin it to 1 like the wave.
             const refractionDelaySeconds = currentParams.revealDelay ?? defaultAuroraParams.revealDelay;
-            const refractionProgress = Math.min(Math.max((elapsedSeconds - refractionDelaySeconds) / introRevealDurationSeconds, 0), 1);
+            const refractionProgress = Math.min(Math.max((elapsedSeconds - refractionDelaySeconds) / revealDurationSeconds, 0), 1);
             const easedRefraction = isFrozen ? 1 : refractionProgress * refractionProgress * (3 - 2 * refractionProgress);
             gl.uniform1f(introRefractionLocation, easedRefraction);
             paramUniforms.forEach(({ key, location }) => {

@@ -10,6 +10,7 @@ const controlGroups = [
         label: 'Reveal',
         controls: [
             { key: 'revealDelay', label: 'Reveal delay (s)', min: 0, max: 2, step: 0.05 },
+            { key: 'revealDuration', label: 'Reveal duration (s)', min: 0.5, max: 6, step: 0.1 },
         ],
     },
     {
