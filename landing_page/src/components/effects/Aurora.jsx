@@ -155,7 +155,7 @@ vec3 meshGradient(vec2 uv, vec2 warpNoise) {
     // kept deep (tiny green/blue fractions) so stacked overlaps stay red
     // instead of fading to pink.
     vec3 color = vec3(0.005, 0.010, 0.055);
-    color += vec3(0.02, 0.04, 0.22) * exp(-e1) * 1.4;
+    color += vec3(0.02, 0.04, 0.12) * exp(-e1) * 1.4;
     color += vec3(1.00, 0.10, 0.09) * exp(-e2) * 2.0;
     color += vec3(0.60, 0.03, 0.06) * exp(-e3) * 1.6;
     color += vec3(1.00, 0.15, 0.12) * exp(-e4) * 1.3;
