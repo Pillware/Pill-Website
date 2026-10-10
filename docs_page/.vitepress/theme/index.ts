@@ -3,6 +3,7 @@
 import DefaultTheme from 'vitepress/theme'
 import type { Theme, EnhanceAppContext } from 'vitepress'
 import { enlargeMermaidDiagrams } from './mermaid'
+import { initSearchTracking } from './search-tracking'
 import { initHomeBackground } from './hero-dither'
 import '../../../pill_style.css'
 import './styles.css'
@@ -132,6 +133,9 @@ export default {
 
     // Copy-to-clipboard for the brand identity color swatches.
     initBrandIdentityCopy();
+
+    // Report docs search queries and result clicks to Umami.
+    initSearchTracking();
 
     const progress = mountScrollProgress();
 

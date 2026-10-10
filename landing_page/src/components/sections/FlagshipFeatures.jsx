@@ -139,6 +139,10 @@ const FlagshipFeatures = () => {
 
     // Opens every card, or closes them all once every card is open.
     const toggleAllFeatures = () => {
+        // Umami: the bulk action is not per-card; report it as its own event
+        // instead of flooding foldout-toggle with one entry per title.
+        window.umami?.track('foldout-toggle-all', { open: !allFeaturesOpen });
+
         if (allFeaturesOpen) {
             setOpenStates({});
         } else {

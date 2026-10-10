@@ -32,6 +32,10 @@ const FeatureFoldout = ({ icon, title, isOpen, onToggle, children }) => {
     // Controlled cards report the toggle upward; uncontrolled cards flip
     // their own state.
     const handleToggle = () => {
+        // Umami: which feature cards visitors open, keyed by title; `open`
+        // is the state the card is about to enter.
+        window.umami?.track('foldout-toggle', { title, open: !isCurrentlyOpen });
+
         if (isControlled) {
             onToggle?.();
         } else {
