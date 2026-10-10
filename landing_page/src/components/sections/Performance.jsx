@@ -195,8 +195,15 @@ const PillLabs = () => {
 
     return (
         <div id="labs" className="scroll-mt-24">
+
             <h2 className="text-3xl sm:text-4xl md:text-5xl text-white leading-[1.15] tracking-tight mb-6">
-                Pill Labs
+                <a href="/" className="flex items-center">
+                    <img
+                        src="/logos/pill_labs_logo_white.svg"
+                        alt="Pill Labs"
+                        className="h-[60px]"
+                    />
+                </a>
             </h2>
 
             <p className="text-xl text-gray-400 max-w-2xl mb-10">
