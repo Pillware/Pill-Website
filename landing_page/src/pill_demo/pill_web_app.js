@@ -1,7 +1,8 @@
 /* @ts-self-types="./pill_web_app.d.ts" */
 
 /**
- * Smoothed frames per second; `null` until the first frame has run.
+ * Frames per second over the last completed one-second window; `null` until
+ * the first window has closed.
  * @returns {number | undefined}
  */
 export function get_fps() {
