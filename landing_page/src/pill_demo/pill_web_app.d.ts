@@ -17,8 +17,11 @@ export function get_frame_time_ms(): number | undefined;
 export function get_num_pills(): number | undefined;
 
 /**
- * The site's reset button: the demo has no teardown path, so a reset replays
- * the spawn animation across the running stream instead of rebuilding it.
+ * The site's reset button: removes every pill from the tunnel, so the count
+ * drops straight to zero instead of the stream replaying its spawn pop. The
+ * burst still streaming in is cancelled with the pills, and the scene (the
+ * hero pill, the camera, the assets) stays loaded: the next spawn request
+ * refills the stream from empty.
  */
 export function reset_pills(): void;
 
