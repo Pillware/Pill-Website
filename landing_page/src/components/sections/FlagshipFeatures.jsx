@@ -169,11 +169,12 @@ const FlagshipFeatures = () => {
         >
             <div className="max-w-6xl mx-auto">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl text-white leading-[1.15] tracking-tight mb-4">
-                    Avoiding the bad, taking the best
+                    Pill's mission: Avoiding the bad, taking the best
                 </h2>
                 <p className="text-xl text-gray-400 max-w-2xl mb-10">
-                    The main goal of Pill is to be an engine that avoids the bad sides, limitations and mistakes of currently
-                    available engines, while taking the best ideas from all of them and improving on them. <br />
+                    Pill learns from the best ideas in existing engines and improves on them, while avoiding their limitations and design mistakes.
+                    <br />
+                    Its goal is to be a next-generation engine, free for everyone.
                 </p>
 
                 <p className="text-xl text-gray-400 max-w-2xl mb-10">

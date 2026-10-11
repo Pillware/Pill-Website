@@ -20,16 +20,18 @@ const Showcase = () => {
                     a departure-board style date: small caps label over the
                     oversized date, flanked by hairlines that fade outward. */}
                 <div className="text-center mb-10 sm:mb-14">
-                    <p className="inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-1.5 mb-4 sm:mb-5">
-                        <span className="relative flex h-2 w-2" aria-hidden="true">
+                    <p className="inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-6 py-1.5 mb-4 sm:mb-5">
+                        <span className="relative flex h-2 w-2 mr-2" aria-hidden="true">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75" />
                             <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-400" />
                         </span>
-                        <span className="text-xs sm:text-sm font-semibold tracking-wider sm:tracking-widest uppercase text-brand-300">
-                            Pill is currently under heavy architecture rework
+                        <span className="text-xs sm:text-md font-semibold tracking-wider sm:tracking-widest uppercase text-brand-300">
+                            <span className="hidden sm:inline text-[14px] ">Pill is currently under heavy architecture rework</span>
+                            <span className="sm:hidden text-[14px]">Pill is currently under heavy <br/> architecture rework</span>
                         </span>
+                         <br/> 
                     </p>
-                    <h2 className="flex flex-col items-center gap-2 sm:gap-3">
+                    <h2 className="flex flex-col items-center gap-2 sm:gap-3 mt-2">
                         <span className="text-sm sm:text-base font-semibold tracking-widest uppercase text-gray-400">
                             v1.0 ETA
                         </span>

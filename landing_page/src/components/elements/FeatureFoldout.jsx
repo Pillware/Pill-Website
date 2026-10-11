@@ -50,7 +50,7 @@ const FeatureFoldout = ({ icon, title, isOpen, onToggle, children }) => {
         <div className="glass-card-top group foldout-card" data-open={isCurrentlyOpen}>
             {/* The button carries the card padding, so the whole foldout
                 surface - padding included - is one click target. */}
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="font-semibold text-white">
                 <button
                     type="button"
                     onClick={handleToggle}
