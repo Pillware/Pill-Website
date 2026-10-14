@@ -343,35 +343,30 @@ const RoadmapItem = ({
                 >
                     {item.label}
                 </p>
-                  {item.id === mostRequestedId && (
-                    <span
-                        className="
-                            inline-flex
-                            rounded-full
-                            bg-brand-400/10
-                            px-2 py-1
-                            text-xs font-medium
-                            text-brand-400
-                        "
-                    >
-                        Most requested
-                    </span>
-                )}
-                <div className="hidden md:block">
-                    {/* Hidden when the item is completed or opts out with show_vote: false. */}
+
+                <div className="flex shrink-0 flex-col items-end gap-1.5 md:flex-row md:items-center md:gap-2">
+                    {item.id === mostRequestedId && (
+                        <span
+                            className="
+                                inline-flex whitespace-nowrap rounded-full
+                                bg-brand-400/10 px-2 py-1
+                                text-xs font-medium text-brand-400
+                            "
+                        >
+                            Most requested
+                        </span>
+                    )}
+
                     {!item.completed && item.show_vote !== false && (
                         <button
                             type="button"
-                            disabled={
-                              voted.has(item.id) ||
-                              votePending !== null
-                            }
+                            disabled={voted.has(item.id) || votePending !== null}
                             onClick={() => vote(item.id)}
                             aria-label={`Vote for ${item.label}`}
                             className={`
-                                inline-flex items-center gap-1.5 flex-shrink-0
-                                px-2.5 py-1.5 rounded-lg text-sm font-medium
-                                transition-colors duration-150
+                                inline-flex shrink-0 items-center gap-1.5
+                                whitespace-nowrap rounded-lg px-2.5 py-1.5
+                                text-sm font-medium transition-colors duration-150
                                 ${voted.has(item.id)
                                     ? 'text-brand-400 bg-brand-400/10 cursor-default'
                                     : 'text-gray-600 hover:text-white hover:bg-white/[0.06]'
@@ -379,13 +374,10 @@ const RoadmapItem = ({
                             `}
                         >
                             <ThumbsUp
-                                className={`w-4 h-4 ${
-                                    voted.has(item.id)
-                                        ? 'fill-current'
-                                        : ''
+                                className={`h-4 w-4 ${
+                                    voted.has(item.id) ? 'fill-current' : ''
                                 }`}
                             />
-
                             <span>
                                 {voted.has(item.id)
                                     ? `Voted · ${votes[item.id] ?? 0}`
