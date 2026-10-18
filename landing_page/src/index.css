@@ -86,6 +86,13 @@
         display: block;
         width: 100% !important;
         height: 100% !important;
+        /*
+         * The game reads raw pointer positions for its touch controls: keep the
+         * browser from turning a drag into a scroll/zoom gesture, which would
+         * cancel the pointer stream mid-press (touch-action) and select text.
+         */
+        touch-action: none;
+        user-select: none;
     }
 
     /* Glow orb for hero background */
