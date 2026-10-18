@@ -14,6 +14,9 @@ import Roadmap from './components/sections/Roadmap';
 // download code for a route they never open.
 const Demos = lazy(() => import('./pages/Demos'));
 
+// Same reasoning for the playable demo page: it pulls in the WASM bundle.
+const WaveyDemo = lazy(() => import('./pages/WaveyDemo'));
+
 function Home() {
     return (
         <>
@@ -110,6 +113,14 @@ function App() {
                     element={
                         <Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}>
                             <Demos />
+                        </Suspense>
+                    }
+                />
+                <Route
+                    path="/demos/wavey"
+                    element={
+                        <Suspense fallback={<div className="min-h-screen bg-[#0A0A0A]" />}>
+                            <WaveyDemo />
                         </Suspense>
                     }
                 />

@@ -74,6 +74,20 @@
 @layer components {
     /* .glass-card and .text-gradient live in /pill_style.css */
 
+    /*
+     * Pill's wasm shell (winit's web backend) writes inline width/height on the
+     * canvas from its inner size, which pins the element to its boot-time size
+     * and letterboxes it whenever the box around it changes (responsive layout,
+     * fullscreen). The page owns the CSS box instead: the backing store
+     * (canvas.width/height) is still driven by the container's device-pixel
+     * size, so the renderer keeps matching the element.
+     */
+    .pill-canvas {
+        display: block;
+        width: 100% !important;
+        height: 100% !important;
+    }
+
     /* Glow orb for hero background */
     .glow-orb {
         position: absolute;

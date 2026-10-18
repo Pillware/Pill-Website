@@ -4,6 +4,11 @@ import VideoPlayer from '../components/elements/VideoPlayer';
 
 const DEMO_ITEMS = [
     {
+        title: 'Wavey',
+        href: '/demos/wavey',
+        description: 'Buoyant ships, gerstner-ish waves and a particle wake — playable in your browser.',
+    },
+    {
         title: 'Pill Teaser',
         video: '/images/xenium_30fps_1920.mp4',
         video4k: '/images/xenium_30fps_4k.mp4',
@@ -36,7 +41,19 @@ const Demos = () => {
                                     {item.title}
                                 </h2>
                                 <div className="rounded-xl overflow-hidden border border-white/[0.06] bg-white/[0.02]">
-                                    {item.video ? (
+                                    {item.href ? (
+                                        <a
+                                            href={item.href}
+                                            className="group flex items-center justify-between gap-6 px-5 py-4 transition-colors hover:bg-white/[0.04]"
+                                        >
+                                            <div>
+                                                <p className="text-sm text-white/80">{item.description}</p>
+                                            </div>
+                                            <span className="shrink-0 text-xs font-medium uppercase tracking-[0.18em] text-white/40 transition-colors group-hover:text-white/80">
+                                                Play
+                                            </span>
+                                        </a>
+                                    ) : item.video ? (
                                         <VideoPlayer
                                             src={item.video}
                                             src4k={item.video4k}
