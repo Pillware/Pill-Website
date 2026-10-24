@@ -29,7 +29,7 @@ export default withMermaid(
       ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
       // Analytics (Umami). data-domains keeps the tracker off localhost and
       // preview deployments; both production domain families are listed.
-      ['script', { defer: '', src: 'https://umami.campfire-on-the-wall.com/script.js', 'data-website-id': 'be02f2ef-9344-46d7-bc07-c9c56af6531e', 'data-domains': 'pillengine.org,www.pillengine.org,docs.pillengine.org,pill.rocks,www.pill.rocks,docs.pill.rocks' }],
+      ['script', { defer: '', src: 'https://umami.pillengine.org/script.js', 'data-website-id': 'be02f2ef-9344-46d7-bc07-c9c56af6531e', 'data-domains': 'pillengine.org,www.pillengine.org,docs.pillengine.org,pill.rocks,www.pill.rocks,docs.pill.rocks' }],
       // Report 404s with the attempted path so broken inbound links show up
       // in the dashboard. The 404 view is client rendered, so the check runs
       // on load and then polls briefly (the static page title is an early
