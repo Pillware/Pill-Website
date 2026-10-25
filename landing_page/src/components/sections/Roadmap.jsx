@@ -465,6 +465,8 @@ const Roadmap = () => {
         setVotePending(itemId);
         setVoteError(null);
 
+        window.umami?.track('roadmap-vote');
+
         try {
             const { data, error } =
                 await supabase.functions.invoke(
