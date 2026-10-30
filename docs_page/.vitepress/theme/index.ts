@@ -2,9 +2,13 @@
 
 import DefaultTheme from 'vitepress/theme'
 import type { Theme, EnhanceAppContext } from 'vitepress'
+import { h } from 'vue'
 import { enlargeMermaidDiagrams } from './mermaid'
 import { initSearchTracking } from './search-tracking'
 import { initHomeBackground } from './hero-dither'
+import { initSidebarActiveSectionCollapse } from './sidebar-collapse'
+import { initSidebarCollapseAnimation, refreshSidebarCollapseSettling } from './sidebar-collapse-animation'
+import TreeBreadcrumb from './TreeBreadcrumb.vue'
 import '../../../pill_style.css'
 import './styles.css'
 
@@ -13,7 +17,7 @@ import './styles.css'
 function mountScrollProgress(): { update: () => void } {
   if (document.getElementById('scroll-progress')) {
     // Hot reload can re-run enhanceApp; keep the existing bar.
-    return { update: () => {} };
+    return { update: () => { } };
   }
 
   const bar = document.createElement('div');
@@ -89,7 +93,7 @@ function showCopiedToast(): void {
 function copySwatchHex(hex: string): void {
   if (!hex) return;
   if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(hex).catch(() => {});
+    navigator.clipboard.writeText(hex).catch(() => { });
   }
   showCopiedToast();
 }
@@ -121,6 +125,13 @@ function initBrandIdentityCopy(): void {
 
 export default {
   extends: DefaultTheme,
+
+  // Adds the sticky page path above the article, inside the content column.
+  Layout: () =>
+    h(DefaultTheme.Layout, null, {
+      'doc-before': () => h(TreeBreadcrumb)
+    }),
+
   enhanceApp(ctx: EnhanceAppContext) {
     // Client-only setup: the SSR build has no window or document.
     if (typeof window === 'undefined') return;
@@ -137,6 +148,12 @@ export default {
     // Report docs search queries and result clicks to Umami.
     initSearchTracking();
 
+    // Clicking the open section of the current page collapses it.
+    initSidebarActiveSectionCollapse();
+
+    // Keep collapsed subtrees out of layout once they finished collapsing.
+    initSidebarCollapseAnimation();
+
     const progress = mountScrollProgress();
 
     // Single route-change hook: reset scroll, refresh the progress bar,
@@ -147,6 +164,8 @@ export default {
       }
       window.setTimeout(progress.update, 40);
       window.setTimeout(enlargeMermaidDiagrams, 200);
+      // The sidebar markup is re-created per page; re-mark its closed sections.
+      window.setTimeout(refreshSidebarCollapseSettling, 80);
     };
 
     // Initial page load.

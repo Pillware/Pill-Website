@@ -10,6 +10,14 @@ on:
       - "build-script.js"
       - "package.json"
       - .github/workflows/deploy.yml
+  # The API reference lives in the Pill-Docs repository, so pushes over there
+  # rebuild this site through a repository_dispatch event. The schedule is a
+  # safety net in case a dispatch is missed.
+  repository_dispatch:
+    types: [pill-docs-updated]
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * *"
 
 jobs:
   build-and-deploy:
@@ -33,12 +41,15 @@ jobs:
           cd landing_page && npm install
           cd ../docs_page && npm install
 
-      # 4. Build both sites (uses root build script)
+      # 4. Build both sites (uses root build script). The docs build syncs the
+      #    Pill-Docs content repository first; PILL_DOCS_TOKEN is only needed
+      #    while that repository is private.
       - name: Build landing page and docs
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY}}
           VITE_TURNSTILE_SITE_KEY: ${{ secrets.VITE_TURNSTILE_SITE_KEY }}
+          PILL_DOCS_TOKEN: ${{ secrets.PILL_DOCS_TOKEN }}
         run: npm run build
 
       # 5. Deploy to server via SSH

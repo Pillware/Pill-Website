@@ -5,6 +5,12 @@ node_modules/
 .vitepress/dist/
 .vitepress/cache/
 
+# Content synced from the Pill-Docs repository by `npm run docs:sync`.
+# The content repository is the single source of truth for the API reference.
+.content/
+pages/reference/
+.vitepress/reference-sidebar.ts
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

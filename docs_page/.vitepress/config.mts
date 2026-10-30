@@ -1,12 +1,18 @@
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 import { codeReferenceSidebarItems } from './reference-sidebar'
+import { flattenReferenceCategories } from './flatten-reference-sidebar'
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid(
   defineConfig({
     base: '/',
     srcDir: 'pages',
+    // The generated reference can contain rustdoc intra-doc links that the
+    // generator could not resolve; they arrive verbatim as "./crate::Item" or
+    // "./mod@name" and point at no page. Ignore only that shape so genuine
+    // dead links still fail the build.
+    ignoreDeadLinks: [/^\.\/(?:::)?[A-Za-z_]\w*::/, /^\.\/mod@/],
     title: "Pill Docs",
     description: "Guide and API reference for Pill - a modern, free and blazingly fast game engine",
     head: [
@@ -165,7 +171,7 @@ export default withMermaid(
             ]
           }
         ],
-        '/reference/': codeReferenceSidebarItems
+        '/reference/': flattenReferenceCategories(codeReferenceSidebarItems)
       },
 
       socialLinks: [

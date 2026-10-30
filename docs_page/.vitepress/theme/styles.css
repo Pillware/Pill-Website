@@ -329,18 +329,204 @@
 /* ═══════════════════════════════════════════════════════════════════════
    SIDEBAR - Left navigation
    ═══════════════════════════════════════════════════════════════════════ */
+/* Sidebar width. The theme derives every layout offset from this token
+   (content padding, navbar padding, local nav), so it must not be set on
+   .VPSidebar directly. */
+:root {
+  --vp-sidebar-width: 360px;
+}
+
 .VPSidebar {
   margin-top: 12px;
 }
 
-.VPSidebarItem.level-0 .link {
-  transition: all 0.2s ease;
-  padding-left: 6px !important;
-  border-radius: 4px;
+/* ── Reference tree ──
+   Crates are the roots (their titles carry .ref-root), modules are the
+   collapsible rows, and every entry carries a .ref-kind badge. Each rule is
+   scoped with one of those markers so the guide sidebar keeps its defaults. */
+
+/* Crate title: the fill starts a few pixels left of the text so it does not
+   hug the label, and the row is rounded like the tree rows below it. */
+.VPSidebar .VPSidebarItem.level-0:has(.ref-root)>.item>.link {
+  margin-left: -8px;
+  padding-left: 14px;
+  border-radius: 6px;
+  transition: color 0.2s ease, background 0.2s ease;
 }
 
-.VPSidebarItem.is-active>.item>.link {
+/* Guide line and indent for the crate's children. VitePress draws the same
+   line for deeper levels, so it continues down through expanded modules.
+   The 16px padding matches VitePress, which keeps every item exactly 17px
+   right of its guide line (border + padding). */
+.VPSidebar .VPSidebarItem.level-0:has(.ref-root)>.items {
+  margin-left: 6px;
+  padding-left: 16px;
+  border-left: 1px solid var(--vp-c-divider);
+}
+
+/* First entry in a crate (the first row that is not a module) starts 16px
+   below the module list, or below the crate title when there are no modules. */
+.VPSidebar .VPSidebarItem.level-0:has(.ref-root)>.items>.VPSidebarItem.level-1.is-link:not(.collapsible):first-child,
+.VPSidebar .VPSidebarItem.level-0:has(.ref-root)>.items>.VPSidebarItem.collapsible+.VPSidebarItem.level-1.is-link:not(.collapsible) {
+  margin-top: 6px;
+}
+
+/* Module rows: collapsible module pages, the section roots inside a crate.
+   Crates are excluded so they keep VitePress's larger, bolder title. */
+.VPSidebar .VPSidebarItem:not(.level-0).is-link.collapsible>.item>.link>.text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+/* Entries: leaf pages, one step quieter than the module that holds them.
+   The badge and the name never split onto two lines - a long name is
+   ellipsized inside the row instead (min-width: 0 lets the flex row shrink). */
+.VPSidebar .VPSidebarItem.is-link>.item>.link:has(.ref-kind) {
+  min-width: 0;
+}
+
+.VPSidebar .VPSidebarItem.is-link>.item>.link>.text:has(.ref-kind) {
+  min-width: 0;
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Active page fill, shared by every row of the tree. */
+.VPSidebar .VPSidebarItem.is-active>.item>.link {
   background: linear-gradient(90deg, rgba(255, 122, 182, 0.08), transparent);
+}
+
+/* Inside a crate the active row is wider and rounded: the fill starts a few
+   pixels left of the label. Margin and padding are equal, so the label keeps
+   its position (a larger margin moves the row left). */
+.VPSidebar .VPSidebarItem.level-0:has(.ref-root) .VPSidebarItem.is-active>.item>.link {
+  margin-left: -10px;
+  padding-left: 10px;
+  border-radius: 6px;
+}
+
+/* The indicator sits on the tree's guide line at every level, and is painted
+   for all levels (VitePress only does level-2 and deeper). */
+.VPSidebar .VPSidebarItem.level-0:has(.ref-root) .VPSidebarItem.is-active>.item>.indicator {
+  left: -17px;
+  background-color: var(--vp-c-brand-1);
+}
+
+/* Animated expand / collapse for the tree sections. VitePress hides collapsed
+   children with display: none; an animatable height replaces it so a section
+   slides open and shut instead of snapping. interpolate-size lets the height
+   transition to and from auto.
+   Per-frame cost: a height tween re-lays out every row below it, so collapsed
+   subtrees are switched to content-visibility: hidden - but only after the
+   collapse finished (the [data-collapsed-settled] marker is set by
+   sidebar-collapse-animation.ts). Flipping it during the transition would
+   make the children disappear in one frame instead of sliding with the
+   parent. overflow: clip keeps the negative-margin active fill and the 2px
+   indicator visible (clip margin covers the border). */
+:root {
+  interpolate-size: allow-keywords;
+}
+
+.VPSidebar .VPSidebarItem>.items {
+  overflow: clip;
+  overflow-clip-margin: 2px;
+  height: auto;
+  visibility: visible;
+  transition: height 0.26s ease, visibility 0s;
+}
+
+.VPSidebar .VPSidebarItem.collapsed>.items {
+  /* Beats the scoped display: none that VitePress ships for collapsed items. */
+  display: block !important;
+  height: 0;
+  visibility: hidden;
+  transition: height 0.26s ease, visibility 0s 0.26s;
+}
+
+/* VitePress hides *every* descendant .items of a collapsed section, not only
+   its direct child. That makes nested, still-expanded sections vanish on the
+   first frame of the collapse, so their content never slides out with the
+   parent. While the collapse is animating (no settled marker yet) all nested
+   containers stay laid out and are simply clipped by the parent's height. */
+.VPSidebar .VPSidebarItem.collapsed>.items:not([data-collapsed-settled]) .items {
+  display: block !important;
+}
+
+/* Skips layout and paint for subtrees that finished collapsing. */
+.VPSidebar .VPSidebarItem.collapsed>.items[data-collapsed-settled] {
+  content-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .VPSidebar .VPSidebarItem>.items,
+  .VPSidebar .VPSidebarItem.collapsed>.items {
+    transition: none;
+  }
+}
+
+
+/* Reference sidebar: every entry carries a small rounded badge with its Rust
+   kind ("fn", "struct", "enum", ...). The generated category headings are not
+   rendered, so the badge is what identifies the entry. */
+.VPSidebar .ref-kind {
+  display: inline-block;
+  min-width: 34px;
+  max-width: 34px;
+  margin-right: 5px;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: var(--vp-c-default-soft);
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+  vertical-align: 1px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TREE BREADCRUMB - Sticky path of the current page
+   ═══════════════════════════════════════════════════════════════════════ */
+/* Rendered in the doc-before slot, so it sits at the top of the article
+   column and sticks below the navbar while the page scrolls. */
+.tree-breadcrumb {
+  position: sticky;
+  top: var(--vp-nav-height);
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 10px 0 12px;
+  background: var(--vp-c-bg);
+  border-bottom: 1px solid var(--vp-c-divider);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.tree-breadcrumb-link {
+  color: var(--vp-c-text-2);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.tree-breadcrumb-link:hover {
+  color: var(--vp-c-brand-1);
+}
+
+.tree-breadcrumb-separator {
+  color: var(--vp-c-text-3);
+}
+
+.tree-breadcrumb-current {
+  color: var(--vp-c-text-1);
+  font-weight: 500;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
