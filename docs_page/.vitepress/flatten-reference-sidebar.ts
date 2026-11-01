@@ -91,3 +91,38 @@ export function flattenReferenceCategories(sidebarItems: SidebarItem[]): Sidebar
             : crateItem
     )
 }
+
+// True when the entry is a crate page carrying its own module tree.
+function isCrateItem(sidebarItem: SidebarItem): boolean {
+    return typeof sidebarItem.link === 'string' && !!sidebarItem.items?.length
+}
+
+// Builds the multi-sidebar map for the reference section. VitePress resolves a
+// page against the longest matching key, so a page under /reference/<crate>/
+// renders that crate's tree instead of all ~3,400 reference entries. A single
+// shared key used to put the whole tree into the markup of every page, which
+// cost about 2 MB of HTML per page and most of the build time.
+// Every crate stays reachable: the other crates are listed as plain links.
+export function buildReferenceSidebarMap(sidebarItems: SidebarItem[]): Record<string, SidebarItem[]> {
+    const crateItems = flattenReferenceCategories(sidebarItems).filter(isCrateItem)
+
+    // Crates as plain links, used for the landing page and for the crates that
+    // are not the current one.
+    const crateLinks: SidebarItem[] = crateItems.map((crateItem) => ({
+        text: crateItem.text,
+        link: crateItem.link
+    }))
+
+    const sidebarByPath: Record<string, SidebarItem[]> = {
+        // Reference landing page and any page outside a crate.
+        '/reference/': crateLinks
+    }
+
+    for (const activeCrateItem of crateItems) {
+        sidebarByPath[activeCrateItem.link as string] = crateItems.map((crateItem) =>
+            crateItem === activeCrateItem ? crateItem : { text: crateItem.text, link: crateItem.link }
+        )
+    }
+
+    return sidebarByPath
+}

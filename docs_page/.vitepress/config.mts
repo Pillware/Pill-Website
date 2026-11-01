@@ -1,7 +1,8 @@
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 import { codeReferenceSidebarItems } from './reference-sidebar'
-import { flattenReferenceCategories } from './flatten-reference-sidebar'
+import { buildReferenceSidebarMap } from './flatten-reference-sidebar'
+import { truncateHugeCodeBlocks } from './truncate-huge-code-blocks'
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid(
@@ -72,7 +73,12 @@ export default withMermaid(
     },
 
     markdown: {
-      html: true
+      html: true,
+      // rustdoc constants that embed fonts/images as multi-megabyte byte
+      // strings otherwise cost the most time in the whole build (three
+      // highlighter passes and a search-index entry each) for a value nobody
+      // can read.
+      config: truncateHugeCodeBlocks
     },
 
     mermaid: {
@@ -171,7 +177,9 @@ export default withMermaid(
             ]
           }
         ],
-        '/reference/': flattenReferenceCategories(codeReferenceSidebarItems)
+        // One sidebar per crate: a page only renders its own crate tree, while
+        // the other crates stay reachable as plain links.
+        ...buildReferenceSidebarMap(codeReferenceSidebarItems)
       },
 
       socialLinks: [

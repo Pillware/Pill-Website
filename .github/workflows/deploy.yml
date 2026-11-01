@@ -28,11 +28,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js
+      # 2. Setup Node.js (npm download cache reused across runs; each project
+      #    has its own lockfile)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            landing_page/package-lock.json
+            docs_page/package-lock.json
 
       # 3. Install all dependencies
       - name: Install dependencies

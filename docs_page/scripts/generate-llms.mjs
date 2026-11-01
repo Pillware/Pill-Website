@@ -101,6 +101,24 @@ function stripFenceHighlights(markdown) {
     return markdown.replace(/^```([A-Za-z0-9]*)\{[^\n]*\}$/gm, '```$1');
 }
 
+// Caps generated binary blobs: rustdoc renders constants that embed fonts or
+// images as one multi-megabyte byte-string literal, which is unreadable here
+// and would dominate llms-full.txt. The limits match the markdown plugin in
+// .vitepress/truncate-huge-code-blocks.ts so the mirror matches the site.
+const MAXIMUM_CODE_FENCE_CHARACTERS = 4000;
+const KEPT_HEAD_CHARACTERS = 2400;
+const KEPT_TAIL_CHARACTERS = 800;
+
+function truncateHugeCodeFences(markdown) {
+    return markdown.replace(/^```[^\n]*\n([\s\S]*?)\n```$/gm, (match, body) => {
+        if (body.length <= MAXIMUM_CODE_FENCE_CHARACTERS) return match;
+        const omittedCharacters = body.length - KEPT_HEAD_CHARACTERS - KEPT_TAIL_CHARACTERS;
+        const marker = `\n// [Pill docs] ${omittedCharacters.toLocaleString('en-US')} characters omitted: the value is a generated binary blob.\n`;
+        const truncatedBody = `${body.slice(0, KEPT_HEAD_CHARACTERS)}${marker}${body.slice(-KEPT_TAIL_CHARACTERS)}`;
+        return match.replace(body, () => truncatedBody);
+    });
+}
+
 // Picks a human-readable title: the first H1, then a frontmatter title, then
 // a prettified file name as a last resort.
 function pickTitle(content, frontmatter, relativePath) {
@@ -148,6 +166,7 @@ const pages = sourceFiles.map((filePath) => {
     const note = pickNote(content, frontmatter);
     const taglineMatch = frontmatter.match(/^\s*tagline:\s*(.+)$/m);
     let cleanContent = stripFenceHighlights(decodeEntities(content));
+    cleanContent = truncateHugeCodeFences(cleanContent);
     cleanContent = rewriteLinks(cleanContent, mirrorPath);
     cleanContent = convertContainers(cleanContent).trim();
     // The docs home page is frontmatter-only (a VitePress hero layout); give
