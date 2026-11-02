@@ -1,0 +1,91 @@
+name: Deploy Landing Page
+
+# The landing page deploys on its own: it never waits for (or breaks on) the
+# much heavier docs build, which lives in deploy-docs.yml.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "landing_page/**"
+      - "pill_style.css"
+      - "build-script.js"
+      - "package.json"
+      - "package-lock.json"
+      - .github/workflows/deploy-landing.yml
+  workflow_dispatch:
+
+# Two quick pushes must not interleave their uploads on the server.
+concurrency:
+  group: deploy-landing
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js (npm download cache reused across runs; each project
+      #    has its own lockfile)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            landing_page/package-lock.json
+
+      # 3. Install the root and landing page dependencies
+      - name: Install dependencies
+        run: |
+          npm install
+          cd landing_page && npm install
+
+      # 4. Build the landing page and assemble it into dist/
+      - name: Build landing page
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY}}
+          VITE_TURNSTILE_SITE_KEY: ${{ secrets.VITE_TURNSTILE_SITE_KEY }}
+        run: |
+          npm run build:landing
+          node build-script.js landing
+
+      # 5. Deploy to server via SSH
+      - name: Deploy to Server
+        run: |
+          set -e
+
+          echo "=== Build output ==="
+          ls -la dist/
+          echo ""
+          echo "=== File count ==="
+          find dist -type f | wc -l
+          echo ""
+          echo "=== Deploy target ==="
+          echo "Host: ${{ secrets.SERVER_HOST }}"
+          echo "User: ${{ secrets.SERVER_USER }}"
+          echo "Port: ${{ secrets.SERVER_PORT || 22 }}"
+          echo ""
+
+          # Write SSH key
+          echo "${{ secrets.LANDING_PAGE_KEY }}" > landing_page_key
+          chmod 600 landing_page_key
+
+          # Deploy via SSH with verbose logging
+          tar -czf - -C dist . | \
+            ssh -v -i landing_page_key \
+                -o StrictHostKeyChecking=no \
+                -o ConnectTimeout=30 \
+                -p ${{ secrets.SERVER_PORT || 22 }} \
+                ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} 2>&1
+
+          echo ""
+          echo "=== Landing deployed to pill.rocks ==="
+
+          rm -f landing_page_key

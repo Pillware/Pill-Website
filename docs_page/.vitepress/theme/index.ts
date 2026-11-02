@@ -9,6 +9,7 @@ import { initHomeBackground } from './hero-dither'
 import { initSidebarActiveSectionCollapse } from './sidebar-collapse'
 import { initSidebarCollapseAnimation, refreshSidebarCollapseSettling } from './sidebar-collapse-animation'
 import TreeBreadcrumb from './TreeBreadcrumb.vue'
+import ContentVersion from './ContentVersion.vue'
 import '../../../pill_style.css'
 import './styles.css'
 
@@ -126,10 +127,13 @@ function initBrandIdentityCopy(): void {
 export default {
   extends: DefaultTheme,
 
-  // Adds the sticky page path above the article, inside the content column.
+  // Adds the sticky page path above the article, inside the content column,
+  // and the content commit line at the bottom of docs pages and the home page.
   Layout: () =>
     h(DefaultTheme.Layout, null, {
-      'doc-before': () => h(TreeBreadcrumb)
+      'doc-before': () => h(TreeBreadcrumb),
+      'doc-after': () => h(ContentVersion),
+      'home-features-after': () => h(ContentVersion)
     }),
 
   enhanceApp(ctx: EnhanceAppContext) {

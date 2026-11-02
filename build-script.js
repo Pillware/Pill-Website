@@ -13,6 +13,15 @@ const distDir = path.join(__dirname, 'dist');
 const docsBuildDir = path.join(__dirname, 'docs_page', '.vitepress', 'dist');
 const distDocsDir = path.join(__dirname, 'dist-docs');
 
+// Optional target argument ("landing" or "docs") assembles only that site, so
+// the two deploy workflows do not need each other's build output. No argument
+// assembles both.
+const requestedTarget = process.argv[2] || 'all';
+if (!['all', 'landing', 'docs'].includes(requestedTarget)) {
+    console.error(`Unknown target "${requestedTarget}". Use "landing", "docs" or no argument.`);
+    process.exit(1);
+}
+
 console.log('🚀 Assembling deploy outputs...');
 
 // Generated output - recreate it so obsolete files cannot survive between builds.
@@ -49,16 +58,20 @@ function copyRecursive(src, dest) {
 }
 
 // ── Landing page → dist/ (served at https://pill.rocks) ──
-console.log('🌐 Assembling landing page...');
-resetDirectory(distDir);
-copyRecursive(landingBuildDir, distDir);
-console.log('✅ Landing page copied to dist/');
+if (requestedTarget !== 'docs') {
+    console.log('🌐 Assembling landing page...');
+    resetDirectory(distDir);
+    copyRecursive(landingBuildDir, distDir);
+    console.log('✅ Landing page copied to dist/');
+}
 
 // ── Documentation → dist-docs/ (served at https://docs.pill.rocks) ──
-console.log('📚 Assembling documentation...');
-resetDirectory(distDocsDir);
-copyRecursive(docsBuildDir, distDocsDir);
-console.log('✅ Documentation copied to dist-docs/');
+if (requestedTarget !== 'landing') {
+    console.log('📚 Assembling documentation...');
+    resetDirectory(distDocsDir);
+    copyRecursive(docsBuildDir, distDocsDir);
+    console.log('✅ Documentation copied to dist-docs/');
+}
 
 console.log('🎉 Build complete!');
 console.log('');

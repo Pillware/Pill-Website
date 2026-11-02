@@ -5,7 +5,8 @@
 //   source tree before a dev or build run:
 //   - reference/            -> pages/reference/  (full mirror, stale pages are removed)
 //   - reference-sidebar.ts  -> .vitepress/reference-sidebar.ts
-//   Both targets are generated and git ignored; never edit them in this repo.
+//   - content commit info   -> .vitepress/content-version.json (shown in the docs footer)
+//   All targets are generated and git ignored; never edit them in this repo.
 // USAGE: node scripts/sync-content.mjs [--from <directory>] [--repo <url>] [--ref <git-ref>] [<directory>]
 //   --from <directory>  read a local checkout instead of cloning
 //   --repo <url>        content repository (default https://github.com/Pillware/Pill-Docs.git)
@@ -21,7 +22,7 @@
 // --- SCRIPT ---
 
 import { spawnSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -46,6 +47,10 @@ const GENERATED_SIDEBAR = {
     source: 'reference-sidebar.ts',
     target: join(docsRoot, '.vitepress', 'reference-sidebar.ts'),
 }
+
+// Which content commit the synced pages came from. The docs footer displays it
+// and the deploy workflow compares it with the latest content commit.
+const CONTENT_VERSION_FILE = join(docsRoot, '.vitepress', 'content-version.json')
 
 // Directory names that are never part of the published content.
 const SKIPPED_DIRECTORY_NAMES = new Set(['.git', 'node_modules', '.vitepress'])
@@ -103,6 +108,14 @@ function runGit(gitArguments, workingDirectory) {
     if (result.status !== 0) {
         throw new Error(`git ${gitArguments.join(' ')} failed with exit code ${result.status}.`)
     }
+}
+
+// Runs one read-only git command and returns its trimmed output, or null when
+// the directory is not a git checkout (a plain local --from folder).
+function readGit(gitArguments, workingDirectory) {
+    const result = spawnSync('git', gitArguments, { cwd: workingDirectory, encoding: 'utf8' })
+    if (result.error || result.status !== 0) return null
+    return result.stdout.trim() || null
 }
 
 // Git authentication header for private content repositories. The token stays
@@ -232,6 +245,22 @@ function mirrorContent(contentDirectory) {
     return totalMarkdownFiles
 }
 
+// Records the commit the content was read from. A local folder that is not a
+// git checkout still gets a file, with null commit fields, so the footer can
+// say the version is unknown instead of showing a stale one.
+function writeContentVersion(contentDirectory, options) {
+    const contentVersion = {
+        repository: options.fromDirectory ? (readGit(['remote', 'get-url', 'origin'], contentDirectory) || options.repository) : options.repository,
+        ref: options.fromDirectory ? readGit(['rev-parse', '--abbrev-ref', 'HEAD'], contentDirectory) : options.ref,
+        commit: readGit(['rev-parse', 'HEAD'], contentDirectory),
+        commitDate: readGit(['log', '-1', '--format=%cI'], contentDirectory),
+        syncedAt: new Date().toISOString(),
+    }
+    mkdirSync(dirname(CONTENT_VERSION_FILE), { recursive: true })
+    writeFileSync(CONTENT_VERSION_FILE, JSON.stringify(contentVersion, null, 2) + '\n')
+    console.log(`  content commit ${contentVersion.commit || 'unknown'} -> ${relative(docsRoot, CONTENT_VERSION_FILE)}`)
+}
+
 // Entry point: resolve the source, validate it, then overwrite the generated
 // parts of the VitePress tree.
 function main() {
@@ -243,6 +272,7 @@ function main() {
 
     console.log('Syncing content:')
     const markdownFileCount = mirrorContent(contentDirectory)
+    writeContentVersion(contentDirectory, options)
 
     const elapsedSeconds = ((Date.now() - startedAt) / 1000).toFixed(1)
     console.log(`Done: ${markdownFileCount} markdown files synced in ${elapsedSeconds}s.`)

@@ -10,6 +10,7 @@ This project builds the Pill Engine guide and generated API reference. It is bui
 | `npm run docs:sync`    | Sync the API reference from the Pill-Docs repository     |
 | `npm run docs:dev`     | Sync, then start the local dev server with hot reload    |
 | `npm run docs:build`   | Sync, then build the static site into `.vitepress/dist/` |
+| `npm run docs:build:synced` | Build from the already synced content, without syncing |
 | `npm run docs:preview` | Serve the last build locally                             |
 
 ## Content source
@@ -21,8 +22,9 @@ The API reference is not authored here. `npm run docs:sync` mirrors it from
 | ---------------------- | --------------------------------- |
 | `reference/`           | `pages/reference/`                |
 | `reference-sidebar.ts` | `.vitepress/reference-sidebar.ts` |
+| commit hash and date   | `.vitepress/content-version.json` |
 
-Both targets are generated and git ignored; a sync replaces them entirely, so
+All targets are generated and git ignored; a sync replaces them entirely, so
 edits made here are lost on the next run. Change content in Pill-Docs instead.
 
 The sync runs automatically before `docs:dev` and `docs:build`. To work against
@@ -42,6 +44,20 @@ The remote clone is cached in `.content/`, so repeat runs only fetch the tip.
 `docs:build` runs the VitePress CLI with an 8 GB heap because the reference has
 thousands of pages and the default limit fails with "JavaScript heap out of
 memory". Expect a full build to take roughly 15 minutes.
+
+## Deployment
+
+`.github/workflows/deploy-docs.yml` deploys the docs separately from the
+landing page, and only rebuilds when the docs site changes, Pill-Docs sends a
+`pill-docs-updated` dispatch, or the workflow is started by hand. The daily
+scheduled run compares the latest Pill-Docs commit with the one in the live
+`build-info.json` and skips when they match. Synced content is cached per
+Pill-Docs commit, so a build reuses the last cached content when Pill-Docs
+cannot be read, and leaves the live docs untouched when nothing is cached.
+
+Every page ends with the Pill-Docs commit it was built from, its date and
+whether it is still the latest commit (checked in the browser against the
+GitHub API).
 
 ## Layout
 

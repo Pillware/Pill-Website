@@ -1,8 +1,18 @@
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 import { codeReferenceSidebarItems } from './reference-sidebar'
 import { buildReferenceSidebarMap } from './flatten-reference-sidebar'
 import { truncateHugeCodeBlocks } from './truncate-huge-code-blocks'
+
+// Content commit written by scripts/sync-content.mjs. Missing until the first
+// sync; the footer then reports the version as unknown.
+const contentVersionPath = fileURLToPath(new URL('./content-version.json', import.meta.url))
+const contentVersion = existsSync(contentVersionPath)
+  ? JSON.parse(readFileSync(contentVersionPath, 'utf8'))
+  : null
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid(
@@ -72,6 +82,17 @@ export default withMermaid(
       ]
     },
 
+    // Publishes which content commit this build holds. The deploy workflow
+    // reads it back from the live site to skip rebuilds when nothing changed.
+    buildEnd(siteConfig) {
+      const buildInfo = {
+        content: contentVersion,
+        siteCommit: process.env.GITHUB_SHA || null,
+        builtAt: new Date().toISOString(),
+      }
+      writeFileSync(join(siteConfig.outDir, 'build-info.json'), JSON.stringify(buildInfo, null, 2) + '\n')
+    },
+
     markdown: {
       html: true,
       // rustdoc constants that embed fonts/images as multi-megabyte byte
@@ -90,6 +111,9 @@ export default withMermaid(
     themeConfig: {
       // https://vitepress.dev/reference/default-theme-config
       siteTitle: 'pill docs',
+
+      // Rendered by theme/ContentVersion.vue at the bottom of every page.
+      contentVersion,
 
       nav: [
         {

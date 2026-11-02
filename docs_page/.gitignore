@@ -10,6 +10,7 @@ node_modules/
 .content/
 pages/reference/
 .vitepress/reference-sidebar.ts
+.vitepress/content-version.json
 
 # Logs
 npm-debug.log*

@@ -1685,3 +1685,34 @@ div[class*="language-"]::before {
     height: 123.2px;
   }
 }
+/* ── Content version line ──
+   Pill-Docs commit the page was built from, rendered by ContentVersion.vue
+   below the article (and below the home page hero). */
+.content-version {
+  margin: 48px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--vp-c-text-3);
+}
+
+.VPHome .content-version {
+  padding: 0 24px 32px;
+  text-align: center;
+}
+
+.content-version-commit {
+  font-family: var(--vp-font-family-mono);
+  color: var(--vp-c-text-2);
+}
+
+.content-version-status {
+  margin-left: 4px;
+}
+
+.content-version-status-up-to-date {
+  color: var(--vp-c-green-1);
+}
+
+.content-version-status-outdated {
+  color: var(--vp-c-yellow-1);
+}

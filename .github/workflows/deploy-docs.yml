@@ -1,0 +1,213 @@
+name: Deploy Docs
+
+# The docs build renders thousands of generated API reference pages, so it
+# only runs when something it depends on changed:
+#   - push            the docs site itself (theme, guide, config) changed
+#   - dispatch        Pill-Docs announced new content
+#   - schedule        safety net for a missed dispatch; skips when the live
+#                     docs already show the latest Pill-Docs commit
+#   - manual run      always rebuilds
+# Synced Pill-Docs content is cached per commit. When Pill-Docs cannot be read
+# (empty repository, missing branch, outage) the last cached content is reused,
+# and when there is none at all the live docs are left untouched.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs_page/**"
+      - "pill_style.css"
+      - "build-script.js"
+      - .github/workflows/deploy-docs.yml
+  repository_dispatch:
+    types: [pill-docs-updated]
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * *"
+
+# A dispatch arriving during a build queues behind it instead of racing it.
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: false
+
+env:
+  PILL_DOCS_REPO: https://github.com/Pillware/Pill-Docs.git
+  PILL_DOCS_REF: main
+  LIVE_BUILD_INFO_URL: https://docs.pillengine.org/build-info.json
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Latest commit of the content branch. Empty when the repository has
+      #    no such branch (or cannot be reached); that is not an error here.
+      - name: Resolve latest Pill-Docs commit
+        id: latest
+        env:
+          PILL_DOCS_TOKEN: ${{ secrets.PILL_DOCS_TOKEN }}
+        run: |
+          authentication_arguments=()
+          if [ -n "$PILL_DOCS_TOKEN" ]; then
+            credentials=$(printf 'x-access-token:%s' "$PILL_DOCS_TOKEN" | base64 -w0)
+            authentication_arguments=(-c "http.extraheader=Authorization: Basic $credentials")
+          fi
+          commit=$(git "${authentication_arguments[@]}" ls-remote "$PILL_DOCS_REPO" "refs/heads/$PILL_DOCS_REF" | cut -f1 || true)
+          if [ -z "$commit" ]; then
+            echo "::warning::Pill-Docs has no '$PILL_DOCS_REF' branch right now (or it could not be reached)."
+          fi
+          echo "Latest Pill-Docs commit: ${commit:-none}"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+
+      # 3. Content commit the live docs were built from (written by the
+      #    VitePress buildEnd hook). Empty for deploys that predate it.
+      - name: Read deployed docs commit
+        id: deployed
+        run: |
+          commit=$(curl -fsS --max-time 20 "$LIVE_BUILD_INFO_URL" | jq -r '.content.commit // empty' 2>/dev/null || true)
+          echo "Deployed Pill-Docs commit: ${commit:-unknown}"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+
+      # 4. Decide whether a rebuild is needed at all. Site changes and manual
+      #    runs always rebuild; content triggers only when the content moved.
+      - name: Decide whether to rebuild
+        id: plan
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          LATEST_COMMIT: ${{ steps.latest.outputs.commit }}
+          DEPLOYED_COMMIT: ${{ steps.deployed.outputs.commit }}
+        run: |
+          if [ "$EVENT_NAME" = "push" ] || [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            build=true
+            echo "Rebuilding: $EVENT_NAME event."
+          elif [ -z "$LATEST_COMMIT" ]; then
+            build=false
+            echo "::notice::Skipping docs build: no Pill-Docs content to publish, live docs stay as they are."
+          elif [ "$LATEST_COMMIT" = "$DEPLOYED_COMMIT" ]; then
+            build=false
+            echo "::notice::Skipping docs build: live docs already show Pill-Docs ${LATEST_COMMIT:0:7}."
+          else
+            build=true
+            echo "Rebuilding: Pill-Docs moved from ${DEPLOYED_COMMIT:-unknown} to $LATEST_COMMIT."
+          fi
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+
+      # 5. Previously synced content: the exact latest commit when it was
+      #    cached before, otherwise the most recent cached commit.
+      - name: Restore cached Pill-Docs content
+        id: content-cache
+        if: steps.plan.outputs.build == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            docs_page/pages/reference
+            docs_page/.vitepress/reference-sidebar.ts
+            docs_page/.vitepress/content-version.json
+          key: pill-docs-content-${{ steps.latest.outputs.commit || 'none' }}
+          restore-keys: pill-docs-content-
+
+      # 6. Setup Node.js (npm download cache reused across runs)
+      - name: Setup Node.js
+        if: steps.plan.outputs.build == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs_page/package-lock.json
+
+      # 7. Pick the content to build from: cached copy of the latest commit,
+      #    a fresh sync, or (when the sync is impossible) older cached content.
+      - name: Prepare Pill-Docs content
+        id: content
+        if: steps.plan.outputs.build == 'true'
+        env:
+          PILL_DOCS_TOKEN: ${{ secrets.PILL_DOCS_TOKEN }}
+          LATEST_COMMIT: ${{ steps.latest.outputs.commit }}
+          CACHE_EXACT_HIT: ${{ steps.content-cache.outputs.cache-hit }}
+          CACHE_MATCHED_KEY: ${{ steps.content-cache.outputs.cache-matched-key }}
+        run: |
+          available=true
+          synced=false
+          if [ "$CACHE_EXACT_HIT" = "true" ]; then
+            echo "Using cached content of Pill-Docs ${LATEST_COMMIT:0:7}."
+          elif [ -n "$LATEST_COMMIT" ] && node docs_page/scripts/sync-content.mjs; then
+            synced=true
+          elif [ -n "$CACHE_MATCHED_KEY" ]; then
+            echo "::warning::Could not sync Pill-Docs; building from older cached content ($CACHE_MATCHED_KEY)."
+          else
+            available=false
+            echo "::warning::No Pill-Docs content available (nothing to sync, nothing cached). Live docs were NOT redeployed."
+          fi
+          commit=$(jq -r '.commit // empty' docs_page/.vitepress/content-version.json 2>/dev/null || true)
+          echo "available=$available" >> "$GITHUB_OUTPUT"
+          echo "synced=$synced" >> "$GITHUB_OUTPUT"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+
+      # 8. Remember freshly synced content for later runs.
+      - name: Cache synced Pill-Docs content
+        if: steps.content.outputs.synced == 'true' && steps.content.outputs.commit != ''
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            docs_page/pages/reference
+            docs_page/.vitepress/reference-sidebar.ts
+            docs_page/.vitepress/content-version.json
+          key: pill-docs-content-${{ steps.content.outputs.commit }}
+
+      # 9. Build the docs from the prepared content (no second sync) and
+      #    assemble them into dist-docs/
+      - name: Build docs
+        if: steps.content.outputs.available == 'true'
+        run: |
+          cd docs_page
+          npm install
+          npm run docs:build:synced
+          cd ..
+          node build-script.js docs
+
+      # 10. Deploy docs to docs.pill.rocks. Uses a SEPARATE deploy key whose
+      #     authorized_keys forced command extracts into the docs webroot.
+      #     One-time server setup:
+      #       1. Generate a second SSH keypair.
+      #       2. Append the public key to ~/.ssh/authorized_keys with a forced
+      #          command, e.g.:
+      #            command="tar -xzf - -C /path/to/docs.pill.rocks",restrict ssh-ed25519 AAAA...
+      #       3. Store the private key as the DOCS_PAGE_KEY GitHub secret.
+      #     NOTE: the `secrets` context is NOT allowed in `if:` conditions, so
+      #     the "is the key configured?" check happens inside the script below.
+      - name: Deploy Docs (docs.pill.rocks)
+        if: steps.content.outputs.available == 'true'
+        env:
+          DOCS_PAGE_KEY: ${{ secrets.DOCS_PAGE_KEY }}
+        run: |
+          set -e
+
+          # Skip with a warning when the docs deploy key has not been set up.
+          if [ -z "$DOCS_PAGE_KEY" ]; then
+            echo "::warning::DOCS_PAGE_KEY secret is not set - docs.pill.rocks was NOT deployed."
+            echo "See the 'Deploy Docs (docs.pill.rocks)' step comments for the one-time server setup."
+            exit 0
+          fi
+
+          echo "=== Docs output ==="
+          ls -la dist-docs/
+          echo ""
+          echo "=== Deploying docs ==="
+
+          echo "$DOCS_PAGE_KEY" > docs_page_key
+          chmod 600 docs_page_key
+
+          tar -czf - -C dist-docs . | \
+            ssh -i docs_page_key \
+                -o StrictHostKeyChecking=no \
+                -o ConnectTimeout=30 \
+                -p ${{ secrets.SERVER_PORT || 22 }} \
+                ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} 2>&1
+
+          rm -f docs_page_key
+          echo ""
+          echo "=== Docs deployed to docs.pill.rocks ==="
