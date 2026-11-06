@@ -35,13 +35,13 @@ ignored, and `docs:dev`/`docs:build` never sync on their own. Every build publis
 that record as `build-info.json` at the site root, which is also what the deploy
 workflow reads to decide whether anything changed.
 
-| Trigger | How |
-| --- | --- |
-| Local | In `docs_page`: `npm run docs:update-reference` and `npm run docs:build`; then from the repository root: `node build-script.js docs` |
-| Site change | push to `main` touching `docs_page/**`, `pill_style.css` or `build-script.js` |
-| Content change | Pill-Docs sends the `pill-docs-updated` `repository_dispatch` |
-| Daily | scheduled run at 04:17 UTC, skipped when the live `build-info.json` already matches Pill-Docs `main` |
-| Manual | Actions → **Deploy Docs** → **Run workflow** (`content_ref`, `refresh_content`, `deploy`) |
+| Trigger        | How                                                                                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Local          | In `docs_page`: `npm run docs:update-reference` and `npm run docs:build`; then from the repository root: `node build-script.js docs` |
+| Site change    | push to `main` touching `docs_page/**`, `pill_style.css` or `build-script.js`                                                        |
+| Content change | Pill-Docs sends the `pill-docs-updated` `repository_dispatch`                                                                        |
+| Daily          | scheduled run at 04:17 UTC, skipped when the live `build-info.json` already matches Pill-Docs `main`                                 |
+| Manual         | Actions → **Deploy Docs** → **Run workflow** (`content_ref`, `refresh_content`, `deploy`)                                            |
 
 When Pill-Docs cannot be read, the last cached content is reused; when nothing is
 cached, the workflow leaves the live docs untouched instead of deploying an

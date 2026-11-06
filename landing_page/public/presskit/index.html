@@ -10,14 +10,14 @@
          (pillengine.org, pill.rocks, localhost). Facts here mirror the
          landing page sections - keep them in sync when those change. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Pill Engine press kit - descriptions, fact sheet, media and logos, ready to use in articles, videos and streams." />
+    <meta name="description"
+        content="Pill Engine press kit - descriptions, fact sheet, media and logos, ready to use in articles, videos and streams." />
     <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" type="image/svg+xml" href="../favicons/favicon.svg" />
     <title>Pill Engine - Press kit</title>
     <!-- Analytics: same Umami website as the main site; this page is copied
          verbatim, so it carries its own tracker instead of the SPA bundle. -->
-    <script defer src="https://umami.pillengine.org/script.js"
-        data-website-id="be02f2ef-9344-46d7-bc07-c9c56af6531e"
+    <script defer src="https://umami.pillengine.org/script.js" data-website-id="be02f2ef-9344-46d7-bc07-c9c56af6531e"
         data-domains="pillengine.org,www.pillengine.org,docs.pillengine.org,pill.rocks,www.pill.rocks,docs.pill.rocks"></script>
     <style>
         /* The same variable font files the landing page serves. */
@@ -284,7 +284,7 @@
             margin: 0;
         }
 
-        .blurb p + p {
+        .blurb p+p {
             margin-top: 10px;
         }
 
@@ -549,11 +549,16 @@
         <section aria-labelledby="numbers-heading">
             <h2 id="numbers-heading">Pill in numbers</h2>
             <div class="numbers">
-                <div class="number"><span class="number-value">500K+</span><span class="number-label">Entities at 60 FPS</span></div>
-                <div class="number"><span class="number-value">&lt;0.5 MB</span><span class="number-label">WebAssembly build</span></div>
-                <div class="number"><span class="number-value">~1 s</span><span class="number-label">Hot reload of game code</span></div>
-                <div class="number"><span class="number-value">&lt;5 s</span><span class="number-label">Startup time</span></div>
-                <div class="number"><span class="number-value">MIT</span><span class="number-label">Open source, free forever</span></div>
+                <div class="number"><span class="number-value">500K+</span><span class="number-label">Entities at 60
+                        FPS</span></div>
+                <div class="number"><span class="number-value">&lt;0.5 MB</span><span class="number-label">WebAssembly
+                        build</span></div>
+                <div class="number"><span class="number-value">~1 s</span><span class="number-label">Hot reload of game
+                        code</span></div>
+                <div class="number"><span class="number-value">&lt;5 s</span><span class="number-label">Startup
+                        time</span></div>
+                <div class="number"><span class="number-value">MIT</span><span class="number-label">Open source, free
+                        forever</span></div>
             </div>
         </section>
 
@@ -628,7 +633,8 @@
                         <p>Fast iteration is central to Pill. Game code hot-reloads in about one to two
                             seconds, and builds stay tiny, with a WebAssembly build under 0.5 MB. The engine
                             is designed around a deliberately small core, with the goal that rendering, physics,
-                            audio and tooling become modules projects add only when they need them. Every engine update is checked by automated
+                            audio and tooling become modules projects add only when they need them. Every engine update
+                            is checked by automated
                             benchmarks, so performance claims are backed by real numbers.</p>
                         <p>Pill runs on Windows, Linux, macOS and the web. It is open source under the MIT
                             license and community driven: the roadmap is voted on by its users. Pill is
@@ -640,7 +646,8 @@
 
         <section aria-labelledby="features-heading">
             <h2 id="features-heading">Features</h2>
-            <p class="section-note">Please keep these two lists apart: the first ships today, the second is where Pill is heading.</p>
+            <p class="section-note">Please keep these two lists apart: the first ships today, the second is where Pill
+                is heading.</p>
             <div class="columns">
                 <div class="panel">
                     <h3>Available today</h3>
@@ -676,14 +683,16 @@
 
         <section id="media" aria-labelledby="media-heading">
             <h2 id="media-heading">Footage</h2>
-            <p class="section-note">Use these in videos, thumbnails and articles. Please credit them as "Pill Engine".</p>
+            <p class="section-note">Use these in videos, thumbnails and articles. Please credit them as "Pill Engine".
+            </p>
             <div class="media">
                 <figure class="media-item">
                     <video src="../images/xenium_30fps_1920.mp4" controls muted playsinline preload="metadata"></video>
                     <figcaption>
                         <span class="media-name">Pill teaser</span>
                         <span class="downloads">
-                            <a class="media-download" href="../images/xenium_30fps_1920.mp4" download>MP4 1080p (2 MB)</a>
+                            <a class="media-download" href="../images/xenium_30fps_1920.mp4" download>MP4 1080p (2
+                                MB)</a>
                             <a class="media-download" href="../images/xenium_30fps_4k.mp4" download>MP4 4K (15 MB)</a>
                         </span>
                     </figcaption>
@@ -698,50 +707,68 @@
                     </figcaption>
                 </figure>
                 <figure class="media-item">
-                    <img src="https://raw.githubusercontent.com/Pillware/Pill/circus_demo/examples/circus_demo/media/ancient_pills.gif" alt="Ancient Pills example running in Pill" loading="lazy" />
+                    <img src="https://raw.githubusercontent.com/Pillware/Pill/circus_demo/examples/circus_demo/media/ancient_pills.gif"
+                        alt="Ancient Pills example running in Pill" loading="lazy" />
                     <figcaption>
                         <span class="media-name">Ancient Pills example</span>
                         <span class="downloads">
-                            <a class="media-download" href="https://raw.githubusercontent.com/Pillware/Pill/circus_demo/examples/circus_demo/media/ancient_pills.gif">GIF on GitHub</a>
+                            <a class="media-download"
+                                href="https://raw.githubusercontent.com/Pillware/Pill/circus_demo/examples/circus_demo/media/ancient_pills.gif">GIF
+                                on GitHub</a>
                         </span>
                     </figcaption>
                 </figure>
             </div>
-            <p class="more-link">More demos, including ones that run in your browser: <a href="../demos">pillengine.org/demos</a></p>
+            <p class="more-link">More demos, including ones that run in your browser: <a
+                    href="../demos">pillengine.org/demos</a></p>
         </section>
 
         <section id="logos" aria-labelledby="logos-heading">
             <h2 id="logos-heading">Logos</h2>
-            <p class="section-note">Use the white logo on dark backgrounds and the black logo on light ones. Don't recolour, stretch or redraw it.</p>
+            <p class="section-note">Use the white logo on dark backgrounds and the black logo on light ones. Don't
+                recolour, stretch or redraw it.</p>
             <div class="grid">
                 <a class="asset" href="../logos/pill_logo_white.svg" download>
-                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_logo_white.svg" alt="White Pill logo" loading="lazy" /></span>
-                    <span class="asset-meta"><span class="asset-name">Logo, white</span><span class="asset-file">pill_logo_white.svg</span></span>
+                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_logo_white.svg"
+                            alt="White Pill logo" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Logo, white</span><span
+                            class="asset-file">pill_logo_white.svg</span></span>
                 </a>
                 <a class="asset" href="../logos/pill_logo_black.svg" download>
-                    <span class="asset-preview asset-preview--light"><img src="../logos/pill_logo_black.svg" alt="Black Pill logo" loading="lazy" /></span>
-                    <span class="asset-meta"><span class="asset-name">Logo, black</span><span class="asset-file">pill_logo_black.svg</span></span>
+                    <span class="asset-preview asset-preview--light"><img src="../logos/pill_logo_black.svg"
+                            alt="Black Pill logo" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Logo, black</span><span
+                            class="asset-file">pill_logo_black.svg</span></span>
                 </a>
                 <a class="asset" href="../logos/pill_logo_white.png" download>
-                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_logo_white.png" alt="White Pill logo, PNG" loading="lazy" /></span>
-                    <span class="asset-meta"><span class="asset-name">Logo, white (PNG)</span><span class="asset-file">pill_logo_white.png</span></span>
+                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_logo_white.png"
+                            alt="White Pill logo, PNG" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Logo, white (PNG)</span><span
+                            class="asset-file">pill_logo_white.png</span></span>
                 </a>
                 <a class="asset" href="../logos/pill_logo_black.png" download>
-                    <span class="asset-preview asset-preview--light"><img src="../logos/pill_logo_black.png" alt="Black Pill logo, PNG" loading="lazy" /></span>
-                    <span class="asset-meta"><span class="asset-name">Logo, black (PNG)</span><span class="asset-file">pill_logo_black.png</span></span>
+                    <span class="asset-preview asset-preview--light"><img src="../logos/pill_logo_black.png"
+                            alt="Black Pill logo, PNG" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Logo, black (PNG)</span><span
+                            class="asset-file">pill_logo_black.png</span></span>
                 </a>
                 <a class="asset" href="../logos/pill_icon_white_black_bg.png" download>
-                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_icon_white_black_bg.png" alt="Pill icon on black" loading="lazy" /></span>
-                    <span class="asset-meta"><span class="asset-name">Icon, square (avatar)</span><span class="asset-file">pill_icon_white_black_bg.png</span></span>
+                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_icon_white_black_bg.png"
+                            alt="Pill icon on black" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Icon, square (avatar)</span><span
+                            class="asset-file">pill_icon_white_black_bg.png</span></span>
                 </a>
                 <a class="asset" href="../logos/pill_icon_white.svg" download>
-                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_icon_white.svg" alt="White Pill icon" loading="lazy" /></span>
-                    <span class="asset-meta"><span class="asset-name">Icon, white</span><span class="asset-file">pill_icon_white.svg</span></span>
+                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_icon_white.svg"
+                            alt="White Pill icon" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Icon, white</span><span
+                            class="asset-file">pill_icon_white.svg</span></span>
                 </a>
             </div>
             <p class="more-link">
                 All formats: <a href="../logos/">pillengine.org/logos</a> &middot;
-                Usage rules: <a href="https://docs.pillengine.org/guide/other/brand-identity">brand identity guidelines</a>
+                Usage rules: <a href="https://docs.pillengine.org/guide/other/brand-identity">brand identity
+                    guidelines</a>
             </p>
         </section>
 

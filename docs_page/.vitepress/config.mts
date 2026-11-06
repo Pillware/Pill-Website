@@ -243,10 +243,10 @@ export default withMermaid(
         // Only linked when the reference has been synced into this checkout.
         ...(hasReference
           ? [{
-              text: 'Reference',
-              link: '/reference/',
-              activeMatch: '^/reference/'
-            }]
+            text: 'Reference',
+            link: '/reference/',
+            activeMatch: '^/reference/'
+          }]
           : [])
       ],
 

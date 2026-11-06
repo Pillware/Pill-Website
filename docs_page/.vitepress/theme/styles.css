@@ -35,6 +35,7 @@
 }
 
 @media (min-width: 960px) {
+
   /* The layout already offsets the fixed navbar above this container. */
   .VPHome {
     min-height: calc(100vh - var(--vp-nav-height));
@@ -1956,6 +1957,7 @@ div[class*="language-"]::before {
    leave the hint stuck visible - there it stays hidden and the tap copies
    via the JS handler + "Copied" toast instead. */
 @media (hover: hover) and (pointer: fine) {
+
   .color-swatch:hover .color-copy-hint,
   .brand-copyable:hover .color-copy-hint {
     opacity: 0.7;
@@ -2011,6 +2013,7 @@ div[class*="language-"]::before {
 
 /* ── Small screens: stack the two-column blocks and list the swatches ── */
 @media (max-width: 640px) {
+
   .brand-anatomy,
   .brand-pattern-row {
     grid-template-columns: 1fr;
@@ -2119,7 +2122,7 @@ div[class*="language-"]::before {
 /* VitePress centers the home content wrapper with `margin: auto`, which takes
    half of the free space and leaves the version line mid-page. Keep the
    wrapper horizontally centered and let the version line own the bottom. */
-.VPHome > .vp-doc.container {
+.VPHome>.vp-doc.container {
   margin: 0 auto;
 }
 

@@ -5,11 +5,11 @@ This project builds the Pill Engine guide and generated API reference. It is bui
 
 ## Scripts
 
-| Command                | Purpose                                                  |
-| ---------------------- | -------------------------------------------------------- |
-| `npm run docs:dev`     | Start the local dev server with hot reload               |
-| `npm run docs:build`   | Build the static site into `.vitepress/dist/`            |
-| `npm run docs:preview` | Serve the last build locally                             |
+| Command                         | Purpose                                                  |
+| ------------------------------- | -------------------------------------------------------- |
+| `npm run docs:dev`              | Start the local dev server with hot reload               |
+| `npm run docs:build`            | Build the static site into `.vitepress/dist/`            |
+| `npm run docs:preview`          | Serve the last build locally                             |
 | `npm run docs:update-reference` | Download the API reference from the Pill-Docs repository |
 
 ## Content source
