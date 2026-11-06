@@ -2,11 +2,11 @@
     "name": "pill-landing-page",
     "private": true,
     "version": "1.0.0",
-    "description": "Landing page of Pill - modern, free and blazingly fast game engine",
+    "description": "Landing page of Pill Engine - modern, free and blazingly fast game engine",
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build",
+        "build": "vite build && node scripts/generate-route-pages.mjs",
         "preview": "vite preview"
     },
     "dependencies": {

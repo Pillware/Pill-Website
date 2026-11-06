@@ -2,8 +2,8 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitepress'
+import type { DefaultTheme } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
-import { codeReferenceSidebarItems } from './reference-sidebar'
 import { buildReferenceSidebarMap } from './flatten-reference-sidebar'
 import { truncateHugeCodeBlocks } from './truncate-huge-code-blocks'
 
@@ -13,6 +13,97 @@ const contentVersionPath = fileURLToPath(new URL('./content-version.json', impor
 const contentVersion = existsSync(contentVersionPath)
   ? JSON.parse(readFileSync(contentVersionPath, 'utf8'))
   : null
+
+// API reference sidebar written by `npm run docs:update-reference`. It is read
+// at runtime instead of imported, so dev and build still work in a checkout
+// that has never synced the reference: the site then simply has no Reference
+// section. The generated file is a typed export of a plain JSON array.
+function readReferenceSidebarItems(): DefaultTheme.SidebarItem[] {
+  const sidebarPath = fileURLToPath(new URL('./reference-sidebar.ts', import.meta.url))
+  if (!existsSync(sidebarPath)) {
+    return []
+  }
+  const sidebarSource = readFileSync(sidebarPath, 'utf8')
+  // Skip past the `=` so the `[]` of the type annotation is not mistaken for the array.
+  const assignmentIndex = sidebarSource.indexOf('=', sidebarSource.indexOf('codeReferenceSidebarItems'))
+  const arrayStart = sidebarSource.indexOf('[', assignmentIndex)
+  try {
+    return JSON.parse(sidebarSource.slice(arrayStart))
+  } catch (parseError) {
+    throw new Error(`Could not read ${sidebarPath}; run "npm run docs:update-reference" again. ${parseError}`)
+  }
+}
+
+const codeReferenceSidebarItems = readReferenceSidebarItems()
+const hasReference = codeReferenceSidebarItems.length > 0
+
+// Shared guide navigation. The same tree serves the experimental snapshot at
+// /guide/ and the current guide at /guide_current/, so links are generated from
+// the prefix instead of being duplicated.
+function createGuideSidebar(prefix: string): DefaultTheme.SidebarItem[] {
+  return [
+    {
+      text: 'Introduction',
+      items: [
+        { text: 'Welcome', link: `${prefix}/` },
+        { text: 'What is Pill?', link: `${prefix}/what-is-pill` }
+      ],
+    },
+    {
+      text: 'Getting Started',
+      items: [
+        { text: 'Setup', link: `${prefix}/getting-started/setup` },
+        { text: 'Pill Launcher', link: `${prefix}/getting-started/pill-launcher` },
+        { text: 'ECS (Entity Component System)', link: `${prefix}/getting-started/ecs` },
+        { text: 'Resources', link: `${prefix}/getting-started/resources` }
+      ]
+    },
+    {
+      text: 'Next Steps',
+      items: [
+        { text: 'Next Steps', link: `${prefix}/next-steps` }
+      ]
+    },
+    {
+      text: 'Help',
+      items: [
+        { text: 'Troubleshooting', link: `${prefix}/troubleshooting` }
+      ]
+    },
+    {
+      text: 'Advanced',
+      items: [
+        { text: 'Pill Launcher', link: `${prefix}/advanced/pill-launcher` },
+      ]
+    },
+    {
+      text: 'Engine Development',
+      items: [
+        {
+          text: 'Contributing',
+          link: `${prefix}/contributing/contributing`,
+          items: [
+            { text: 'Coding Standards', link: `${prefix}/contributing/coding-standards` },
+            { text: 'Code of Conduct', link: `${prefix}/contributing/code-of-conduct` },
+          ]
+        },
+        { text: 'CI Pipeline', link: `${prefix}/advanced/ci-pipeline` }
+      ]
+    },
+    {
+      text: 'Other',
+      items: [
+        { text: 'Brand Identity', link: `${prefix}/other/brand-identity` },
+      ]
+    }
+  ];
+}
+
+// `vitepress dev` renders every page for the local search index before it
+// starts listening. Rendering the ~3,450 reference pages delays every dev
+// start, so the dev server indexes the guide only; production builds still
+// index everything.
+const isDevServer = process.argv.includes('dev')
 
 // https://vitepress.dev/reference/site-config
 export default withMermaid(
@@ -24,6 +115,20 @@ export default withMermaid(
     // "./mod@name" and point at no page. Ignore only that shape so genuine
     // dead links still fail the build.
     ignoreDeadLinks: [/^\.\/(?:::)?[A-Za-z_]\w*::/, /^\.\/mod@/],
+
+    // The dev server's watcher opens one handle per file on Windows, about
+    // 3,800 with the generated reference pages. They only change through
+    // `npm run docs:update-reference`, so restart the dev server after an
+    // update instead of watching them. Together with the dev search index
+    // above this cuts dev startup from ~13 s to ~2 s.
+    vite: {
+      server: {
+        watch: {
+          ignored: ['**/pages/reference/**', '**/.content/**']
+        }
+      }
+    },
+
     title: "Pill Docs",
     description: "Guide and API reference for Pill - a modern, free and blazingly fast game engine",
     head: [
@@ -99,7 +204,19 @@ export default withMermaid(
       // strings otherwise cost the most time in the whole build (three
       // highlighter passes and a search-index entry each) for a value nobody
       // can read.
-      config: truncateHugeCodeBlocks
+      config: truncateHugeCodeBlocks,
+      // rustdoc marks doc-test examples with attributes in place of a language
+      // (```no_run, ```ignore, ...). They are Rust code, so highlight them as
+      // Rust instead of warning and falling back to plain text.
+      languageAlias: {
+        no_run: 'rust',
+        ignore: 'rust',
+        compile_fail: 'rust',
+        should_panic: 'rust',
+        edition2018: 'rust',
+        edition2021: 'rust',
+        edition2024: 'rust'
+      }
     },
 
     mermaid: {
@@ -117,15 +234,20 @@ export default withMermaid(
 
       nav: [
         {
+          // The current guide lives at /guide_current/; the older snapshot and
+          // the API reference are linked as experimental from the home page.
           text: 'Guide',
-          link: '/guide/',
-          activeMatch: '^/guide/'
+          link: '/guide_current/',
+          activeMatch: '^/guide'
         },
-        {
-          text: 'Reference',
-          link: '/reference/',
-          activeMatch: '^/reference/'
-        }
+        // Only linked when the reference has been synced into this checkout.
+        ...(hasReference
+          ? [{
+              text: 'Reference',
+              link: '/reference/',
+              activeMatch: '^/reference/'
+            }]
+          : [])
       ],
 
       outline: {
@@ -134,73 +256,22 @@ export default withMermaid(
       },
 
       search: {
-        provider: 'local'
+        provider: 'local',
+        options: {
+          // Skips reference pages from the index on the dev server only (see
+          // isDevServer); everything else renders as VitePress would by default.
+          _render(source, environment, markdownRenderer) {
+            if (isDevServer && environment.relativePath.startsWith('reference/')) {
+              return ''
+            }
+            return markdownRenderer.render(source, environment)
+          }
+        }
       },
 
       sidebar: {
-        '/guide/': [
-          {
-            text: 'Introduction',
-            items: [
-              {
-                text: 'Welcome',
-                link: '/guide/'
-              },
-              {
-                text: 'What is Pill?',
-                link: '/guide/what-is-pill'
-              }
-            ],
-          },
-          {
-            text: 'Getting Started',
-            items: [
-              { text: 'Setup', link: '/guide/getting-started/setup' },
-              { text: 'Pill Launcher', link: '/guide/getting-started/pill-launcher' },
-              { text: 'ECS (Entity Component System)', link: '/guide/getting-started/ecs' },
-              { text: 'Resources', link: '/guide/getting-started/resources' }
-            ]
-          },
-          {
-            text: 'Next Steps',
-            items: [
-              { text: 'Next Steps', link: '/guide/next-steps' }
-            ]
-          },
-          {
-            text: 'Help',
-            items: [
-              { text: 'Troubleshooting', link: '/guide/troubleshooting' }
-            ]
-          },
-          {
-            text: 'Advanced',
-            items: [
-              { text: 'Pill Launcher', link: '/guide/advanced/pill-launcher' },
-            ]
-          },
-          {
-            text: 'Engine Development',
-            items: [
-              {
-                text: 'Contributing',
-                link: '/guide/contributing/contributing',
-                items: [
-                  { text: 'Coding Standards', link: '/guide/contributing/coding-standards' },
-                  { text: 'Code of Conduct', link: '/guide/contributing/code-of-conduct' },
-                ]
-              },
-              { text: 'CI Pipeline', link: '/guide/advanced/ci-pipeline' }
-            ]
-          },
-          {
-
-            text: 'Other',
-            items: [
-              { text: 'Brand Identity', link: '/guide/other/brand-identity' },
-            ]
-          }
-        ],
+        '/guide/': createGuideSidebar('/guide'),
+        '/guide_current/': createGuideSidebar('/guide_current'),
         // One sidebar per crate: a page only renders its own crate tree, while
         // the other crates stay reachable as plain links.
         ...buildReferenceSidebarMap(codeReferenceSidebarItems)

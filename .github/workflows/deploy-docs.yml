@@ -6,7 +6,9 @@ name: Deploy Docs
 #   - dispatch        Pill-Docs announced new content
 #   - schedule        safety net for a missed dispatch; skips when the live
 #                     docs already show the latest Pill-Docs commit
-#   - manual run      always rebuilds
+#   - manual run      always rebuilds; the Run workflow button can also pick a
+#                     Pill-Docs branch/tag, force a fresh sync, or build
+#                     without deploying
 # Synced Pill-Docs content is cached per commit. When Pill-Docs cannot be read
 # (empty repository, missing branch, outage) the last cached content is reused,
 # and when there is none at all the live docs are left untouched.
@@ -22,8 +24,22 @@ on:
   repository_dispatch:
     types: [pill-docs-updated]
   workflow_dispatch:
-  schedule:
-    - cron: "17 4 * * *"
+    inputs:
+      content_ref:
+        description: "Pill-Docs branch or tag to build from"
+        required: false
+        default: main
+        type: string
+      refresh_content:
+        description: "Ignore the content cache and sync Pill-Docs again"
+        required: false
+        default: false
+        type: boolean
+      deploy:
+        description: "Deploy the built docs to docs.pill.rocks"
+        required: false
+        default: true
+        type: boolean
 
 # A dispatch arriving during a build queues behind it instead of racing it.
 concurrency:
@@ -32,7 +48,9 @@ concurrency:
 
 env:
   PILL_DOCS_REPO: https://github.com/Pillware/Pill-Docs.git
-  PILL_DOCS_REF: main
+  # Manual runs may point the build at another Pill-Docs branch or tag; every
+  # other trigger leaves the input empty and builds from main.
+  PILL_DOCS_REF: ${{ inputs.content_ref || 'main' }}
   LIVE_BUILD_INFO_URL: https://docs.pillengine.org/build-info.json
 
 jobs:
@@ -56,9 +74,14 @@ jobs:
             credentials=$(printf 'x-access-token:%s' "$PILL_DOCS_TOKEN" | base64 -w0)
             authentication_arguments=(-c "http.extraheader=Authorization: Basic $credentials")
           fi
+          # A branch and a tag cannot be resolved with one pattern, so the tag is
+          # only looked up when the branch lookup came back empty.
           commit=$(git "${authentication_arguments[@]}" ls-remote "$PILL_DOCS_REPO" "refs/heads/$PILL_DOCS_REF" | cut -f1 || true)
           if [ -z "$commit" ]; then
-            echo "::warning::Pill-Docs has no '$PILL_DOCS_REF' branch right now (or it could not be reached)."
+            commit=$(git "${authentication_arguments[@]}" ls-remote "$PILL_DOCS_REPO" "refs/tags/$PILL_DOCS_REF" | cut -f1 || true)
+          fi
+          if [ -z "$commit" ]; then
+            echo "::warning::Pill-Docs has no '$PILL_DOCS_REF' branch or tag right now (or it could not be reached)."
           fi
           echo "Latest Pill-Docs commit: ${commit:-none}"
           echo "commit=$commit" >> "$GITHUB_OUTPUT"
@@ -68,7 +91,14 @@ jobs:
       - name: Read deployed docs commit
         id: deployed
         run: |
-          commit=$(curl -fsS --max-time 20 "$LIVE_BUILD_INFO_URL" | jq -r '.content.commit // empty' 2>/dev/null || true)
+          response=$(curl -fsS --max-time 20 "$LIVE_BUILD_INFO_URL" || true)
+          commit=$(printf '%s' "$response" | jq -r '.content.commit // empty' 2>/dev/null || true)
+          # A missing file falls back to the site HTML, which still answers 200.
+          # That used to pass silently as "unknown commit", disabling the skip
+          # check forever, so say it out loud instead.
+          if [ -z "$commit" ] && [ -n "$response" ]; then
+            echo "::warning::$LIVE_BUILD_INFO_URL did not return build-info JSON; the deployed build predates it."
+          fi
           echo "Deployed Pill-Docs commit: ${commit:-unknown}"
           echo "commit=$commit" >> "$GITHUB_OUTPUT"
 
@@ -129,9 +159,15 @@ jobs:
           LATEST_COMMIT: ${{ steps.latest.outputs.commit }}
           CACHE_EXACT_HIT: ${{ steps.content-cache.outputs.cache-hit }}
           CACHE_MATCHED_KEY: ${{ steps.content-cache.outputs.cache-matched-key }}
+          FORCE_SYNC: ${{ inputs.refresh_content }}
         run: |
           available=true
           synced=false
+          # A manual refresh ignores the cached copy even when the commit matches;
+          # the restored cache still serves as a fallback when the sync fails.
+          if [ "$FORCE_SYNC" = "true" ]; then
+            CACHE_EXACT_HIT=false
+          fi
           if [ "$CACHE_EXACT_HIT" = "true" ]; then
             echo "Using cached content of Pill-Docs ${LATEST_COMMIT:0:7}."
           elif [ -n "$LATEST_COMMIT" ] && node docs_page/scripts/sync-content.mjs; then
@@ -149,7 +185,9 @@ jobs:
 
       # 8. Remember freshly synced content for later runs.
       - name: Cache synced Pill-Docs content
-        if: steps.content.outputs.synced == 'true' && steps.content.outputs.commit != ''
+        # A forced refresh already had a cache entry for its commit, so saving
+        # it again could collide; the next regular run refreshes it instead.
+        if: steps.content.outputs.synced == 'true' && steps.content.outputs.commit != '' && inputs.refresh_content != true
         uses: actions/cache/save@v4
         with:
           path: |
@@ -158,18 +196,23 @@ jobs:
             docs_page/.vitepress/content-version.json
           key: pill-docs-content-${{ steps.content.outputs.commit }}
 
-      # 9. Build the docs from the prepared content (no second sync) and
+      # 9. Build the docs from the prepared content (docs:build never syncs) and
       #    assemble them into dist-docs/
       - name: Build docs
         if: steps.content.outputs.available == 'true'
         run: |
           cd docs_page
           npm install
-          npm run docs:build:synced
+          npm run docs:build
           cd ..
           node build-script.js docs
 
-      # 10. Deploy docs to docs.pill.rocks. Uses a SEPARATE deploy key whose
+      # 10. Explain a missing deploy instead of leaving the build log silent.
+      - name: Report skipped deploy
+        if: github.event_name == 'workflow_dispatch' && inputs.deploy == false
+        run: echo "::notice::deploy=false - docs were built but not deployed."
+
+      # 11. Deploy docs to docs.pill.rocks. Uses a SEPARATE deploy key whose
       #     authorized_keys forced command extracts into the docs webroot.
       #     One-time server setup:
       #       1. Generate a second SSH keypair.
@@ -180,9 +223,14 @@ jobs:
       #     NOTE: the `secrets` context is NOT allowed in `if:` conditions, so
       #     the "is the key configured?" check happens inside the script below.
       - name: Deploy Docs (docs.pill.rocks)
-        if: steps.content.outputs.available == 'true'
+        # Manual runs can stop after the build; every other trigger deploys.
+        # The event check matters: a missing input is null, and null == false is
+        # true in Actions expressions, so a bare boolean check would disable
+        # deploys for push, dispatch and schedule runs.
+        if: steps.content.outputs.available == 'true' && (github.event_name != 'workflow_dispatch' || inputs.deploy)
         env:
           DOCS_PAGE_KEY: ${{ secrets.DOCS_PAGE_KEY }}
+          EXPECTED_CONTENT_COMMIT: ${{ steps.content.outputs.commit }}
         run: |
           set -e
 
@@ -211,3 +259,28 @@ jobs:
           rm -f docs_page_key
           echo ""
           echo "=== Docs deployed to docs.pill.rocks ==="
+
+          # Confirm the public site now reports the commit that was built. Both
+          # docs domains serve the same webroot, so the health URL is enough.
+          # Without this, a guide-only or stale deployment stays invisible until
+          # someone notices the missing reference pages.
+          if [ -z "$EXPECTED_CONTENT_COMMIT" ]; then
+            echo "::warning::No content commit recorded for this build; skipping the live version check."
+            exit 0
+          fi
+
+          deployed_commit=""
+          for attempt in 1 2 3 4 5; do
+            response=$(curl -fsS --max-time 20 "$LIVE_BUILD_INFO_URL" || true)
+            deployed_commit=$(printf '%s' "$response" | jq -r '.content.commit // empty' 2>/dev/null || true)
+            if [ "$deployed_commit" = "$EXPECTED_CONTENT_COMMIT" ]; then
+              break
+            fi
+            sleep 3
+          done
+
+          if [ "$deployed_commit" != "$EXPECTED_CONTENT_COMMIT" ]; then
+            echo "::error::Live build-info reports '${deployed_commit:-none}' but the built content is '$EXPECTED_CONTENT_COMMIT'. Is $LIVE_BUILD_INFO_URL the site that was just deployed?"
+            exit 1
+          fi
+          echo "Verified: live docs report Pill-Docs ${deployed_commit:0:7}."

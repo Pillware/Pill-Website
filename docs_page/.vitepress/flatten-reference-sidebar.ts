@@ -106,12 +106,17 @@ function isCrateItem(sidebarItem: SidebarItem): boolean {
 export function buildReferenceSidebarMap(sidebarItems: SidebarItem[]): Record<string, SidebarItem[]> {
     const crateItems = flattenReferenceCategories(sidebarItems).filter(isCrateItem)
 
-    // Crates as plain links, used for the landing page and for the crates that
-    // are not the current one.
-    const crateLinks: SidebarItem[] = crateItems.map((crateItem) => ({
+    // A crate as a plain link, used for the landing page and for the crates
+    // that are not the current one. The empty `items` matters: VitePress
+    // gathers consecutive entries without `items` into one anonymous group,
+    // which renders them one level deeper (smaller text, tree guide line)
+    // than the expanded crate. With it, each crate is its own level-0 title.
+    const toCrateLink = (crateItem: SidebarItem): SidebarItem => ({
         text: crateItem.text,
-        link: crateItem.link
-    }))
+        link: crateItem.link,
+        items: []
+    })
+    const crateLinks: SidebarItem[] = crateItems.map(toCrateLink)
 
     const sidebarByPath: Record<string, SidebarItem[]> = {
         // Reference landing page and any page outside a crate.
@@ -120,7 +125,7 @@ export function buildReferenceSidebarMap(sidebarItems: SidebarItem[]): Record<st
 
     for (const activeCrateItem of crateItems) {
         sidebarByPath[activeCrateItem.link as string] = crateItems.map((crateItem) =>
-            crateItem === activeCrateItem ? crateItem : { text: crateItem.text, link: crateItem.link }
+            crateItem === activeCrateItem ? crateItem : toCrateLink(crateItem)
         )
     }
 

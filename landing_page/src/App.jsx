@@ -9,6 +9,7 @@ import CommunityCTA from './components/sections/CommunityCTA';
 import Footer from './components/sections/Footer';
 import SectionDivider from './components/elements/SectionDivider';
 import Roadmap from './components/sections/Roadmap';
+import RouteMetadata from './components/elements/RouteMetadata';
 
 // The /demos page is split into its own chunk so home-page visitors do not
 // download code for a route they never open.
@@ -105,6 +106,7 @@ const ScrollDepthTracker = () => {
 function App() {
     return (
         <BrowserRouter>
+            <RouteMetadata />
             <HashScrollHandler />
             <Routes>
                 <Route path="/" element={<Home />} />

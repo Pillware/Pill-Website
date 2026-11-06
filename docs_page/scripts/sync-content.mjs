@@ -2,7 +2,7 @@
 //   PATH when syncing from the remote repository; a local --from directory
 //   needs no git at all.
 // DESCRIPTION: Mirrors the Pill-Docs content repository into this VitePress
-//   source tree before a dev or build run:
+//   source tree. Run on demand only; dev and build use whatever was last synced:
 //   - reference/            -> pages/reference/  (full mirror, stale pages are removed)
 //   - reference-sidebar.ts  -> .vitepress/reference-sidebar.ts
 //   - content commit info   -> .vitepress/content-version.json (shown in the docs footer)
@@ -15,10 +15,10 @@
 //   Environment equivalents: PILL_DOCS_SOURCE, PILL_DOCS_REPO, PILL_DOCS_REF and
 //   PILL_DOCS_TOKEN (read access to a private content repository).
 // EXAMPLE USAGE:
-//   npm run docs:sync
-//   npm run docs:sync -- D:\Programming\Pill-Docs
+//   npm run docs:update-reference
+//   npm run docs:update-reference -- D:\Programming\Pill-Docs
 //   node scripts/sync-content.mjs --from D:\Programming\Pill-Docs
-//   $env:PILL_DOCS_REF='v1.2.0'; npm run docs:sync
+//   $env:PILL_DOCS_REF='v1.2.0'; npm run docs:update-reference
 // --- SCRIPT ---
 
 import { spawnSync } from 'node:child_process'

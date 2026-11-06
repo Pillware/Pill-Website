@@ -76,6 +76,15 @@ npm run preview
 
 The development server will be available at `http://localhost:5173`
 
+### Search metadata
+
+`src/lib/siteMetadata.js` is the single source of truth for the site name, the
+canonical origin (`pillengine.org`) and each route's title and description.
+`npm run build` uses it to write static HTML for `/demos` and `/demos/wavey`, so
+crawlers receive route-specific tags without running React; `RouteMetadata`
+applies the same values during client-side navigation. Add new pages to that file
+and to `App.jsx` together.
+
 ## 📁 Project Structure
 
 ```

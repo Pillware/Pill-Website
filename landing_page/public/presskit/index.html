@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <!-- Static press kit served at /presskit/ for journalists, creators and
+         streamers. Like /logos/, files in public/ are copied verbatim (no
+         bundling), so this page is dependency-free and self-contained; all
+         paths are relative so it works on every deployment domain
+         (pillengine.org, pill.rocks, localhost). Facts here mirror the
+         landing page sections - keep them in sync when those change. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Pill Engine press kit - descriptions, fact sheet, media and logos, ready to use in articles, videos and streams." />
+    <meta name="theme-color" content="#0a0a0a" />
+    <link rel="icon" type="image/svg+xml" href="../favicons/favicon.svg" />
+    <title>Pill Engine - Press kit</title>
+    <!-- Analytics: same Umami website as the main site; this page is copied
+         verbatim, so it carries its own tracker instead of the SPA bundle. -->
+    <script defer src="https://umami.pillengine.org/script.js"
+        data-website-id="be02f2ef-9344-46d7-bc07-c9c56af6531e"
+        data-domains="pillengine.org,www.pillengine.org,docs.pillengine.org,pill.rocks,www.pill.rocks,docs.pill.rocks"></script>
+    <style>
+        /* The same variable font files the landing page serves. */
+        @font-face {
+            font-family: 'Outfit';
+            src: url('../fonts/outfit-variable-latin.woff2') format('woff2');
+            font-weight: 100 900;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Inter';
+            src: url('../fonts/inter-variable-latin.woff2') format('woff2');
+            font-weight: 100 900;
+            font-display: swap;
+        }
+
+        :root {
+            --background: #0a0a0a;
+            --panel: #111113;
+            --panel-raised: #17171a;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(240, 68, 68, 0.5);
+            --text: #ececee;
+            --text-dim: rgba(255, 255, 255, 0.55);
+            --brand: #f04444;
+            --brand-soft: rgba(240, 68, 68, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 16px;
+            line-height: 1.55;
+        }
+
+        a {
+            color: var(--brand);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .page {
+            max-width: 1060px;
+            margin: 0 auto;
+            padding: 56px 24px 72px;
+        }
+
+        /* Header: brand mark linking home, title, lead and quick actions. */
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-brand {
+            display: inline-block;
+            margin-bottom: 28px;
+        }
+
+        .page-brand img {
+            display: block;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2rem, 5vw, 2.75rem);
+            font-weight: 650;
+            letter-spacing: -0.02em;
+            margin: 0 0 12px;
+        }
+
+        .lead {
+            max-width: 660px;
+            margin: 0 0 24px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--panel);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: border-color 0.18s ease;
+        }
+
+        .button:hover {
+            border-color: var(--border-hover);
+            text-decoration: none;
+        }
+
+        .button-primary {
+            background: var(--brand);
+            border-color: var(--brand);
+            color: #fff;
+        }
+
+        .button-primary:hover {
+            border-color: #ff7676;
+        }
+
+        /* Release status strip, mirroring the chip in the Showcase section. */
+        .status {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 18px;
+            margin-bottom: 44px;
+            padding: 14px 18px;
+            border: 1px solid rgba(240, 68, 68, 0.25);
+            border-radius: 12px;
+            background: var(--brand-soft);
+            font-size: 0.92rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--brand);
+            box-shadow: 0 0 0 4px rgba(240, 68, 68, 0.2);
+        }
+
+        .status strong {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        section {
+            margin-bottom: 52px;
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--text-dim);
+            margin: 0 0 14px;
+        }
+
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin: 0 0 10px;
+        }
+
+        .section-note {
+            margin: -4px 0 16px;
+            color: var(--text-dim);
+            font-size: 0.92rem;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 22px;
+        }
+
+        /* Key numbers: the same five figures as the hero spec bar. */
+        .numbers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+        }
+
+        .number {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 18px 16px;
+        }
+
+        .number-value {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 650;
+            letter-spacing: -0.02em;
+            color: #fff;
+        }
+
+        .number-label {
+            display: block;
+            margin-top: 2px;
+            color: var(--text-dim);
+            font-size: 0.86rem;
+        }
+
+        /* Fact sheet: label column and value column, stacked on phones. */
+        .facts {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            margin: 0;
+        }
+
+        .facts dt,
+        .facts dd {
+            margin: 0;
+            padding: 11px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .facts dt:first-of-type,
+        .facts dd:first-of-type {
+            border-top: none;
+        }
+
+        .facts dt {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        /* Ready-to-paste descriptions, each with its own copy button. */
+        .blurbs {
+            display: grid;
+            gap: 12px;
+        }
+
+        .blurb-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .blurb-head h3 {
+            margin: 0;
+        }
+
+        .blurb-length {
+            margin-left: 8px;
+            color: var(--text-dim);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 400;
+        }
+
+        .blurb p {
+            margin: 0;
+        }
+
+        .blurb p + p {
+            margin-top: 10px;
+        }
+
+        .copy-button {
+            flex-shrink: 0;
+            padding: 5px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--panel-raised);
+            color: var(--text);
+            font: 600 0.8rem 'Outfit', sans-serif;
+            cursor: pointer;
+            transition: border-color 0.18s ease;
+        }
+
+        .copy-button:hover {
+            border-color: var(--border-hover);
+        }
+
+        .copy-button.copied {
+            border-color: var(--brand);
+            color: var(--brand);
+        }
+
+        /* Two columns: what ships today, and the goals Pill is working toward. */
+        .columns {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 12px;
+        }
+
+        .list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .list li {
+            position: relative;
+            padding: 6px 0 6px 18px;
+            font-size: 0.94rem;
+        }
+
+        .list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.95em;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--brand);
+        }
+
+        .list-goals li::before {
+            background: transparent;
+            border: 1.5px solid var(--brand);
+        }
+
+        .list li span {
+            color: var(--text-dim);
+        }
+
+        /* Media: video and animated captures, each with its download links. */
+        .media {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 14px;
+        }
+
+        .media-item {
+            margin: 0;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .media-item video,
+        .media-item img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .media-item figcaption {
+            padding: 12px 14px 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .media-name {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
+        .downloads {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 14px;
+            margin-top: 4px;
+            font-size: 0.82rem;
+        }
+
+        /* Logos: one card per file, the whole card is the download link. */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+            gap: 14px;
+        }
+
+        .asset {
+            display: flex;
+            flex-direction: column;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            color: inherit;
+            transition: border-color 0.18s ease, transform 0.18s ease;
+        }
+
+        .asset:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .asset-preview {
+            height: 140px;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+        }
+
+        .asset-preview img {
+            max-width: 80%;
+            max-height: 100px;
+        }
+
+        .asset-preview--dark {
+            background: #070709;
+        }
+
+        .asset-preview--light {
+            background: #f2f2f4;
+        }
+
+        .asset-meta {
+            padding: 11px 14px 13px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .asset-name {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.86rem;
+            font-weight: 600;
+        }
+
+        .asset-file {
+            display: block;
+            margin-top: 3px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+        }
+
+        .more-link {
+            margin-top: 14px;
+            font-size: 0.92rem;
+        }
+
+        /* Usage notes and contact sit side by side on wide screens. */
+        .usage p {
+            margin: 0 0 10px;
+            font-size: 0.94rem;
+        }
+
+        .usage p:last-child {
+            margin-bottom: 0;
+        }
+
+        .contact-line {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 12px;
+        }
+
+        .email {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 1rem;
+            color: #fff;
+            user-select: all;
+        }
+
+        .page-footer {
+            margin-top: 48px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                padding-top: 40px;
+            }
+
+            .facts {
+                grid-template-columns: 1fr;
+            }
+
+            .facts dt {
+                padding-bottom: 0;
+            }
+
+            .facts dd {
+                border-top: none;
+                padding-top: 2px;
+            }
+
+            .facts dt:first-of-type {
+                border-top: none;
+            }
+
+            .blurb-head {
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+        <header class="page-header">
+            <a class="page-brand" href="../" title="Pill - modern, free and blazingly fast game engine">
+                <img src="../logos/pill_logo_white.svg" alt="Pill" height="34" />
+            </a>
+            <h1>Press kit</h1>
+            <p class="lead">
+                Everything you need to write, stream or make a video about Pill: ready-to-paste
+                descriptions, the key facts, footage and logos. Everything here is free to use in
+                coverage of Pill, no permission needed.
+            </p>
+            <div class="actions">
+                <a class="button button-primary" href="#media">Footage</a>
+                <a class="button" href="#logos">Logos</a>
+                <a class="button" href="#contact">Contact</a>
+            </div>
+        </header>
+
+        <div class="status" role="note">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span><strong>In development.</strong> Pill is currently under heavy architecture rework.
+                Version 1.0 is planned for <strong>Q1 2027</strong>.</span>
+        </div>
+
+        <section aria-labelledby="numbers-heading">
+            <h2 id="numbers-heading">Pill in numbers</h2>
+            <div class="numbers">
+                <div class="number"><span class="number-value">500K+</span><span class="number-label">Entities at 60 FPS</span></div>
+                <div class="number"><span class="number-value">&lt;0.5 MB</span><span class="number-label">WebAssembly build</span></div>
+                <div class="number"><span class="number-value">~1 s</span><span class="number-label">Hot reload of game code</span></div>
+                <div class="number"><span class="number-value">&lt;5 s</span><span class="number-label">Startup time</span></div>
+                <div class="number"><span class="number-value">MIT</span><span class="number-label">Open source, free forever</span></div>
+            </div>
+        </section>
+
+        <section aria-labelledby="facts-heading">
+            <h2 id="facts-heading">Fact sheet</h2>
+            <div class="panel">
+                <dl class="facts">
+                    <dt>Name</dt>
+                    <dd>Pill (also written Pill Engine)</dd>
+                    <dt>What it is</dt>
+                    <dd>A modern, free and blazingly fast game engine</dd>
+                    <dt>Written in</dt>
+                    <dd>Rust</dd>
+                    <dt>Architecture</dt>
+                    <dd>Hybrid, archetype-based Entity Component System (ECS)</dd>
+                    <dt>Platforms</dt>
+                    <dd>Windows, Linux, macOS, Web (WebAssembly)</dd>
+                    <dt>License</dt>
+                    <dd>MIT, free and open source</dd>
+                    <dt>Status</dt>
+                    <dd>In development, under heavy architecture rework</dd>
+                    <dt>Version 1.0</dt>
+                    <dd>Planned for Q1 2027</dd>
+                    <dt>Website</dt>
+                    <dd><a href="https://pillengine.org">pillengine.org</a></dd>
+                    <dt>Documentation</dt>
+                    <dd><a href="https://docs.pillengine.org">docs.pillengine.org</a></dd>
+                    <dt>Source code</dt>
+                    <dd><a href="https://github.com/Pillware/Pill">github.com/Pillware/Pill</a></dd>
+                    <dt>Community</dt>
+                    <dd><a href="https://discord.gg/VUKNQrctms">Discord</a></dd>
+                </dl>
+            </div>
+        </section>
+
+        <section aria-labelledby="descriptions-heading">
+            <h2 id="descriptions-heading">Descriptions</h2>
+            <p class="section-note">Copy these as they are, or shorten them to fit.</p>
+            <div class="blurbs">
+                <div class="panel blurb">
+                    <div class="blurb-head">
+                        <h3>One line</h3>
+                        <button class="copy-button" type="button" data-copy="blurb-short">Copy</button>
+                    </div>
+                    <div id="blurb-short">
+                        <p>Pill is a modern, free and blazingly fast game engine written in Rust.</p>
+                    </div>
+                </div>
+                <div class="panel blurb">
+                    <div class="blurb-head">
+                        <h3>Short <span class="blurb-length">about 60 words</span></h3>
+                        <button class="copy-button" type="button" data-copy="blurb-medium">Copy</button>
+                    </div>
+                    <div id="blurb-medium">
+                        <p>Pill is a free, open-source game engine written in Rust. It is built around a
+                            high-performance hybrid Entity Component System, reloads game code in about a
+                            second and produces tiny builds: a WebAssembly build fits in under 0.5 MB. Pill
+                            runs on Windows, Linux, macOS and the web, and is released under the MIT license.</p>
+                    </div>
+                </div>
+                <div class="panel blurb">
+                    <div class="blurb-head">
+                        <h3>Long <span class="blurb-length">about 170 words</span></h3>
+                        <button class="copy-button" type="button" data-copy="blurb-long">Copy</button>
+                    </div>
+                    <div id="blurb-long">
+                        <p>Pill is a modern, free and blazingly fast game engine. Its core is written in Rust
+                            and built around a high-performance, archetype-based Entity Component System that
+                            can simulate hundreds of thousands of objects. The ECS is hybrid: developers can
+                            write data-oriented code, put logic straight into components in a classic
+                            object-oriented style, or mix both.</p>
+                        <p>Fast iteration is central to Pill. Game code hot-reloads in about one to two
+                            seconds, and builds stay tiny, with a WebAssembly build under 0.5 MB. The engine
+                            is designed around a deliberately small core, with the goal that rendering, physics,
+                            audio and tooling become modules projects add only when they need them. Every engine update is checked by automated
+                            benchmarks, so performance claims are backed by real numbers.</p>
+                        <p>Pill runs on Windows, Linux, macOS and the web. It is open source under the MIT
+                            license and community driven: the roadmap is voted on by its users. Pill is
+                            currently in development, with version 1.0 planned for the first quarter of 2027.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section aria-labelledby="features-heading">
+            <h2 id="features-heading">Features</h2>
+            <p class="section-note">Please keep these two lists apart: the first ships today, the second is where Pill is heading.</p>
+            <div class="columns">
+                <div class="panel">
+                    <h3>Available today</h3>
+                    <ul class="list">
+                        <li>Archetype-based ECS</li>
+                        <li>3D graphics <span>- Blinn-Phong, instancing</span></li>
+                        <li>Material system and custom shaders</li>
+                        <li>Scenes</li>
+                        <li>Input <span>- keyboard, mouse, gamepad</span></li>
+                        <li>Sound <span>- mono and spatial</span></li>
+                        <li>Game project and engine code hot-reloading</li>
+                        <li>Launcher tool</li>
+                        <li>Error chaining</li>
+                        <li>Windows, Linux, macOS and Web (wasm32)</li>
+                    </ul>
+                </div>
+                <div class="panel">
+                    <h3>Goals for Pill</h3>
+                    <ul class="list list-goals">
+                        <li>C# and Rust as first-class scripting languages</li>
+                        <li>Crash-resistant editor with full project sandboxing</li>
+                        <li>Live game and scene editing side by side</li>
+                        <li>Modular core <span>- even run fully headless</span></li>
+                        <li>Builds around 1 MB</li>
+                        <li>Efficient streaming of huge worlds</li>
+                        <li>Editor opening in seconds, even for large projects</li>
+                        <li>Embedded devices such as ESP32-class microcontrollers</li>
+                        <li>Readable JSON asset format</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="media" aria-labelledby="media-heading">
+            <h2 id="media-heading">Footage</h2>
+            <p class="section-note">Use these in videos, thumbnails and articles. Please credit them as "Pill Engine".</p>
+            <div class="media">
+                <figure class="media-item">
+                    <video src="../images/xenium_30fps_1920.mp4" controls muted playsinline preload="metadata"></video>
+                    <figcaption>
+                        <span class="media-name">Pill teaser</span>
+                        <span class="downloads">
+                            <a class="media-download" href="../images/xenium_30fps_1920.mp4" download>MP4 1080p (2 MB)</a>
+                            <a class="media-download" href="../images/xenium_30fps_4k.mp4" download>MP4 4K (15 MB)</a>
+                        </span>
+                    </figcaption>
+                </figure>
+                <figure class="media-item">
+                    <img src="../images/xenium_rc1.gif" alt="Animated capture of the Pill teaser" loading="lazy" />
+                    <figcaption>
+                        <span class="media-name">Pill teaser, animated</span>
+                        <span class="downloads">
+                            <a class="media-download" href="../images/xenium_rc1.gif" download>GIF (9 MB)</a>
+                        </span>
+                    </figcaption>
+                </figure>
+                <figure class="media-item">
+                    <img src="https://raw.githubusercontent.com/Pillware/Pill/circus_demo/examples/circus_demo/media/ancient_pills.gif" alt="Ancient Pills example running in Pill" loading="lazy" />
+                    <figcaption>
+                        <span class="media-name">Ancient Pills example</span>
+                        <span class="downloads">
+                            <a class="media-download" href="https://raw.githubusercontent.com/Pillware/Pill/circus_demo/examples/circus_demo/media/ancient_pills.gif">GIF on GitHub</a>
+                        </span>
+                    </figcaption>
+                </figure>
+            </div>
+            <p class="more-link">More demos, including ones that run in your browser: <a href="../demos">pillengine.org/demos</a></p>
+        </section>
+
+        <section id="logos" aria-labelledby="logos-heading">
+            <h2 id="logos-heading">Logos</h2>
+            <p class="section-note">Use the white logo on dark backgrounds and the black logo on light ones. Don't recolour, stretch or redraw it.</p>
+            <div class="grid">
+                <a class="asset" href="../logos/pill_logo_white.svg" download>
+                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_logo_white.svg" alt="White Pill logo" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Logo, white</span><span class="asset-file">pill_logo_white.svg</span></span>
+                </a>
+                <a class="asset" href="../logos/pill_logo_black.svg" download>
+                    <span class="asset-preview asset-preview--light"><img src="../logos/pill_logo_black.svg" alt="Black Pill logo" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Logo, black</span><span class="asset-file">pill_logo_black.svg</span></span>
+                </a>
+                <a class="asset" href="../logos/pill_logo_white.png" download>
+                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_logo_white.png" alt="White Pill logo, PNG" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Logo, white (PNG)</span><span class="asset-file">pill_logo_white.png</span></span>
+                </a>
+                <a class="asset" href="../logos/pill_logo_black.png" download>
+                    <span class="asset-preview asset-preview--light"><img src="../logos/pill_logo_black.png" alt="Black Pill logo, PNG" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Logo, black (PNG)</span><span class="asset-file">pill_logo_black.png</span></span>
+                </a>
+                <a class="asset" href="../logos/pill_icon_white_black_bg.png" download>
+                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_icon_white_black_bg.png" alt="Pill icon on black" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Icon, square (avatar)</span><span class="asset-file">pill_icon_white_black_bg.png</span></span>
+                </a>
+                <a class="asset" href="../logos/pill_icon_white.svg" download>
+                    <span class="asset-preview asset-preview--dark"><img src="../logos/pill_icon_white.svg" alt="White Pill icon" loading="lazy" /></span>
+                    <span class="asset-meta"><span class="asset-name">Icon, white</span><span class="asset-file">pill_icon_white.svg</span></span>
+                </a>
+            </div>
+            <p class="more-link">
+                All formats: <a href="../logos/">pillengine.org/logos</a> &middot;
+                Usage rules: <a href="https://docs.pillengine.org/guide/other/brand-identity">brand identity guidelines</a>
+            </p>
+        </section>
+
+        <section aria-labelledby="usage-heading">
+            <h2 id="usage-heading">Writing about Pill</h2>
+            <div class="columns">
+                <div class="panel usage">
+                    <h3>Good to know</h3>
+                    <p>Write the name as <strong>Pill</strong>, or <strong>Pill Engine</strong> where "Pill"
+                        alone could be unclear. Not "PILL" or "PillEngine".</p>
+                    <p>Pill is still in development, so features and numbers can change before 1.0. Please
+                        mention that it is in development when you show it.</p>
+                    <p>Linking to <a href="https://pillengine.org">pillengine.org</a> helps readers find the
+                        project.</p>
+                </div>
+                <div class="panel usage" id="contact">
+                    <h3>Contact</h3>
+                    <p>For interviews, early looks, footage or anything else:</p>
+                    <p class="contact-line">
+                        <span class="email" id="press-email">contact (at) pillengine.org</span>
+                        <button class="copy-button" type="button" data-copy="press-email">Copy</button>
+                    </p>
+                    <p>You can also reach the team on <a href="https://discord.gg/VUKNQrctms">Discord</a>.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="page-footer">
+            <p>
+                Pill is an open-source project.
+                <a href="../">pillengine.org</a> &middot;
+                <a href="https://docs.pillengine.org">Documentation</a> &middot;
+                <a href="https://github.com/Pillware/Pill">GitHub</a>
+            </p>
+        </footer>
+    </main>
+    <script>
+        // Assemble the press address at runtime, like the roadmap's contact
+        // link, so the plain address never appears in the HTML for scrapers.
+        const pressEmail = ['contact', '@', 'pillengine', '.', 'org'].join('');
+        document.getElementById('press-email').textContent = pressEmail;
+
+        // Copy buttons: copy the text of the element named in data-copy,
+        // with paragraphs separated by blank lines and wrapped source lines
+        // joined, then show a short confirmation on the button.
+        document.addEventListener('click', async (event) => {
+            const copyButton = event.target.closest('button[data-copy]');
+            if (!copyButton) {
+                return;
+            }
+            const source = document.getElementById(copyButton.dataset.copy);
+            const paragraphs = source.querySelectorAll('p');
+            const textParts = paragraphs.length > 0 ? [...paragraphs].map((paragraph) => paragraph.textContent) : [source.textContent];
+            const copiedText = textParts.map((part) => part.replace(/\s+/g, ' ').trim()).join('\n\n');
+            try {
+                await navigator.clipboard.writeText(copiedText);
+                copyButton.textContent = 'Copied';
+            } catch {
+                copyButton.textContent = 'Select and copy';
+            }
+            copyButton.classList.add('copied');
+            setTimeout(() => {
+                copyButton.textContent = 'Copy';
+                copyButton.classList.remove('copied');
+            }, 1600);
+            window.umami?.track('presskit-copy', { block: copyButton.dataset.copy });
+        });
+
+        // Report downloads of logos and footage, so the dashboard shows what
+        // press and creators actually use. The file path is the event data.
+        document.addEventListener('click', (event) => {
+            const downloadLink = event.target.closest('a.asset, a.media-download');
+            if (!downloadLink) {
+                return;
+            }
+            window.umami?.track('presskit-download', { asset: downloadLink.getAttribute('href') });
+        });
+    </script>
+</body>
+
+</html>
