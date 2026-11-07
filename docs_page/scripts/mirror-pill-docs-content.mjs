@@ -3,10 +3,10 @@
 //   needs no git at all.
 // DESCRIPTION: Mirrors the Pill-Docs content repository into this VitePress
 //   source tree. Run on demand only; dev and build use whatever was last synced:
-//   - reference/            -> pages/reference/  (full mirror, stale pages are removed)
-//   - reference-sidebar.ts  -> .vitepress/reference-sidebar.ts
-//   - guide/                -> pages/guide/      (full mirror, stale pages are removed)
-//   - guide-sidebar.ts      -> .vitepress/guide-sidebar.ts
+//   - reference/                       -> pages/reference/  (full mirror, stale pages are removed)
+//   - reference/reference-sidebar.ts   -> .vitepress/reference-sidebar.ts
+//   - guide/                           -> pages/guide/      (full mirror, stale pages are removed)
+//   - guide/guide-sidebar.ts           -> .vitepress/guide-sidebar.ts
 //   - content commit info   -> .vitepress/content-version.json (shown in the docs footer)
 //   All targets are generated and git ignored; never edit them in this repo.
 // USAGE: node scripts/mirror-pill-docs-content.mjs [--from <directory>] [--repo <url>] [--ref <git-ref>] [<directory>]
@@ -45,14 +45,15 @@ const CONTENT_MIRRORS = [
 ]
 
 // Sidebars travel with the content they describe instead of being maintained
-// in this repo. A missing file is not fatal: the existing sidebar is kept.
+// in this repo. The root location is a fallback for older content checkouts.
+// A missing file is not fatal: the existing sidebar is kept.
 const GENERATED_SIDEBARS = [
     {
-        source: 'reference-sidebar.ts',
+        sourceCandidates: [join('reference', 'reference-sidebar.ts'), 'reference-sidebar.ts'],
         target: join(docsRoot, '.vitepress', 'reference-sidebar.ts'),
     },
     {
-        source: 'guide-sidebar.ts',
+        sourceCandidates: [join('guide', 'guide-sidebar.ts'), 'guide-sidebar.ts'],
         target: join(docsRoot, '.vitepress', 'guide-sidebar.ts'),
     },
 ]
@@ -63,6 +64,10 @@ const CONTENT_VERSION_FILE = join(docsRoot, '.vitepress', 'content-version.json'
 
 // Directory names that are never part of the published content.
 const SKIPPED_DIRECTORY_NAMES = new Set(['.git', 'node_modules', '.vitepress'])
+
+// Sidebars live beside the content they describe. They are copied separately
+// into .vitepress, so they must not also be published as content files.
+const SKIPPED_FILE_NAMES = new Set(['guide-sidebar.ts', 'reference-sidebar.ts'])
 
 // Reads the supported command line flags into a plain options object. Missing
 // flags fall back to the PILL_DOCS_* environment variables and then defaults.
@@ -206,6 +211,8 @@ function copyDirectoryTree(sourceDirectory, targetDirectory, copiedFiles) {
     for (const entry of readdirSync(sourceDirectory, { withFileTypes: true })) {
         if (entry.isDirectory() && SKIPPED_DIRECTORY_NAMES.has(entry.name)) continue
 
+        if (entry.isFile() && SKIPPED_FILE_NAMES.has(entry.name)) continue
+
         const sourceEntryPath = join(sourceDirectory, entry.name)
         const targetEntryPath = join(targetDirectory, entry.name)
         if (entry.isDirectory()) {
@@ -223,14 +230,16 @@ function copyDirectoryTree(sourceDirectory, targetDirectory, copiedFiles) {
 // checkout without one keeps the sidebar this repo already has.
 function copyGeneratedSidebars(contentDirectory) {
     for (const generatedSidebar of GENERATED_SIDEBARS) {
-        const sourceFile = join(contentDirectory, generatedSidebar.source)
-        if (!existsSync(sourceFile)) {
-            console.warn(`Warning: ${generatedSidebar.source} is missing from the content repository, keeping the existing sidebar.`)
+        const sourceFile = generatedSidebar.sourceCandidates
+            .map((candidate) => join(contentDirectory, candidate))
+            .find((candidate) => existsSync(candidate))
+        if (!sourceFile) {
+            console.warn(`Warning: ${generatedSidebar.sourceCandidates[0]} is missing from the content repository, keeping the existing sidebar.`)
             continue
         }
         mkdirSync(dirname(generatedSidebar.target), { recursive: true })
         copyFileSync(sourceFile, generatedSidebar.target)
-        console.log(`  ${generatedSidebar.source} -> ${relative(docsRoot, generatedSidebar.target)}`)
+        console.log(`  ${relative(contentDirectory, sourceFile)} -> ${relative(docsRoot, generatedSidebar.target)}`)
     }
 }
 

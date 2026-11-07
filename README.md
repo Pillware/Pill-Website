@@ -27,9 +27,9 @@ And
 - **Current guide** - authored in this repository, under
   `docs_page/pages/guide_current/` and served at `/guide_current/`.
 - **Experimental guide and API reference** - authored in
-  [`Pillware/Pill-Docs`](https://github.com/Pillware/Pill-Docs) (`guide/`,
-  `guide-sidebar.ts`, `reference/` and `reference-sidebar.ts`), not here. The
-  reference has ~3,850 generated pages.
+  [`Pillware/Pill-Docs`](https://github.com/Pillware/Pill-Docs) (`guide/` and
+  `reference/`, including their sidebar files), not here. The reference has
+  ~3,850 generated pages.
 
 `npm run docs:update-reference` (run in `docs_page/`) mirrors them into
 `docs_page/pages/guide/` and `docs_page/pages/reference/` and records the source

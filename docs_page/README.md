@@ -18,18 +18,19 @@ The API reference and the experimental guide are not authored here.
 `npm run docs:update-reference` mirrors them from
 [`Pillware/Pill-Docs`](https://github.com/Pillware/Pill-Docs):
 
-| From Pill-Docs         | To this repo                      |
-| ---------------------- | --------------------------------- |
-| `reference/`           | `pages/reference/`                |
-| `reference-sidebar.ts` | `.vitepress/reference-sidebar.ts` |
-| `guide/`               | `pages/guide/`                    |
-| `guide-sidebar.ts`     | `.vitepress/guide-sidebar.ts`     |
-| commit hash and date   | `.vitepress/content-version.json` |
+| From Pill-Docs                   | To this repo                      |
+| -------------------------------- | --------------------------------- |
+| `reference/`                     | `pages/reference/`                |
+| `reference/reference-sidebar.ts` | `.vitepress/reference-sidebar.ts` |
+| `guide/`                         | `pages/guide/`                    |
+| `guide/guide-sidebar.ts`         | `.vitepress/guide-sidebar.ts`     |
+| commit hash and date             | `.vitepress/content-version.json` |
 
 All targets are generated and git ignored; a sync replaces them entirely, so
 edits made here are lost on the next run. Change content in Pill-Docs instead.
-Both sidebar files live at the root of Pill-Docs (`guide-sidebar.ts` and
-`reference-sidebar.ts`); the sync copies them into `.vitepress/`.
+Each sidebar lives beside its content (`guide/guide-sidebar.ts` and
+`reference/reference-sidebar.ts`); the sync copies them into `.vitepress/` and
+leaves them out of the published page folders.
 The current guide (`pages/guide_current/`) is authored in this repository and is
 never overwritten by a sync.
 
