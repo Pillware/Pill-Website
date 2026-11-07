@@ -28,6 +28,8 @@ The API reference and the experimental guide are not authored here.
 
 All targets are generated and git ignored; a sync replaces them entirely, so
 edits made here are lost on the next run. Change content in Pill-Docs instead.
+Both sidebar files live at the root of Pill-Docs (`guide-sidebar.ts` and
+`reference-sidebar.ts`); the sync copies them into `.vitepress/`.
 The current guide (`pages/guide_current/`) is authored in this repository and is
 never overwritten by a sync.
 
