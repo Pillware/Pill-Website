@@ -5,6 +5,8 @@
 //   source tree. Run on demand only; dev and build use whatever was last synced:
 //   - reference/            -> pages/reference/  (full mirror, stale pages are removed)
 //   - reference-sidebar.ts  -> .vitepress/reference-sidebar.ts
+//   - guide/                -> pages/guide/      (full mirror, stale pages are removed)
+//   - guide-sidebar.ts      -> .vitepress/guide-sidebar.ts
 //   - content commit info   -> .vitepress/content-version.json (shown in the docs footer)
 //   All targets are generated and git ignored; never edit them in this repo.
 // USAGE: node scripts/mirror-pill-docs-content.mjs [--from <directory>] [--repo <url>] [--ref <git-ref>] [<directory>]
@@ -39,14 +41,21 @@ const CONTENT_CACHE_DIRECTORY = join(docsRoot, '.content', 'Pill-Docs')
 // the content repository cannot survive a sync.
 const CONTENT_MIRRORS = [
     { source: 'reference', target: join(docsRoot, 'pages', 'reference') },
+    { source: 'guide', target: join(docsRoot, 'pages', 'guide') },
 ]
 
-// The sidebar is generated from the same rustdoc JSON as the pages, so it
-// travels with the content instead of being maintained in this repo.
-const GENERATED_SIDEBAR = {
-    source: 'reference-sidebar.ts',
-    target: join(docsRoot, '.vitepress', 'reference-sidebar.ts'),
-}
+// Sidebars travel with the content they describe instead of being maintained
+// in this repo. A missing file is not fatal: the existing sidebar is kept.
+const GENERATED_SIDEBARS = [
+    {
+        source: 'reference-sidebar.ts',
+        target: join(docsRoot, '.vitepress', 'reference-sidebar.ts'),
+    },
+    {
+        source: 'guide-sidebar.ts',
+        target: join(docsRoot, '.vitepress', 'guide-sidebar.ts'),
+    },
+]
 
 // Which content commit the synced pages came from. The docs footer displays it
 // and the deploy workflow compares it with the latest content commit.
@@ -210,18 +219,19 @@ function copyDirectoryTree(sourceDirectory, targetDirectory, copiedFiles) {
     return copiedFiles
 }
 
-// Copies the generated sidebar. It is optional in the source: an older checkout
-// without one keeps the sidebar this repo already has.
-function copyGeneratedSidebar(contentDirectory) {
-    const sourceFile = join(contentDirectory, GENERATED_SIDEBAR.source)
-    if (!existsSync(sourceFile)) {
-        console.warn(`Warning: ${GENERATED_SIDEBAR.source} is missing from the content repository, keeping the existing sidebar.`)
-        return false
+// Copies the generated sidebars. Each is optional in the source: an older
+// checkout without one keeps the sidebar this repo already has.
+function copyGeneratedSidebars(contentDirectory) {
+    for (const generatedSidebar of GENERATED_SIDEBARS) {
+        const sourceFile = join(contentDirectory, generatedSidebar.source)
+        if (!existsSync(sourceFile)) {
+            console.warn(`Warning: ${generatedSidebar.source} is missing from the content repository, keeping the existing sidebar.`)
+            continue
+        }
+        mkdirSync(dirname(generatedSidebar.target), { recursive: true })
+        copyFileSync(sourceFile, generatedSidebar.target)
+        console.log(`  ${generatedSidebar.source} -> ${relative(docsRoot, generatedSidebar.target)}`)
     }
-    mkdirSync(dirname(GENERATED_SIDEBAR.target), { recursive: true })
-    copyFileSync(sourceFile, GENERATED_SIDEBAR.target)
-    console.log(`  ${GENERATED_SIDEBAR.source} -> ${relative(docsRoot, GENERATED_SIDEBAR.target)}`)
-    return true
 }
 
 // Mirrors every configured content entry, replacing its target directory so the
@@ -241,7 +251,7 @@ function mirrorContent(contentDirectory) {
         )
     }
 
-    copyGeneratedSidebar(contentDirectory)
+    copyGeneratedSidebars(contentDirectory)
     return totalMarkdownFiles
 }
 

@@ -5,11 +5,15 @@ node_modules/
 .vitepress/dist/
 .vitepress/cache/
 
-# Content synced from the Pill-Docs repository by `npm run docs:sync`.
-# The content repository is the single source of truth for the API reference.
+# Content synced from the Pill-Docs repository by `npm run docs:update-reference`.
+# The content repository is the single source of truth for the API reference
+# and the experimental guide. The current guide (pages/guide_current/) is
+# authored in this repository and is not generated.
 .content/
 pages/reference/
+pages/guide/
 .vitepress/reference-sidebar.ts
+.vitepress/guide-sidebar.ts
 .vitepress/content-version.json
 
 # Logs

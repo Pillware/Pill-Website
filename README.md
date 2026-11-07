@@ -24,16 +24,19 @@ And
 
 `docs_page/` builds the VitePress site from two sources:
 
-- **Guide** - authored in this repository, under `docs_page/pages/guide/`.
-- **API reference** - authored in [`Pillware/Pill-Docs`](https://github.com/Pillware/Pill-Docs)
-  (`reference/` and `reference-sidebar.ts`), not here. It has ~3,450 generated pages.
+- **Current guide** - authored in this repository, under
+  `docs_page/pages/guide_current/` and served at `/guide_current/`.
+- **Experimental guide and API reference** - authored in
+  [`Pillware/Pill-Docs`](https://github.com/Pillware/Pill-Docs) (`guide/`,
+  `guide-sidebar.ts`, `reference/` and `reference-sidebar.ts`), not here. The
+  reference has ~3,850 generated pages.
 
-`npm run docs:update-reference` (run in `docs_page/`) mirrors it into
-`docs_page/pages/reference/` and records the source commit and date in
-`docs_page/.vitepress/content-version.json`. These targets are generated and git
-ignored, and `docs:dev`/`docs:build` never sync on their own. Every build publishes
-that record as `build-info.json` at the site root, which is also what the deploy
-workflow reads to decide whether anything changed.
+`npm run docs:update-reference` (run in `docs_page/`) mirrors them into
+`docs_page/pages/guide/` and `docs_page/pages/reference/` and records the source
+commit and date in `docs_page/.vitepress/content-version.json`. These targets are
+generated and git ignored, and `docs:dev`/`docs:build` never sync on their own.
+Every build publishes that record as `build-info.json` at the site root, which is
+also what the deploy workflow reads to decide whether anything changed.
 
 | Trigger        | How                                                                                                                                  |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |

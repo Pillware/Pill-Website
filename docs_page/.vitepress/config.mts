@@ -37,9 +37,32 @@ function readReferenceSidebarItems(): DefaultTheme.SidebarItem[] {
 const codeReferenceSidebarItems = readReferenceSidebarItems()
 const hasReference = codeReferenceSidebarItems.length > 0
 
-// Shared guide navigation. The same tree serves the experimental snapshot at
-// /guide/ and the current guide at /guide_current/. Roots are collapsible and
-// start expanded so the whole guide stays visible.
+// Guide sidebar written by the same content sync, from the guide-sidebar.ts
+// file in the content repository. Read at runtime for the same reason as the
+// reference sidebar: a checkout that has never synced the guide still builds.
+function readGuideSidebarItems(): DefaultTheme.SidebarItem[] {
+  const sidebarPath = fileURLToPath(new URL('./guide-sidebar.ts', import.meta.url))
+  if (!existsSync(sidebarPath)) {
+    return []
+  }
+  const sidebarSource = readFileSync(sidebarPath, 'utf8')
+  // Skip past the `=` so the `[]` of the type annotation is not mistaken for the array.
+  const assignmentIndex = sidebarSource.indexOf('=', sidebarSource.indexOf('guideSidebarItems'))
+  const arrayStart = sidebarSource.indexOf('[', assignmentIndex)
+  try {
+    return JSON.parse(sidebarSource.slice(arrayStart))
+  } catch (parseError) {
+    throw new Error(`Could not read ${sidebarPath}; run "npm run docs:update-reference" again. ${parseError}`)
+  }
+}
+
+const codeGuideSidebarItems = readGuideSidebarItems()
+const hasGuide = codeGuideSidebarItems.length > 0
+
+// Navigation for the current guide at /guide_current/. This guide is authored
+// in this repository; the experimental guide at /guide/ gets its own sidebar
+// from the Pill-Docs content repository. Roots are collapsible and start
+// expanded so the whole guide stays visible.
 function createGuideSidebar(prefix: string): DefaultTheme.SidebarItem[] {
   return [
     {
@@ -120,9 +143,10 @@ export default withMermaid(
     srcDir: 'pages',
     // The generated reference can contain rustdoc intra-doc links that the
     // generator could not resolve; they arrive verbatim as "./crate::Item" or
-    // "./mod@name" and point at no page. Ignore only that shape so genuine
-    // dead links still fail the build.
-    ignoreDeadLinks: [/^\.\/(?:::)?[A-Za-z_]\w*::/, /^\.\/mod@/],
+    // "./mod@name" and point at no page. A bare "self" link also appears when
+    // rustdoc loses the target of a constant reference. Ignore only those
+    // shapes so genuine dead links still fail the build.
+    ignoreDeadLinks: [/^\.\/(?:::)?[A-Za-z_]\w*::/, /^\.\/mod@/, /^\.?\/?self$/],
 
     // The dev server's watcher opens one handle per file on Windows, about
     // 3,800 with the generated reference pages. They only change through
@@ -242,8 +266,8 @@ export default withMermaid(
 
       nav: [
         {
-          // The current guide lives at /guide_current/; the older snapshot and
-          // the API reference are linked as experimental from the home page.
+          // The current guide lives at /guide_current/; the experimental guide
+          // at /guide/ and the API reference are linked from the home page.
           text: 'Guide',
           link: '/guide_current/',
           activeMatch: '^/guide'
@@ -278,7 +302,11 @@ export default withMermaid(
       },
 
       sidebar: {
-        '/guide/': createGuideSidebar('/guide'),
+        // The experimental guide's sidebar travels with the Pill-Docs content,
+        // so it is only present after a sync.
+        ...(hasGuide ? { '/guide/': codeGuideSidebarItems } : {}),
+        // The current guide is authored in this repository and keeps its own
+        // hand-maintained sidebar.
         '/guide_current/': createGuideSidebar('/guide_current'),
         // One sidebar per crate: a page only renders its own crate tree, while
         // the other crates stay reachable as plain links.
