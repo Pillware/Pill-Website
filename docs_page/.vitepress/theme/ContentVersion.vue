@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // REQUIREMENTS: Vue SFC rendered from the doc-after and home-features-after
 //   slots of the default theme layout (registered in theme/index.ts). Reads
-//   themeConfig.contentVersion, written by scripts/sync-content.mjs.
+//   themeConfig.contentVersion, written by scripts/mirror-pill-docs-content.mjs.
 // DESCRIPTION: Shows which Pill-Docs commit (short hash and date) the
 //   displayed docs were built from, followed by whether that commit is still
 //   the latest one on the content branch. The latest commit is asked from the

@@ -406,106 +406,123 @@
   margin-top: 12px;
 }
 
-/* ── Reference tree ──
-   Crates are the roots (their titles carry .ref-root), modules are the
-   collapsible rows, and every entry carries a .ref-kind badge. Each rule is
-   scoped with one of those markers so the guide sidebar keeps its defaults. */
+/* ── Sidebar tree ──
+   The same tree treatment for the guide and the generated reference: roots
+   are level-0 rows, modules are collapsible rows and leaves are pages. The
+   reference additionally renders .ref-kind badges, styled further below. */
 
-/* Crate title: the fill starts a few pixels left of the text so it does not
-   hug the label, and the row is rounded like the tree rows below it. */
-.VPSidebar .VPSidebarItem.level-0:has(.ref-root)>.item>.link {
+/* Root row: the fill starts a few pixels left of the label and is rounded
+   like the tree rows below it. */
+.VPSidebar .VPSidebarItem.level-0>.item>.link {
   margin-left: -8px;
-  margin-right: 0;
   padding-left: 14px;
   border-radius: 6px;
   transition: color 0.2s ease, background 0.2s ease;
 }
 
-/* Crate list spacing. Every crate is its own sidebar group (see
-   flatten-reference-sidebar.ts), and VitePress separates groups with a divider
-   and 24px of padding - built for a few big sections, it spreads a list of
-   crates far apart. Crates sit close together instead, and only the expanded
-   crate (the one with a tree) gets room around it. */
-.VPSidebar .group:has(.ref-root)+.group:has(.ref-root) {
-  border-top: none;
-  padding-top: 2px;
+/* Roots sit close together with a one-pixel gray splitter centered in the
+   gap: 16px below the previous section and 16px above the next title. */
+.VPSidebar .group+.group {
+  border-top: 1px solid transparent;
+  padding-top: 16px;
 }
 
-.VPSidebar .VPSidebarItem.level-0:has(.ref-root) {
-  padding-bottom: 2px;
+.VPSidebar .VPSidebarItem.level-0 {
+  padding-bottom: 16px;
 }
 
-.VPSidebar .VPSidebarItem.level-0:has(.ref-root):has(> .items) {
-  padding-top: 6px;
-  padding-bottom: 12px;
-}
-
-/* Guide line and indent for the crate's children. VitePress draws the same
-   line for deeper levels, so it continues down through expanded modules.
-   The 16px padding matches VitePress, which keeps every item exactly 17px
-   right of its guide line (border + padding). */
-.VPSidebar .VPSidebarItem.level-0:has(.ref-root)>.items {
+/* Guide line and indent for every root's children. The 16px padding matches
+   VitePress, which keeps every item 17px right of its guide line (border +
+   padding). */
+.VPSidebar .VPSidebarItem.level-0>.items {
   margin-left: 6px;
   padding-left: 16px;
   border-left: 1px solid var(--vp-c-divider);
 }
 
-/* First entry in a crate (the first row that is not a module) starts 16px
-   below the module list, or below the crate title when there are no modules. */
-.VPSidebar .VPSidebarItem.level-0:has(.ref-root)>.items>.VPSidebarItem.level-1.is-link:not(.collapsible):first-child,
-.VPSidebar .VPSidebarItem.level-0:has(.ref-root)>.items>.VPSidebarItem.collapsible+.VPSidebarItem.level-1.is-link:not(.collapsible) {
-  margin-top: 6px;
+/* Space between a parent row and its first child at every nesting level. */
+.VPSidebar .VPSidebarItem>.items>.VPSidebarItem:first-child {
+  margin-top: 10px;
 }
 
-/* Module rows: collapsible module pages, the section roots inside a crate.
-   Crates are excluded so they keep VitePress's larger, bolder title. */
+/* A leaf that follows a collapsible module also starts 10px below it. */
+.VPSidebar .VPSidebarItem>.items>.VPSidebarItem.collapsible+.VPSidebarItem.is-link:not(.collapsible) {
+  margin-top: 10px;
+}
+
+/* Root headings sit above the rest of the tree at 16px. */
+.VPSidebar .VPSidebarItem.level-0>.item>.text,
+.VPSidebar .VPSidebarItem.level-0>.item>.link>.text {
+  font-size: 16px;
+}
+
+/* Module rows: collapsible pages and section roots. */
 .VPSidebar .VPSidebarItem:not(.level-0).is-link.collapsible>.item>.link>.text {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
+}
+
+/* Only non-active module rows use the quieter colour; active rows keep the
+   VitePress brand red. */
+.VPSidebar .VPSidebarItem:not(.level-0).is-link.collapsible:not(.is-active)>.item>.link>.text {
   color: var(--vp-c-text-1);
 }
 
-/* Entries: leaf pages, one step quieter than the module that holds them.
-   The badge and the name never split onto two lines - a long name is
-   ellipsized inside the row instead (min-width: 0 lets the flex row shrink). */
-.VPSidebar .VPSidebarItem.is-link>.item>.link:has(.ref-kind) {
+/* Leaves: one step quieter than the module that holds them. Long names are
+   ellipsized inside the row instead of wrapping (min-width: 0 lets the flex
+   row shrink). */
+.VPSidebar .VPSidebarItem.is-link:not(.collapsible)>.item>.link {
   min-width: 0;
 }
 
-.VPSidebar .VPSidebarItem.is-link>.item>.link>.text:has(.ref-kind) {
+.VPSidebar .VPSidebarItem.is-link:not(.collapsible)>.item>.link>.text {
   min-width: 0;
-  font-size: 13px;
-  color: var(--vp-c-text-2);
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Active page fill, shared by every row of the tree. A solid fill keeps the
-   whole row visible; the previous gradient faded out and read as a cut row.
-   The negative margin widens the fill to the left while equal padding keeps
-   the label exactly where it was. */
+/* Only non-active leaves use the muted colour; active leaves keep the brand
+   red from VitePress. */
+.VPSidebar .VPSidebarItem.is-link:not(.collapsible):not(.is-active)>.item>.link>.text {
+  color: var(--vp-c-text-2);
+}
+
+/* Active page row: permanent rounded fill, with the negative margin widening
+   it to the left while equal padding keeps the label in place. */
 .VPSidebar .VPSidebarItem.is-active>.item>.link {
   margin-left: -10px;
-  margin-right: 24px;
   padding-left: 10px;
   background: rgba(255, 122, 182, 0.08);
   border-radius: 6px;
 }
 
-/* Inside a crate the active row is wider and rounded: the fill starts a few
-   pixels left of the label. Margin and padding are equal, so the label keeps
-   its position (a larger margin moves the row left). */
-.VPSidebar .VPSidebarItem.level-0:has(.ref-root) .VPSidebarItem.is-active>.item>.link {
-  margin-left: -10px;
-  margin-right: 0;
-  padding-left: 10px;
+/* Inactive rows get a faint gray rounded fill on hover; the active row keeps
+   its permanent fill. */
+.VPSidebar .VPSidebarItem:not(.is-active)>.item>.link:hover {
+  background: var(--vp-c-default-soft);
   border-radius: 6px;
 }
 
-/* The indicator sits on the tree's guide line at every level, and is painted
-   for all levels (VitePress only does level-2 and deeper). */
-.VPSidebar .VPSidebarItem.level-0:has(.ref-root) .VPSidebarItem.is-active>.item>.indicator {
+.VPSidebar .VPSidebarItem:not(.is-active):not(.level-0)>.item>.link:hover {
+  margin-left: -10px;
+  padding-left: 10px;
+}
+
+.VPSidebar .VPSidebarItem:not(.is-active):not(.level-0)>.item:not(:has(> .caret))>.link:hover {
+  margin-right: 24px;
+}
+
+/* Rows without a caret reserve the same right-hand space the caret occupies
+   in root rows, so every active fill has the same rounded, inset shape. */
+.VPSidebar .VPSidebarItem.is-active>.item:not(:has(> .caret))>.link {
+  margin-right: 24px;
+}
+
+/* The indicator sits on the tree's guide line at every level (VitePress only
+   paints it for level-2 and deeper). */
+.VPSidebar .VPSidebarItem.is-active>.item>.indicator {
   left: -17px;
   background-color: var(--vp-c-brand-1);
 }

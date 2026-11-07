@@ -39,8 +39,8 @@ To work against a local checkout instead of the remote repository:
 ```bash
 npm run docs:update-reference -- D:\Programming\Pill-Docs
 # or, with full flag support:
-node scripts/sync-content.mjs --from D:\Programming\Pill-Docs
-node scripts/sync-content.mjs --repo https://github.com/you/fork --ref v1.2.0
+node scripts/mirror-pill-docs-content.mjs --from D:\Programming\Pill-Docs
+node scripts/mirror-pill-docs-content.mjs --repo https://github.com/you/fork --ref v1.2.0
 ```
 
 The same knobs exist as `PILL_DOCS_SOURCE`, `PILL_DOCS_REF`, `PILL_DOCS_REPO`
@@ -56,7 +56,7 @@ about 3,450 pages, so two guards keep the build in the minutes range:
   which triples the build and ships roughly 2 MB of HTML per page.
 - Constants that embed fonts or images arrive from rustdoc as multi-megabyte
   byte-string literals; `.vitepress/truncate-huge-code-blocks.ts` caps code
-  blocks, and `scripts/generate-llms.mjs` applies the same cap to the Markdown
+  blocks, and `scripts/generate-llm-documentation-artifacts.mjs` applies the same cap to the Markdown
   mirrors.
 
 A full build takes about 3 minutes (3,454 pages measured in 2 min 47 s; it was

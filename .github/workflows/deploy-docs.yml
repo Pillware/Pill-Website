@@ -170,7 +170,7 @@ jobs:
           fi
           if [ "$CACHE_EXACT_HIT" = "true" ]; then
             echo "Using cached content of Pill-Docs ${LATEST_COMMIT:0:7}."
-          elif [ -n "$LATEST_COMMIT" ] && node docs_page/scripts/sync-content.mjs; then
+          elif [ -n "$LATEST_COMMIT" ] && node docs_page/scripts/mirror-pill-docs-content.mjs; then
             synced=true
           elif [ -n "$CACHE_MATCHED_KEY" ]; then
             echo "::warning::Could not sync Pill-Docs; building from older cached content ($CACHE_MATCHED_KEY)."

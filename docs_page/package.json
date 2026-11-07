@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "description": "Guide and API reference for Pill Engine",
   "scripts": {
-    "docs:update-reference": "node scripts/sync-content.mjs",
+    "docs:update-reference": "node scripts/mirror-pill-docs-content.mjs",
     "docs:dev": "vitepress dev",
-    "docs:build": "node --max-old-space-size=8192 node_modules/vitepress/bin/vitepress.js build && node scripts/generate-llms.mjs",
+    "docs:build": "node --max-old-space-size=8192 node_modules/vitepress/bin/vitepress.js build && node scripts/generate-llm-documentation-artifacts.mjs",
     "docs:preview": "vitepress preview"
   },
   "devDependencies": {

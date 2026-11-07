@@ -7,8 +7,8 @@
 //     removed)
 //   - dist/llms.txt          curated llms.txt index for AI agents
 //   - dist/llms-full.txt     all pages concatenated into one Markdown file
-// USAGE: node scripts/generate-llms.mjs [--site-url https://docs.pill.rocks]
-// EXAMPLE USAGE: node scripts/generate-llms.mjs
+// USAGE: node scripts/generate-llm-documentation-artifacts.mjs [--site-url https://docs.pill.rocks]
+// EXAMPLE USAGE: node scripts/generate-llm-documentation-artifacts.mjs
 // --- SCRIPT ---
 
 import { readdirSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
@@ -237,5 +237,5 @@ const llmsFullContent = pages
     .join('\n---\n\n');
 writeFileSync(join(outputDirectory, 'llms-full.txt'), `${llmsFullContent}\n`, 'utf8');
 
-console.log(`generate-llms: wrote ${pages.length} Markdown mirrors, llms.txt and llms-full.txt to ${outputDirectory}`);
-console.log(`generate-llms: llms-full.txt size roughly ${Math.round((llmsFullContent.length / 1024))} KB`);
+console.log(`generate-llm-documentation-artifacts: wrote ${pages.length} Markdown mirrors, llms.txt and llms-full.txt to ${outputDirectory}`);
+console.log(`generate-llm-documentation-artifacts: llms-full.txt size roughly ${Math.round((llmsFullContent.length / 1024))} KB`);

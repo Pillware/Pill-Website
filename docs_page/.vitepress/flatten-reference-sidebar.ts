@@ -81,15 +81,11 @@ function expandCategoryGroups(sidebarItems: SidebarItem[]): SidebarItem[] {
     })
 }
 
-// Entry point used by the site config: modules stay collapsible, categories are
-// flattened into badged entries. Crate titles carry a marker span so the tree
-// guide line can be scoped to the reference sidebar in CSS.
+// Entry point used by the site config: modules stay collapsible and categories
+// are flattened into badged entries. The guide and reference share the same
+// tree styling, so crate titles no longer need a marker span.
 export function flattenReferenceCategories(sidebarItems: SidebarItem[]): SidebarItem[] {
-    return expandCategoryGroups(sidebarItems).map((crateItem) =>
-        crateItem.link && crateItem.items?.length
-            ? { ...crateItem, text: `<span class="ref-root">${escapeHtml(crateItem.text)}</span>` }
-            : crateItem
-    )
+    return expandCategoryGroups(sidebarItems)
 }
 
 // True when the entry is a crate page carrying its own module tree.

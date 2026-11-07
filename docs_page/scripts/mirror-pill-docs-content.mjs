@@ -7,7 +7,7 @@
 //   - reference-sidebar.ts  -> .vitepress/reference-sidebar.ts
 //   - content commit info   -> .vitepress/content-version.json (shown in the docs footer)
 //   All targets are generated and git ignored; never edit them in this repo.
-// USAGE: node scripts/sync-content.mjs [--from <directory>] [--repo <url>] [--ref <git-ref>] [<directory>]
+// USAGE: node scripts/mirror-pill-docs-content.mjs [--from <directory>] [--repo <url>] [--ref <git-ref>] [<directory>]
 //   --from <directory>  read a local checkout instead of cloning
 //   --repo <url>        content repository (default https://github.com/Pillware/Pill-Docs.git)
 //   --ref <git-ref>     branch or tag to read (default main)
@@ -17,7 +17,7 @@
 // EXAMPLE USAGE:
 //   npm run docs:update-reference
 //   npm run docs:update-reference -- D:\Programming\Pill-Docs
-//   node scripts/sync-content.mjs --from D:\Programming\Pill-Docs
+//   node scripts/mirror-pill-docs-content.mjs --from D:\Programming\Pill-Docs
 //   $env:PILL_DOCS_REF='v1.2.0'; npm run docs:update-reference
 // --- SCRIPT ---
 
