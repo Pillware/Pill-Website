@@ -140,6 +140,9 @@ const isDevServer = process.argv.includes('dev')
 export default withMermaid(
   defineConfig({
     base: '/',
+    // Links omit the ".html" extension. Pages are still written as *.html, so
+    // nginx must resolve them: try_files $uri $uri.html $uri/ =404;
+    cleanUrls: true,
     srcDir: 'pages',
     // The generated reference can contain rustdoc intra-doc links that the
     // generator could not resolve; they arrive verbatim as "./crate::Item" or
