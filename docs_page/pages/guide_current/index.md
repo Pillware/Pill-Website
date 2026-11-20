@@ -6,7 +6,7 @@ layout: doc
 <div class="hero">
   <div class="hero-inner">
     <div class="hero-left">
-      <a href="https://pillengine.org"><img src="https://pillengine.org/logos/pill_logo.svg" alt="Pill Engine Logo" class="hero-logo" /></a>
+      <a href="https://pillengine.org"><img src="https://pillengine.org/logos/pill_logo_white.svg" alt="Pill Engine Logo" class="hero-logo" /></a>
       <p class="tagline">
         Modern, <strong>free</strong> and <strong>blazingly fast</strong> game engine
       </p>
