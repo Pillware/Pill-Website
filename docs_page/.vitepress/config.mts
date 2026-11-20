@@ -146,10 +146,11 @@ export default withMermaid(
     srcDir: 'pages',
     // The generated reference can contain rustdoc intra-doc links that the
     // generator could not resolve; they arrive verbatim as "./crate::Item" or
-    // "./mod@name" and point at no page. A bare "self" link also appears when
-    // rustdoc loses the target of a constant reference. Ignore only those
-    // shapes so genuine dead links still fail the build.
-    ignoreDeadLinks: [/^\.\/(?:::)?[A-Za-z_]\w*::/, /^\.\/mod@/, /^\.?\/?self$/],
+    // with a rustdoc disambiguator such as "./mod@name" or "./macro@name", and
+    // point at no page. A bare "self" or "Self" link also appears when rustdoc
+    // loses the target of a constant or associated item reference. Ignore only
+    // those shapes so genuine dead links still fail the build.
+    ignoreDeadLinks: [/^\.\/(?:::)?[A-Za-z_]\w*::/, /^\.\/[a-z]+@/, /^\.?\/?[Ss]elf$/],
 
     // The dev server's watcher opens one handle per file on Windows, about
     // 3,800 with the generated reference pages. They only change through
