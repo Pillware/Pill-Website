@@ -52,6 +52,11 @@ env:
   # other trigger leaves the input empty and builds from main.
   PILL_DOCS_REF: ${{ inputs.content_ref || 'main' }}
   LIVE_BUILD_INFO_URL: https://docs.pillengine.org/build-info.json
+  # Prefix of the synced content cache keys. Cache entries cannot be updated,
+  # so bump it whenever the cached paths change; otherwise an older entry for
+  # the same Pill-Docs commit keeps restoring without the new paths.
+  # v2: the experimental guide (pages/guide, guide-sidebar.ts) is cached too.
+  CONTENT_CACHE_PREFIX: pill-docs-content-v2-
 
 jobs:
   build-and-deploy:
@@ -127,7 +132,10 @@ jobs:
           echo "build=$build" >> "$GITHUB_OUTPUT"
 
       # 5. Previously synced content: the exact latest commit when it was
-      #    cached before, otherwise the most recent cached commit.
+      #    cached before, otherwise the most recent cached commit. The paths
+      #    must list every target of mirror-pill-docs-content.mjs (and match
+      #    step 8): a target missing here is silently absent from builds that
+      #    hit the cache.
       - name: Restore cached Pill-Docs content
         id: content-cache
         if: steps.plan.outputs.build == 'true'
@@ -135,10 +143,12 @@ jobs:
         with:
           path: |
             docs_page/pages/reference
+            docs_page/pages/guide
             docs_page/.vitepress/reference-sidebar.ts
+            docs_page/.vitepress/guide-sidebar.ts
             docs_page/.vitepress/content-version.json
-          key: pill-docs-content-${{ steps.latest.outputs.commit || 'none' }}
-          restore-keys: pill-docs-content-
+          key: ${{ env.CONTENT_CACHE_PREFIX }}${{ steps.latest.outputs.commit || 'none' }}
+          restore-keys: ${{ env.CONTENT_CACHE_PREFIX }}
 
       # 6. Setup Node.js (npm download cache reused across runs)
       - name: Setup Node.js
@@ -192,9 +202,11 @@ jobs:
         with:
           path: |
             docs_page/pages/reference
+            docs_page/pages/guide
             docs_page/.vitepress/reference-sidebar.ts
+            docs_page/.vitepress/guide-sidebar.ts
             docs_page/.vitepress/content-version.json
-          key: pill-docs-content-${{ steps.content.outputs.commit }}
+          key: ${{ env.CONTENT_CACHE_PREFIX }}${{ steps.content.outputs.commit }}
 
       # 9. Build the docs from the prepared content (docs:build never syncs) and
       #    assemble them into dist-docs/
