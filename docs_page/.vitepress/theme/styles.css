@@ -350,6 +350,20 @@
   color: var(--vp-c-brand-1);
 }
 
+/* Marks the experimental guide at /guide/ (generated from Pill-Docs) beside the
+   site title; the current guide at /guide_current/ never shows it. */
+.nav-golden-badge {
+  margin-left: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #f0c14b;
+}
+
+:root:not(.dark) .nav-golden-badge {
+  color: #8a6300;
+}
+
 .VPNavBarMenuLink,
 .VPLink {
   transition: color 0.2s ease;
@@ -821,23 +835,6 @@
   padding: 24px;
 }
 
-.feature::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--vp-c-brand-1), var(--vp-c-brand-1-dim-2));
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.3s ease;
-}
-
-.feature:hover::before {
-  transform: scaleX(1);
-}
-
 .feature:hover {
   transform: translateY(-4px);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
@@ -952,6 +949,15 @@ div[class*="language-"]::before {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* VitePress sizes this box to the widest line plus the 24px side padding, so a
+   line that ends inside that padding still makes the block scroll while
+   nothing visible is hidden. Pinning the box to the container width turns the
+   padding into visible space: the scrollbar now appears only when the text
+   itself is cut off. */
+.vp-doc div[class*="language-"] code {
+  width: 100%;
+}
+
 .vp-code-group .tabs {
   border-radius: 12px 12px 0 0;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -959,11 +965,20 @@ div[class*="language-"]::before {
 }
 
 .vp-code-group .tabs label {
+  line-height: 36px;
+  font-size: 12px;
   transition: all 0.2s ease;
 }
 
 .vp-code-group .tabs label:hover {
   background: rgba(255, 255, 255, 0.05);
+}
+
+/* The tab already names the language, so the copy of that name in the
+   top-right corner of the block is redundant. Only blocks inside a code group
+   hide it; standalone blocks keep their label. */
+.vp-code-group div[class*="language-"]>span.lang {
+  display: none;
 }
 
 /* Copy button enhancement */
@@ -1183,6 +1198,14 @@ div[class*="language-"]::before {
 :root:not(.dark) div[class*="language-"]::before {
   background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(96, 165, 250, 0.15));
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+:root:not(.dark) .vp-code-group .tabs {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:root:not(.dark) .vp-code-group .tabs label:hover {
+  background: rgba(0, 0, 0, 0.04);
 }
 
 :root:not(.dark) .custom-block {

@@ -5,6 +5,7 @@ import { defineConfig } from 'vitepress'
 import type { DefaultTheme } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 import { buildReferenceSidebarMap } from './flatten-reference-sidebar'
+import { groupConsecutiveCodeBlocks } from './group-code-blocks'
 import { truncateHugeCodeBlocks } from './truncate-huge-code-blocks'
 
 // Content commit written by scripts/mirror-pill-docs-content.mjs. Missing until the first
@@ -240,7 +241,13 @@ export default withMermaid(
       // strings otherwise cost the most time in the whole build (three
       // highlighter passes and a search-index entry each) for a value nobody
       // can read.
-      config: truncateHugeCodeBlocks,
+      //
+      // Adjacent fences in different languages document the same step for
+      // several shells, so they are rendered as one switchable code group.
+      config: (md) => {
+        truncateHugeCodeBlocks(md)
+        groupConsecutiveCodeBlocks(md)
+      },
       // rustdoc marks doc-test examples with attributes in place of a language
       // (```no_run, ```ignore, ...). They are Rust code, so highlight them as
       // Rust instead of warning and falling back to plain text.

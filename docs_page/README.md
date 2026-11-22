@@ -68,6 +68,12 @@ about 3,850 pages, so two guards keep the build in the minutes range:
   blocks, and `scripts/generate-llm-documentation-artifacts.mjs` applies the same cap to the Markdown
   mirrors.
 
+Steps written for several shells are rendered as one tabbed code group by
+`.vitepress/group-code-blocks.ts`: the `powershell`, `cmd` and `bash` fences of a
+step become one block with tabs. Authors keep writing plain, adjacent fences as
+the writing guidelines require; no `::: code-group` markers are needed in the
+content.
+
 A full build takes about 3 minutes (3,921 pages measured in 2 min 42 s; it was
 about 14 minutes before those two guards).
 
@@ -103,7 +109,8 @@ GitHub API).
 - `.vitepress/config.mts` — site config, sidebar, head metadata.
 - `.vitepress/theme/` — custom theme:
   - `styles.css` — VitePress-specific styling built on the shared tokens.
-  - `index.ts` — theme entry point (route handling, scroll progress bar).
+  - `index.ts` — theme entry point (route handling, scroll progress bar,
+    GOLDEN badge on the experimental guide).
   - `mermaid.ts` — click-to-enlarge lightbox for Mermaid diagrams.
 
 ## Shared styling with rustdoc

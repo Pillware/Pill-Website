@@ -2,6 +2,7 @@
 
 import DefaultTheme from 'vitepress/theme'
 import type { Theme, EnhanceAppContext } from 'vitepress'
+import { useRoute } from 'vitepress'
 import { defineComponent, h, onMounted } from 'vue'
 import { enlargeMermaidDiagrams } from './mermaid'
 import { initSearchTracking } from './search-tracking'
@@ -125,14 +126,27 @@ const SidebarOpenSectionsRestorer = defineComponent({
   }
 });
 
+// The experimental guide at /guide/ is generated from Pill-Docs and is easy to
+// confuse with the current guide at /guide_current/, so its pages label the
+// site title in the navbar. Reads the reactive route, so client-side
+// navigation between the two guides updates it without a reload.
+const GoldenGuideBadge = defineComponent({
+  setup() {
+    const route = useRoute()
+    return () => (route.path.startsWith('/guide/') ? h('span', { class: 'nav-golden-badge' }, 'GOLDEN') : null)
+  }
+})
+
 export default {
   extends: DefaultTheme,
 
-  // Adds the sticky page path above the article, inside the content column,
-  // the content commit line at the bottom of docs pages and the home page, and
-  // the preview-guide row directly below the home hero actions.
+  // Adds the GOLDEN badge to the navbar of the experimental guide, the sticky
+  // page path above the article, inside the content column, the content commit
+  // line at the bottom of docs pages and the home page, and the preview-guide
+  // row directly below the home hero actions.
   Layout: () =>
     h(DefaultTheme.Layout, null, {
+      'nav-bar-title-after': () => h(GoldenGuideBadge),
       'doc-before': () => h(TreeBreadcrumb),
       'doc-after': () => h(ContentVersion),
       'home-features-after': () => h(ContentVersion),
