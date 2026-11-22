@@ -72,8 +72,8 @@ const FLAGSHIP_FEATURES = [
     },
     {
         icon: <Box className="w-5 h-5" />,
-        title: 'JSON asset format',
-        description: "Pill uses JSON for all the assets' data, making them easy to read, edit, and version control. No more binary blobs that you can't understand or modify.",
+        title: 'Human-readable asset format',
+        description: "Pill uses YAML for all the assets' data, making them easy to read, edit, and version control. No more binary blobs that you can't understand or modify.",
     },
     {
         icon: <Columns2 className="w-5 h-5" />,
@@ -157,9 +157,9 @@ const FlagshipFeatures = () => {
     // screens one flat list keeps the original top-to-bottom order.
     const columns = isTwoColumn
         ? [
-              FLAGSHIP_FEATURES.filter((feature, index) => index % 2 === 0),
-              FLAGSHIP_FEATURES.filter((feature, index) => index % 2 === 1),
-          ]
+            FLAGSHIP_FEATURES.filter((feature, index) => index % 2 === 0),
+            FLAGSHIP_FEATURES.filter((feature, index) => index % 2 === 1),
+        ]
         : [FLAGSHIP_FEATURES];
 
     return (

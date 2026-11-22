@@ -25,7 +25,7 @@ const usps = [
     },
     {
         icon: <Package className="w-5 h-5" />,
-        metric: '<0.5 MB',
+        metric: '<1.0 MB',
         label: 'WASM build',
     },
     {
@@ -40,8 +40,8 @@ const usps = [
     },
     {
         icon: <Heart className="w-5 h-5" />,
-        metric: 'MIT',
-        label: 'Open source, free forever',
+        metric: 'Open source',
+        label: 'Free forever',
     },
 ];
 
@@ -69,9 +69,8 @@ const UspStrip = () => {
             {usps.map((usp, index) => (
                 <div
                     key={usp.metric}
-                    className={`border-white/[0.08] p-3 sm:p-4 flex flex-col items-center text-center gap-1.5 sm:gap-2 ${cellSeparators[index]} ${
-                        index === usps.length - 1 ? 'col-span-2 lg:col-span-1' : ''
-                    }`}
+                    className={`border-white/[0.08] p-3 sm:p-4 flex flex-col items-center text-center gap-1.5 sm:gap-2 ${cellSeparators[index]} ${index === usps.length - 1 ? 'col-span-2 lg:col-span-1' : ''
+                        }`}
                 >
                     <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center">
                         {usp.icon}
