@@ -181,11 +181,17 @@ export default withMermaid(
       ['link', { rel: 'shortcut icon', href: '/favicons/favicon.ico' }],
       ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/favicons/apple-touch-icon.png' }],
       ['link', { rel: 'manifest', href: '/favicons/site.webmanifest' }],
-      // Social meta
+      // Social meta. Unfurlers need an absolute og:image URL, and the icon is a
+      // square tile, so the card is a plain "summary" rather than a wide banner.
       ['meta', { property: 'og:title', content: 'Pill Docs' }],
       ['meta', { property: 'og:description', content: 'Guide and API reference for Pill Engine' }],
-      ['meta', { property: 'og:image', content: '/favicons/web-app-manifest-512x512.png' }],
-      ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+      ['meta', { property: 'og:image', content: 'https://docs.pillengine.org/favicons/web-app-manifest-512x512.png' }],
+      ['meta', { property: 'og:image:type', content: 'image/png' }],
+      ['meta', { property: 'og:image:width', content: '512' }],
+      ['meta', { property: 'og:image:height', content: '512' }],
+      ['meta', { property: 'og:image:alt', content: 'Pill logo' }],
+      ['meta', { name: 'twitter:card', content: 'summary' }],
+      ['meta', { name: 'twitter:image', content: 'https://docs.pillengine.org/favicons/web-app-manifest-512x512.png' }],
       // Analytics (Umami). data-domains keeps the tracker off localhost and
       // preview deployments; both production domain families are listed.
       ['script', { defer: '', src: 'https://umami.pillengine.org/script.js', 'data-website-id': 'be02f2ef-9344-46d7-bc07-c9c56af6531e', 'data-domains': 'pillengine.org,www.pillengine.org,docs.pillengine.org,pill.rocks,www.pill.rocks,docs.pill.rocks' }],
